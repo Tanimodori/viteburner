@@ -1,5 +1,5 @@
-import { NS } from "@ns";
+import { NS } from '@ns';
 
 export async function main(ns: NS) {
-  ns.tprint("Hello World!");
+  ns.tprint('Hello World!');
 }

@@ -4,7 +4,8 @@
   "description": "Bitburner template using vite",
   "main": "index.js",
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "format": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,json}\""
   },
   "repository": {
     "type": "git",
