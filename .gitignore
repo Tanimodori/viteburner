@@ -1,0 +1,22 @@
+# npm node_modules
+node_modules/
+
+# dist folder
+dist/
+
+# Mac DS_Store files
+**/.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# dotenv locals
+.env.local
+.env.*.local
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Bitburner type definitions
+NetscriptDefinitions.d.ts
