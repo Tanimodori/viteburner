@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "target": "esnext",
+    "lib": ["esnext", "dom"],
+    "strict": true,
+    "allowJs": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "inlineSourceMap": true,
+    "moduleResolution": "Node",
+    "skipLibCheck": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@ns": ["./NetscriptDefinitions.d.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts", "NetscriptDefinitions.d.ts"]
+}
