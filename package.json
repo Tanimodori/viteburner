@@ -1,0 +1,23 @@
+{
+  "name": "bitburner-vite",
+  "version": "0.0.1",
+  "description": "Bitburner template using vite",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tanimodori/bitburner-vite.git"
+  },
+  "keywords": [
+    "bitburner",
+    "vite"
+  ],
+  "author": "Tanimodori",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Tanimodori/bitburner-vite/issues"
+  },
+  "homepage": "https://github.com/Tanimodori/bitburner-vite#readme"
+}
