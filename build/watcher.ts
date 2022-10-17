@@ -23,7 +23,10 @@ export async function watch() {
 
   const node = new ViteNodeServer(server);
 
-  const result = await node.fetchModule(path2Id('src/template.ts', server.config.base));
+  let result;
+  result = await node.fetchModule(path2Id('src/template.ts', server.config.base));
+  console.log(result);
+  result = await node.fetchModule(path2Id('src/multi-entry.ts', server.config.base));
   console.log(result);
 
   console.log(server.emitter);
