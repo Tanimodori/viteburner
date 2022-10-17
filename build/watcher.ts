@@ -16,7 +16,16 @@ export async function watch() {
       disabled: true,
     },
     clearScreen: false,
-    plugins: [viteNodeHmrPlugin()],
+    plugins: [
+      viteNodeHmrPlugin(),
+      {
+        name: 'bitburner-vite:hmr',
+        handleHotUpdate(...args) {
+          console.log(args);
+          return;
+        },
+      },
+    ],
   });
 
   await server.pluginContainer.buildStart({});
