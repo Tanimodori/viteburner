@@ -1,5 +1,6 @@
 import { resolve } from 'node:path';
 import { createServer } from 'vite';
+import { viteNodeHmrPlugin } from 'vite-node/hmr';
 import { ViteNodeServer } from 'vite-node/server';
 import { slash, normalizeRequestId } from 'vite-node/utils';
 
@@ -14,6 +15,8 @@ export async function watch() {
     optimizeDeps: {
       disabled: true,
     },
+    clearScreen: false,
+    plugins: [viteNodeHmrPlugin()],
   });
 
   await server.pluginContainer.buildStart({});
@@ -22,6 +25,12 @@ export async function watch() {
 
   const result = await node.fetchModule(path2Id('src/template.ts', server.config.base));
   console.log(result);
+
+  console.log(server.emitter);
+
+  server.emitter?.on('message', (payload) => {
+    console.log(payload);
+  });
 }
 
 watch();
