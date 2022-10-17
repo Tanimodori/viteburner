@@ -16,5 +16,10 @@
       "@ns": ["./NetscriptDefinitions.d.ts"]
     }
   },
-  "include": ["src/**/*.ts", "test/**/*.ts", "NetscriptDefinitions.d.ts", "vite.config.ts"]
+  "include": ["src/**/*.ts", "test/**/*.ts", "NetscriptDefinitions.d.ts", "vite.config.ts"],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  }
 }
