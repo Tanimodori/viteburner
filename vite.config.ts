@@ -16,6 +16,10 @@ export default defineConfig({
     emptyOutDir: true,
     minify: false,
     lib: {
+      /**
+       * Meaningless for Vite<3.2.0
+       * @see {@link https://github.com/vitejs/vite/discussions/1736}
+       */
       entry: entries[0],
       formats: ['es'],
     },
