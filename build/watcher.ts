@@ -9,8 +9,18 @@ export function path2Id(file: string, base: string) {
   return normalizeRequestId(id, base);
 }
 
-export async function watch() {
-  const server = await createServer({
+export function createHmrPlugin() {
+  return hmrPlugin({
+    watch: {
+      js: { pattern: 'src/**/*.{js,ts}', transform: true },
+      script: { pattern: 'src/**/*.script', transform: false },
+      txt: { pattern: 'src/**/*.txt', transform: false },
+    },
+  });
+}
+
+export async function createViteServer() {
+  return createServer({
     mode: 'development',
     optimizeDeps: {
       disabled: true,
@@ -34,18 +44,12 @@ export async function watch() {
         },
       },
     },
-    plugins: [
-      entryPlugin(),
-      hmrPlugin({
-        watch: {
-          js: { pattern: 'src/**/*.{js,ts}', transform: true },
-          script: { pattern: 'src/**/*.script', transform: false },
-          txt: { pattern: 'src/**/*.txt', transform: false },
-        },
-      }),
-    ],
+    plugins: [entryPlugin(), createHmrPlugin()],
   });
+}
 
+export async function watch() {
+  const server = await createViteServer();
   server.emitter.on(hmrPluginName, (data: HmrData) => {
     console.log(data);
   });
