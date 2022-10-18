@@ -56,7 +56,7 @@ export async function watch() {
   result = await node.fetchModule(path2Id('src/multi-entry.ts', server.config.base));
   console.log(result);
 
-  server.ws.on(hmrPluginName, (data: HmrData) => {
+  server.emitter.on(hmrPluginName, (data: HmrData) => {
     console.log(data);
   });
 }

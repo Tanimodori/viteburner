@@ -1,6 +1,8 @@
 import { HmrContext, Plugin } from 'vite';
 import { isMatch } from 'micromatch';
 import chokidar from 'chokidar';
+import { relative } from 'node:path';
+import EventEmitter from 'node:events';
 
 export interface HmrOptions {
   watch?: {
@@ -13,6 +15,7 @@ export interface HmrOptions {
 
 export interface HmrData {
   file: string;
+  event: string;
   type: string;
   transform: boolean;
 }
@@ -31,6 +34,8 @@ export function hmrPlugin(options: HmrOptions = {}): Plugin {
   return {
     name: hmrPluginName,
     configureServer(server) {
+      // emitter
+      server.emitter = new EventEmitter();
       // events for watching
       const events = ['add', 'unlink', 'change'] as const;
 
@@ -46,19 +51,14 @@ export function hmrPlugin(options: HmrOptions = {}): Plugin {
         for (const event of events) {
           watcher.on(event, (file) => {
             // emit the event
-            server.ws.send({
-              type: 'custom',
-              event: `${hmrPluginName}`,
-              data: { file, type, transform },
-            });
+            server.emitter.emit(hmrPluginName, { file, event, type, transform });
+            console.log(`${hmrPluginName}:${event} ${file}`);
           });
         }
-
-        console.log(server.config.root, pattern, watcher.getWatched());
       }
     },
     handleHotUpdate(context: HmrContext) {
-      const { file } = context;
+      const file = relative(context.server.config.root, context.file);
       // using micromatch to test if the file matches any of the patterns
       const matched = Object.keys(watch).find((key) => isMatch(file, watch[key].pattern, {}));
       // if matched, ignore hmr and return
