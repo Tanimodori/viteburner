@@ -32,6 +32,15 @@ export const hmrPluginName = 'bitburner-vite:hmr';
 
 export function hmrPlugin(options: HmrOptions = {}): Plugin {
   const { watch } = parseOptions(options);
+  const findMatchedType = (file: string) => {
+    for (const type in watch) {
+      if (isMatch(file, watch[type].pattern)) {
+        return type;
+      }
+    }
+    return undefined;
+  };
+
   return {
     name: hmrPluginName,
     configureServer(server) {
@@ -41,40 +50,44 @@ export function hmrPlugin(options: HmrOptions = {}): Plugin {
       const events = ['add', 'unlink', 'change'] as const;
 
       // watchers that are ready
-      const readyWatchers = new Set<FSWatcher>();
+      let initial = true;
 
-      // for each pattern, create a watcher
-      for (const [type, { pattern, transform }] of Object.entries(watch)) {
-        const watcher = chokidar.watch(pattern, {
-          cwd: server.config.root,
-          ignoreInitial: false,
-          persistent: true,
-        });
+      const patterns = Object.values(watch).map((item) => item.pattern);
+      // create watcher
+      const watcher = chokidar.watch(patterns, {
+        cwd: server.config.root,
+        ignoreInitial: false,
+        persistent: true,
+      });
 
-        // add watcher to ready watchers when ready
-        watcher.on('ready', () => {
-          readyWatchers.add(watcher);
-        });
+      // add watcher to ready watchers when ready
+      watcher.on('ready', () => {
+        initial = false;
+      });
 
-        // for each event, create a handler
-        for (const event of events) {
-          watcher.on(event, (file: string) => {
-            // emit the event
+      // for each event, create a handler
+      for (const event of events) {
+        watcher.on(event, (file: string) => {
+          // emit the event
+          const type = findMatchedType(file);
+          if (type) {
             server.emitter.emit(hmrPluginName, {
               file,
               event,
               type,
-              transform,
-              initial: !readyWatchers.has(watcher),
+              transform: watch[type].transform,
+              initial,
             });
-          });
-        }
+          } else {
+            throw new Error(`File ${file} does not match any patterns`);
+          }
+        });
       }
     },
     handleHotUpdate(context: HmrContext) {
       const file = relative(context.server.config.root, context.file);
       // using micromatch to test if the file matches any of the patterns
-      const matched = Object.keys(watch).find((key) => isMatch(file, watch[key].pattern, {}));
+      const matched = findMatchedType(file);
       // if matched, ignore hmr and return
       if (matched) {
         return [];
