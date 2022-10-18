@@ -15,23 +15,6 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     minify: false,
-    lib: {
-      /**
-       * Meaningless for Vite<3.2.0
-       * @see {@link https://github.com/vitejs/vite/discussions/1736}
-       */
-      entry: entries[0],
-      formats: ['es'],
-    },
-    rollupOptions: {
-      input: entries,
-      output: {
-        exports: 'named',
-        preserveModules: true,
-        preserveModulesRoot: 'src',
-        entryFileNames: () => `[name].js`,
-      },
-    },
   },
   plugins: [
     viteStaticCopy({
