@@ -46,19 +46,17 @@ export async function watch() {
     ],
   });
 
+  server.emitter.on(hmrPluginName, (data: HmrData) => {
+    console.log(data);
+  });
+
   await server.pluginContainer.buildStart({});
 
   const node = new ViteNodeServer(server);
 
   let result;
   result = await node.fetchModule(path2Id('src/template.ts', server.config.base));
-  console.log(result);
   result = await node.fetchModule(path2Id('src/multi-entry.ts', server.config.base));
-  console.log(result);
-
-  server.emitter.on(hmrPluginName, (data: HmrData) => {
-    console.log(data);
-  });
 }
 
 watch();

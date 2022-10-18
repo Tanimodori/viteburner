@@ -1,6 +1,6 @@
 import { HmrContext, Plugin } from 'vite';
 import { isMatch } from 'micromatch';
-import chokidar from 'chokidar';
+import chokidar, { FSWatcher } from 'chokidar';
 import { relative } from 'node:path';
 import EventEmitter from 'node:events';
 
@@ -18,6 +18,7 @@ export interface HmrData {
   event: string;
   type: string;
   transform: boolean;
+  initial: boolean;
 }
 
 const parseOptions = (options: HmrOptions = {}) => {
@@ -39,6 +40,9 @@ export function hmrPlugin(options: HmrOptions = {}): Plugin {
       // events for watching
       const events = ['add', 'unlink', 'change'] as const;
 
+      // watchers that are ready
+      const readyWatchers = new Set<FSWatcher>();
+
       // for each pattern, create a watcher
       for (const [type, { pattern, transform }] of Object.entries(watch)) {
         const watcher = chokidar.watch(pattern, {
@@ -47,12 +51,22 @@ export function hmrPlugin(options: HmrOptions = {}): Plugin {
           persistent: true,
         });
 
+        // add watcher to ready watchers when ready
+        watcher.on('ready', () => {
+          readyWatchers.add(watcher);
+        });
+
         // for each event, create a handler
         for (const event of events) {
-          watcher.on(event, (file) => {
+          watcher.on(event, (file: string) => {
             // emit the event
-            server.emitter.emit(hmrPluginName, { file, event, type, transform });
-            console.log(`${hmrPluginName}:${event} ${file}`);
+            server.emitter.emit(hmrPluginName, {
+              file,
+              event,
+              type,
+              transform,
+              initial: !readyWatchers.has(watcher),
+            });
           });
         }
       }
