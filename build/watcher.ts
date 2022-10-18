@@ -1,6 +1,5 @@
 import { resolve } from 'node:path';
-import { createServer } from 'vite';
-import { ViteNodeServer } from 'vite-node/server';
+import { createServer, ViteDevServer } from 'vite';
 import { slash, normalizeRequestId } from 'vite-node/utils';
 import { hmrPlugin, entryPlugin, virtualModuleId, hmrPluginName, HmrData } from './plugins';
 
@@ -48,13 +47,14 @@ export async function createViteServer() {
   });
 }
 
-export async function fetchModule(node: ViteNodeServer, file: string) {
-  return node.fetchModule(path2Id(file, node.server.config.base));
+export async function fetchModule(server: ViteDevServer, file: string) {
+  const id = path2Id(file, server.config.base);
+  return server.transformRequest(id);
 }
 
-export async function handleHmrMessage(node: ViteNodeServer, data: HmrData) {
+export async function handleHmrMessage(server: ViteDevServer, data: HmrData) {
   console.log(data);
-  const module = await fetchModule(node, data.file);
+  const module = await fetchModule(server, data.file);
   console.log(module);
 }
 
@@ -69,19 +69,17 @@ export async function watch() {
     if (!buildStarted) {
       initialDatas.push(data);
     } else {
-      await handleHmrMessage(node, data);
+      await handleHmrMessage(server, data);
     }
   });
 
-  // init vite-node server
-  const node = new ViteNodeServer(server);
   // init plugins
   await server.pluginContainer.buildStart({});
   buildStarted = true;
 
   // process initial HMR datas
   for (const data of initialDatas) {
-    await handleHmrMessage(node, data);
+    await handleHmrMessage(server, data);
   }
 }
 

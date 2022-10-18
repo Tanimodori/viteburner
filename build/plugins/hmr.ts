@@ -1,6 +1,6 @@
 import { HmrContext, Plugin } from 'vite';
 import { isMatch } from 'micromatch';
-import chokidar, { FSWatcher } from 'chokidar';
+import chokidar from 'chokidar';
 import { relative } from 'node:path';
 import EventEmitter from 'node:events';
 
