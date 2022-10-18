@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
 import { createServer } from 'vite';
 import { ViteNodeServer } from 'vite-node/server';
 import { slash, normalizeRequestId } from 'vite-node/utils';
-import { hmrPlugin, entryPlugin, virtualModuleId } from './plugins';
+import { hmrPlugin, entryPlugin, virtualModuleId, hmrPluginName, HmrData } from './plugins';
 
 export function path2Id(file: string, base: string) {
   const id = `/@fs/${slash(resolve(file))}`;
@@ -34,7 +34,16 @@ export async function watch() {
         },
       },
     },
-    plugins: [entryPlugin(), hmrPlugin()],
+    plugins: [
+      entryPlugin(),
+      hmrPlugin({
+        watch: {
+          js: { pattern: 'src/**/*.{js,ts}', transform: true },
+          script: { pattern: 'src/**/*.script', transform: false },
+          txt: { pattern: 'src/**/*.txt', transform: false },
+        },
+      }),
+    ],
   });
 
   await server.pluginContainer.buildStart({});
@@ -46,7 +55,10 @@ export async function watch() {
   console.log(result);
   result = await node.fetchModule(path2Id('src/multi-entry.ts', server.config.base));
   console.log(result);
-  console.log(server.watcher.getWatched());
+
+  server.ws.on(hmrPluginName, (data: HmrData) => {
+    console.log(data);
+  });
 }
 
 watch();
