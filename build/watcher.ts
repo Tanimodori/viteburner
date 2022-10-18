@@ -48,19 +48,41 @@ export async function createViteServer() {
   });
 }
 
+export async function fetchModule(node: ViteNodeServer, file: string) {
+  return node.fetchModule(path2Id(file, node.server.config.base));
+}
+
+export async function handleHmrMessage(node: ViteNodeServer, data: HmrData) {
+  console.log(data);
+  const module = await fetchModule(node, data.file);
+  console.log(module);
+}
+
 export async function watch() {
+  // create vite server
   const server = await createViteServer();
-  server.emitter.on(hmrPluginName, (data: HmrData) => {
-    console.log(data);
+
+  // store initial HMR datas
+  let buildStarted = false;
+  const initialDatas: HmrData[] = [];
+  server.emitter.on(hmrPluginName, async (data: HmrData) => {
+    if (!buildStarted) {
+      initialDatas.push(data);
+    } else {
+      await handleHmrMessage(node, data);
+    }
   });
 
-  await server.pluginContainer.buildStart({});
-
+  // init vite-node server
   const node = new ViteNodeServer(server);
+  // init plugins
+  await server.pluginContainer.buildStart({});
+  buildStarted = true;
 
-  let result;
-  result = await node.fetchModule(path2Id('src/template.ts', server.config.base));
-  result = await node.fetchModule(path2Id('src/multi-entry.ts', server.config.base));
+  // process initial HMR datas
+  for (const data of initialDatas) {
+    await handleHmrMessage(node, data);
+  }
 }
 
 watch();
