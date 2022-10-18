@@ -1,6 +1,6 @@
 export const virtualModuleId = 'virtual:bitburner-vite-entry';
 
-export default function entryPlugin() {
+export function entryPlugin() {
   const resolvedVirtualModuleId = '\0' + virtualModuleId;
 
   return {
@@ -17,3 +17,5 @@ export default function entryPlugin() {
     },
   };
 }
+
+export default entryPlugin;

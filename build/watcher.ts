@@ -1,10 +1,8 @@
 import { resolve } from 'node:path';
 import { createServer } from 'vite';
-import { viteNodeHmrPlugin } from 'vite-node/hmr';
 import { ViteNodeServer } from 'vite-node/server';
 import { slash, normalizeRequestId } from 'vite-node/utils';
-import entryPlugin, { virtualModuleId } from './plugins/entry';
-import hmrPlugin from './plugins/hmr';
+import { hmrPlugin, entryPlugin, virtualModuleId } from './plugins';
 
 export function path2Id(file: string, base: string) {
   const id = `/@fs/${slash(resolve(file))}`;
@@ -48,6 +46,7 @@ export async function watch() {
   console.log(result);
   result = await node.fetchModule(path2Id('src/multi-entry.ts', server.config.base));
   console.log(result);
+  console.log(server.watcher.getWatched());
 }
 
 watch();

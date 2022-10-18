@@ -1,4 +1,4 @@
-export default function hmrPlugin() {
+export function hmrPlugin() {
   return {
     name: 'bitburner-vite:hmr',
     handleHotUpdate(...args) {
@@ -7,3 +7,5 @@ export default function hmrPlugin() {
     },
   };
 }
+
+export default hmrPlugin;
