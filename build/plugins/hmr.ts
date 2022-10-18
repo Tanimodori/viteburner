@@ -4,6 +4,12 @@ import chokidar from 'chokidar';
 import { relative } from 'node:path';
 import EventEmitter from 'node:events';
 
+declare module 'vite' {
+  interface ViteDevServer {
+    emitter: EventEmitter;
+  }
+}
+
 export interface HmrOptions {
   watch?: {
     [key: string]: {
