@@ -4,7 +4,7 @@ import { slash, normalizeRequestId } from 'vite-node/utils';
 import { SourceMap } from 'rollup';
 import { hmrPlugin, entryPlugin, virtualModuleId, hmrPluginName, HmrData } from './plugins';
 import { formatNormal } from './console';
-import { loadConfig, ViteBurnerConfig } from './config';
+import { ViteBurnerConfig } from './config';
 
 export function path2Id(file: string, base: string) {
   const id = `/@fs/${slash(resolve(file))}`;
@@ -66,13 +66,8 @@ export async function handleHmrMessage(server: ViteDevServer, data: HmrData) {
   }
 }
 
-export async function watch() {
-  // resolve config
-  console.log(formatNormal('resolving user config...'));
-  const config = await loadConfig();
-
+export async function watch(config: ViteBurnerConfig) {
   // create vite server
-  console.log(formatNormal('config resolved, starting dev server...'));
   const server = await createViteServer(config);
   server.config.logger.info(formatNormal('watching for file changes...'));
 

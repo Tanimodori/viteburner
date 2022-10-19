@@ -11,7 +11,11 @@ export interface ViteBurnerUserConfig extends UserConfig {
   viteburner?: ViteBurnerConfig;
 }
 
-export async function loadConfig() {
+export interface ViteBurnerInlineConfig {
+  cwd: string;
+}
+
+export async function loadConfig(inlineConfig: ViteBurnerInlineConfig) {
   const { config } = await loadConfigRaw<ViteBurnerConfig>({
     sources: [
       // load from `viteburner.config.xx`
@@ -32,6 +36,7 @@ export async function loadConfig() {
         },
       },
     ],
+    cwd: inlineConfig.cwd,
     merge: true,
   });
   return config;
