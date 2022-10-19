@@ -1,9 +1,13 @@
 import { z } from 'zod';
 
-export interface WsRequest<P> {
+export interface WsRequestNoParam {
   jsonrpc: '2.0';
   id: number;
   method: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface WsRequest<P = any> extends WsRequestNoParam {
   params: P;
 }
 
