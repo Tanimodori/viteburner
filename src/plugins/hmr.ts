@@ -1,8 +1,8 @@
 import { HmrContext, Plugin } from 'vite';
 import { isMatch } from 'micromatch';
 import chokidar from 'chokidar';
-import { relative } from 'node:path';
-import EventEmitter from 'node:events';
+import { relative } from 'path';
+import EventEmitter from 'events';
 
 declare module 'vite' {
   interface ViteDevServer {

@@ -1,4 +1,4 @@
-import { resolve } from 'node:path';
+import { resolve } from 'path';
 import { createServer, ViteDevServer } from 'vite';
 import { slash, normalizeRequestId } from 'vite-node/utils';
 import { SourceMap } from 'rollup';
@@ -96,5 +96,3 @@ export async function watch() {
     await handleHmrMessage(server, data);
   }
 }
-
-watch();
