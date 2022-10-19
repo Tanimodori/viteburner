@@ -49,8 +49,11 @@ export default class WsManager {
   get connected() {
     return this.wss.clients.size > 0;
   }
-  onConnection(cb: (ws: WebSocket) => void) {
+  onConnected(cb: (ws: WebSocket) => void) {
     this.wss.on('connection', cb);
+  }
+  onDisconneted(cb: () => void) {
+    this.wss.on('close', cb);
   }
   handleMessage(response: string) {
     const { id, result, error } = wsResponseSchema.parse(JSON.parse(response));
@@ -65,24 +68,34 @@ export default class WsManager {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async sendMessage<P = undefined, R extends z.ZodTypeAny = z.ZodTypeAny>(options: MessageSchema<P, R>) {
     const params = options.params;
-    if (!this.ws) {
+    if (!this.connected || !this.ws) {
       throw new Error('No connection');
     }
+    const id = this.nextId;
     this.ws.send({
       jsonrpc: '2.0',
-      id: this.nextId,
+      id,
       method: options.method,
       ...(params && { params }),
     });
     const result = new Promise<z.infer<R>>((resolve, reject) => {
-      const parse = (data: unknown) => {
+      const onResolve = (data: unknown) => {
         try {
           resolve(options.validator?.parse(data) ?? data);
         } catch (e) {
           reject(e);
+        } finally {
+          delete this.trackers[id];
         }
       };
-      this.trackers.push({ resolve: parse, reject });
+      const onReject = (reason: unknown) => {
+        delete this.trackers[id];
+        reject(reason);
+      };
+      this.trackers[id] = {
+        resolve: onResolve,
+        reject: onReject,
+      };
     });
     return result;
   }
