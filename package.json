@@ -2,7 +2,14 @@
   "name": "viteburner",
   "version": "0.0.1",
   "description": "Bitburner template using vite",
-  "main": "index.js",
+  "main": "dist/viteburner.js",
+  "module": "dist/viteburner.mjs",
+  "exports": {
+    ".": {
+      "require": "./dist/viteburner.js",
+      "import": "./dist/viteburner.mjs"
+    }
+  },
   "scripts": {
     "build": "vite build",
     "test": "vitest",
