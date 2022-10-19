@@ -16,7 +16,7 @@ export default defineConfig({
       formats: ['cjs', 'es'],
     },
     rollupOptions: {
-      external: ['cac', 'chokidar', 'micromatch', 'pathe', 'picocolors', 'unconfig', 'vite', ...builtins],
+      external: ['cac', 'chokidar', 'micromatch', 'pathe', 'picocolors', 'unconfig', 'vite', 'ws', ...builtins],
       input: {
         entry: resolve(__dirname, 'src/entry.ts'),
         index: resolve(__dirname, 'src/index.ts'),
