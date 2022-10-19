@@ -32,33 +32,33 @@ export interface PushFileParams {
   content: string;
   server: string;
 }
-export const PushFileResponseSchema = z.literal('OK');
+export const pushFileResponseSchema = z.literal('OK');
 
 // getFile
 export interface GetFileParams {
   filename: string;
   server: string;
 }
-export const GetFileResponseSchema = z.string();
+export const getFileResponseSchema = z.string();
 
 // deleteFile
 export interface DeleteFileParams {
   filename: string;
   server: string;
 }
-export const DeleteFileResponseSchema = z.literal('OK');
+export const deleteFileResponseSchema = z.literal('OK');
 
 // getFileNames
 export interface GetFileNamesParams {
   server: string;
 }
-export const GetFileNamesResponseSchema = z.array(z.string());
+export const getFileNamesResponseSchema = z.array(z.string());
 
 // getAllFiles
 export interface GetAllFilesParams {
   server: string;
 }
-export const GetAllFilesResponseSchema = z.array(
+export const getAllFilesResponseSchema = z.array(
   z.object({
     filename: z.string(),
     content: z.string(),
@@ -70,17 +70,8 @@ export interface CalculateRamParams {
   filename: string;
   server: string;
 }
-export const CalculateRamResponseSchema = z.number();
+export const calculateRamResponseSchema = z.number();
 
 // getDefinitionFile
 // no params
-export const GetDefinitionFileResponseSchema = z.string();
-
-export function parseResponse<R extends z.ZodTypeAny>(response: string, schema: R): z.infer<R> {
-  const json = JSON.parse(response);
-  const { result, error } = wsResponseSchema.parse(json);
-  if (error) {
-    throw new Error(error);
-  }
-  return schema.parse(result);
-}
+export const getDefinitionFileResponseSchema = z.string();
