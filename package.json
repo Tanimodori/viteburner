@@ -4,7 +4,7 @@
   "description": "Bitburner template using vite",
   "main": "index.js",
   "scripts": {
-    "watch": "vite-node build/watcher.ts",
+    "build": "vite build",
     "test": "vitest",
     "format": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,json}\""
   },
@@ -39,7 +39,8 @@
     "micromatch": "^4.0.5",
     "pathe": "^0.3.9",
     "picocolors": "^1.0.0",
-    "unconfig": "^0.3.7"
+    "unconfig": "^0.3.7",
+    "vite-node": "^0.24.0"
   },
   "peerDependencies": {
     "vite": "^3.0.0"
