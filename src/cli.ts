@@ -10,26 +10,30 @@ cli
   .command('', 'start dev server')
   .alias('serve')
   .alias('dev')
-  .option('--cwd <cwd>', 'Working directory', { default: process.cwd() });
+  .option('--cwd <cwd>', 'Working directory', { default: process.cwd() })
+  .option('--port <port>', 'Port to listen on')
+  .action(startDev);
 
 cli.help();
 
 cli.version(pkg.version);
 
-export async function main() {
-  const parsed = cli.parse();
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function startDev(options: any) {
+  const port = options.port;
   const resolveInlineConfig: ViteBurnerInlineConfig = {
-    cwd: parsed.options.cwd,
+    cwd: options.cwd,
+    ...(port && { port }),
   };
 
   // resolve config
   console.log(formatNormal('resolving user config...'));
   const config = await loadConfig(resolveInlineConfig);
-  console.log(formatNormal('config resolved, starting dev server...'));
+  console.log(formatNormal('config resolved'));
 
-  watch({
-    ...resolveInlineConfig,
-    ...config,
-  });
+  watch(config);
+}
+
+export async function main() {
+  cli.parse();
 }

@@ -1,9 +1,11 @@
 import { slash } from 'vite-node/utils';
+import pc from 'picocolors';
 import { HmrData } from './plugins';
 import { formatNormal } from './console';
 import { ViteBurnerConfig } from './config';
 import { createServer, ViteBurnerServer } from './server';
 import { getSourceMapString } from './utils';
+import WsManager from './ws/manager';
 
 export async function handleHmrMessage(data: HmrData, server: ViteBurnerServer) {
   server.config.logger.info(formatNormal(`hmr ${data.event}`, slash(data.file)));
@@ -17,7 +19,14 @@ export async function handleHmrMessage(data: HmrData, server: ViteBurnerServer) 
 }
 
 export async function watch(config: ViteBurnerConfig) {
+  // create ws server
+  const port = config.port ?? 12525;
+  console.log(formatNormal('creating WebSocket server...'));
+  const wsManager = new WsManager(port);
+  console.log(formatNormal(`WebSocket server listening on localhost:${pc.magenta(String(port))}`));
+
   // create vite server
+  console.log(formatNormal('creating dev server...'));
   const server = await createServer(config);
   server.config.logger.info(formatNormal('watching for file changes...'));
 

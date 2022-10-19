@@ -5,6 +5,7 @@ import { HmrOptions } from './plugins/hmr';
 
 export interface ViteBurnerUserConfig extends HmrOptions {
   sourcemap?: boolean | 'inline' | 'hidden';
+  port?: number;
 }
 
 export interface ViteBurnerViteConfig extends UserConfig {
@@ -13,6 +14,7 @@ export interface ViteBurnerViteConfig extends UserConfig {
 
 export interface ViteBurnerInlineConfig {
   cwd: string;
+  port?: number;
 }
 
 export interface ViteBurnerConfig extends ViteBurnerUserConfig, ViteBurnerInlineConfig {}
@@ -41,5 +43,8 @@ export async function loadConfig(inlineConfig: ViteBurnerInlineConfig) {
     cwd: inlineConfig.cwd,
     merge: true,
   });
-  return config;
+  return {
+    ...config,
+    ...inlineConfig,
+  } as ViteBurnerConfig;
 }
