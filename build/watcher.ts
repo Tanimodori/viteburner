@@ -4,23 +4,18 @@ import { slash, normalizeRequestId } from 'vite-node/utils';
 import { SourceMap } from 'rollup';
 import { hmrPlugin, entryPlugin, virtualModuleId, hmrPluginName, HmrData } from './plugins';
 import { formatNormal } from './console';
+import { loadConfig, ViteBurnerConfig } from './config';
 
 export function path2Id(file: string, base: string) {
   const id = `/@fs/${slash(resolve(file))}`;
   return normalizeRequestId(id, base);
 }
 
-export function createHmrPlugin() {
-  return hmrPlugin({
-    watch: {
-      js: { pattern: 'src/**/*.{js,ts}', transform: true },
-      script: { pattern: 'src/**/*.script', transform: false },
-      txt: { pattern: 'src/**/*.txt', transform: false },
-    },
-  });
+export function createHmrPlugin(config: ViteBurnerConfig) {
+  return hmrPlugin(config);
 }
 
-export async function createViteServer() {
+export async function createViteServer(config: ViteBurnerConfig) {
   return createServer({
     mode: 'development',
     optimizeDeps: {
@@ -45,7 +40,7 @@ export async function createViteServer() {
         },
       },
     },
-    plugins: [entryPlugin(), createHmrPlugin()],
+    plugins: [entryPlugin(), createHmrPlugin(config)],
   });
 }
 
@@ -72,8 +67,13 @@ export async function handleHmrMessage(server: ViteDevServer, data: HmrData) {
 }
 
 export async function watch() {
+  // resolve config
+  console.log(formatNormal('resolving user config...'));
+  const config = await loadConfig();
+
   // create vite server
-  const server = await createViteServer();
+  console.log(formatNormal('config resolved, starting dev server...'));
+  const server = await createViteServer(config);
   server.config.logger.info(formatNormal('watching for file changes...'));
 
   // store initial HMR datas
