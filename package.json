@@ -13,6 +13,7 @@
   "scripts": {
     "build": "vite build",
     "test": "vitest",
+    "test:playground": "vite-node ./src/cli.ts -- --cwd ./playground",
     "format": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,json}\""
   },
   "repository": {

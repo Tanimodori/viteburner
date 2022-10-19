@@ -30,3 +30,5 @@ export async function main() {
 
   watch(config);
 }
+
+main();
