@@ -14,7 +14,7 @@ export default defineConfig({
       formats: ['cjs', 'es'],
     },
     rollupOptions: {
-      external: ['chokidar', 'micromatch', 'pathe', 'picocolors', 'unconfig', 'vite', ...builtins],
+      external: ['cac', 'chokidar', 'micromatch', 'pathe', 'picocolors', 'unconfig', 'vite', ...builtins],
     },
     outDir: 'dist',
     emptyOutDir: true,
