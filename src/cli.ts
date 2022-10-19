@@ -28,7 +28,10 @@ export async function main() {
   const config = await loadConfig(resolveInlineConfig);
   console.log(formatNormal('config resolved, starting dev server...'));
 
-  watch(config);
+  watch({
+    ...resolveInlineConfig,
+    ...config,
+  });
 }
 
 main();

@@ -3,11 +3,11 @@ import { loadConfig as loadConfigRaw } from 'unconfig';
 import { UserConfig } from 'vite';
 import { HmrOptions } from './plugins/hmr';
 
-export interface ViteBurnerConfig extends HmrOptions {
+export interface ViteBurnerUserConfig extends HmrOptions {
   sourcemap?: boolean | 'inline' | 'hidden';
 }
 
-export interface ViteBurnerUserConfig extends UserConfig {
+export interface ViteBurnerViteConfig extends UserConfig {
   viteburner?: ViteBurnerConfig;
 }
 
@@ -15,8 +15,10 @@ export interface ViteBurnerInlineConfig {
   cwd: string;
 }
 
+export interface ViteBurnerConfig extends ViteBurnerUserConfig, ViteBurnerInlineConfig {}
+
 export async function loadConfig(inlineConfig: ViteBurnerInlineConfig) {
-  const { config } = await loadConfigRaw<ViteBurnerConfig>({
+  const { config } = await loadConfigRaw<ViteBurnerUserConfig>({
     sources: [
       // load from `viteburner.config.xx`
       {

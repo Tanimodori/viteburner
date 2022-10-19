@@ -16,7 +16,9 @@ export function createHmrPlugin(config: ViteBurnerConfig) {
 }
 
 export async function createViteServer(config: ViteBurnerConfig) {
+  const root = config.cwd;
   return createServer({
+    ...(root && { root }),
     mode: 'development',
     optimizeDeps: {
       disabled: true,
