@@ -10,6 +10,7 @@
     "baseUrl": ".",
     "inlineSourceMap": true,
     "moduleResolution": "Node",
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "paths": {
       "@/*": ["./src/*"],

@@ -5,12 +5,12 @@ export function entryPlugin() {
 
   return {
     name: 'viteburner:entry',
-    resolveId(id) {
+    resolveId(id: string) {
       if (id === virtualModuleId) {
         return resolvedVirtualModuleId;
       }
     },
-    load(id) {
+    load(id: string) {
       if (id === resolvedVirtualModuleId) {
         return `export {}`;
       }
