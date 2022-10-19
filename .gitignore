@@ -19,4 +19,4 @@ dist/
 *.tsbuildinfo
 
 # Bitburner type definitions
-NetscriptDefinitions.d.ts
+**/NetscriptDefinitions.d.ts
