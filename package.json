@@ -1,5 +1,5 @@
 {
-  "name": "bitburner-vite",
+  "name": "viteburner",
   "version": "0.0.1",
   "description": "Bitburner template using vite",
   "main": "index.js",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Tanimodori/bitburner-vite.git"
+    "url": "git+https://github.com/Tanimodori/viteburner.git"
   },
   "keywords": [
     "bitburner",
@@ -19,9 +19,9 @@
   "author": "Tanimodori",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Tanimodori/bitburner-vite/issues"
+    "url": "https://github.com/Tanimodori/viteburner/issues"
   },
-  "homepage": "https://github.com/Tanimodori/bitburner-vite#readme",
+  "homepage": "https://github.com/Tanimodori/viteburner#readme",
   "devDependencies": {
     "@types/node": "^18.8.2",
     "@typescript-eslint/eslint-plugin": "^5.39.0",

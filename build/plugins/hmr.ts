@@ -34,7 +34,7 @@ const parseOptions = (options: HmrOptions = {}) => {
   };
 };
 
-export const hmrPluginName = 'bitburner-vite:hmr';
+export const hmrPluginName = 'viteburner:hmr';
 
 export function hmrPlugin(options: HmrOptions = {}): Plugin {
   const { watch } = parseOptions(options);

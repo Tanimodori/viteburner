@@ -1,10 +1,10 @@
-export const virtualModuleId = 'virtual:bitburner-vite-entry';
+export const virtualModuleId = 'virtual:viteburner-entry';
 
 export function entryPlugin() {
   const resolvedVirtualModuleId = '\0' + virtualModuleId;
 
   return {
-    name: 'bitburner-vite:entry',
+    name: 'viteburner:entry',
     resolveId(id) {
       if (id === virtualModuleId) {
         return resolvedVirtualModuleId;

@@ -1,7 +1,7 @@
 import pc from 'picocolors';
 
 export function formatRaw(msg: string) {
-  return `${pc.cyan('[bitburner-vite]')} ${msg}`;
+  return `${pc.cyan('[viteburner]')} ${msg}`;
 }
 
 export function formatNormal(first = '', second = '') {
