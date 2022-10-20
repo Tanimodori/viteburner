@@ -11,3 +11,11 @@ export function formatNormal(first = '', second = '', third = '') {
   third && parts.push(third);
   return formatRaw(parts.join(' '));
 }
+
+export function formatWarn(msg: string) {
+  return pc.yellow(`[viteburner] ${msg}`);
+}
+
+export function formatError(msg: string) {
+  return pc.red(`[viteburner] ${msg}`);
+}

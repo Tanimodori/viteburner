@@ -1,4 +1,4 @@
-import { formatNormal, getSourceMapString, HmrData, ViteBurnerServer } from '..';
+import { formatError, formatNormal, getSourceMapString, HmrData, ViteBurnerServer } from '..';
 import WsManager from './manager';
 import fs from 'fs';
 import pc from 'picocolors';
@@ -28,7 +28,7 @@ export default class WsAdapter {
       await fs.promises.writeFile(fullpath, data);
       this.server.config.logger.info(formatNormal('dts updated', fullpath));
     } catch (e) {
-      this.server.config.logger.error(`[viteburner] error getting dts file: ${e}`);
+      this.server.config.logger.error(formatError(`error getting dts file: ${e}`));
     }
   }
   async handleHmrMessage(data: HmrData | HmrData[]) {
@@ -62,7 +62,7 @@ export default class WsAdapter {
       if (data.transform) {
         const module = await this.server.fetchModule(data.file);
         if (!module) {
-          this.server.config.logger.error('[viteburner] module not found: ' + data.file);
+          this.server.config.logger.error('module not found: ' + data.file);
           return;
         }
         content = module.code;
@@ -82,7 +82,7 @@ export default class WsAdapter {
         // check timestamp
         this.deleteCache(data);
       } catch (e) {
-        this.server.config.logger.error(`[viteburner] error pushing file: ${data.file} ${e}`);
+        this.server.config.logger.error(formatError(`error pushing file: ${data.file} ${e}`));
       }
     } else if (data.event === 'unlink') {
       try {
@@ -93,7 +93,7 @@ export default class WsAdapter {
         // check timestamp
         this.deleteCache(data);
       } catch (e) {
-        this.server.config.logger.error(`[viteburner] error pushing file: ${data.file} ${e}`);
+        this.server.config.logger.error(formatError(`error pushing file: ${data.file} ${e}`));
       }
     } else {
       throw new Error('Unknown hmr event: ' + data.event);
