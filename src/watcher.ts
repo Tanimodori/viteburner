@@ -1,4 +1,3 @@
-import { slash } from 'vite-node/utils';
 import pc from 'picocolors';
 import { HmrData } from './plugins';
 import { formatNormal } from './console';
@@ -8,7 +7,7 @@ import { getSourceMapString } from './utils';
 import WsManager from './ws/manager';
 
 export async function handleHmrMessage(data: HmrData, server: ViteBurnerServer) {
-  server.config.logger.info(formatNormal(`hmr ${data.event}`, slash(data.file)));
+  server.config.logger.info(formatNormal(`hmr ${data.event}`, data.file));
   const module = await server.fetchModule(data.file);
   if (module) {
     const result = module.code + getSourceMapString(module.map);

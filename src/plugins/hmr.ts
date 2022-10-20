@@ -3,6 +3,7 @@ import { isMatch } from 'micromatch';
 import chokidar from 'chokidar';
 import { relative } from 'path';
 import EventEmitter from 'events';
+import { slash } from 'vite-node/utils';
 
 declare module 'vite' {
   interface ViteDevServer {
@@ -85,7 +86,7 @@ export function hmrPlugin(): Plugin {
           const type = findMatchedType(file);
           if (type) {
             server.emitter.emit(hmrPluginName, {
-              file,
+              file: slash(file),
               event,
               type,
               transform: watch[type].transform,
