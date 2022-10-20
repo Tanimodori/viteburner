@@ -1,0 +1,8 @@
+.eslintrc
+.gitattributes
+.prettierignore
+.prettierrc
+playground/**/*
+src/**
+vite.config.ts
+NetscriptDefinitions.d.ts
