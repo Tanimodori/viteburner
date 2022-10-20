@@ -11,7 +11,13 @@ export default class WsAdapter {
   constructor(manager: WsManager, server: ViteBurnerServer) {
     this.manager = manager;
     this.server = server;
-    this.manager.onConnected(this.getDts);
+    this.manager.onConnected((ws) => {
+      this.server.config.logger.info(formatNormal('connected'));
+      ws.on('close', () => {
+        this.server.config.logger.info(formatNormal('disconnected'));
+      });
+      this.getDts();
+    });
   }
   async getDts() {
     try {
