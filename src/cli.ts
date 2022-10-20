@@ -27,9 +27,9 @@ export async function startDev(options: any) {
   };
 
   // resolve config
-  console.log(formatNormal('resolving user config...'));
+  console.log(formatNormal('config', 'resolving user config...'));
   const config = await loadConfig(resolveInlineConfig);
-  console.log(formatNormal('config resolved'));
+  console.log(formatNormal('config', 'config resolved'));
 
   watch(config);
 }

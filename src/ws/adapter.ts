@@ -12,9 +12,9 @@ export default class WsAdapter {
     this.manager = manager;
     this.server = server;
     this.manager.onConnected((ws) => {
-      this.server.config.logger.info(formatNormal('connected'));
+      this.server.config.logger.info(formatNormal('conn', '', 'connected'));
       ws.on('close', () => {
-        this.server.config.logger.info(formatNormal('disconnected'));
+        this.server.config.logger.info(formatNormal('conn', '', pc.yellow('disconnected')));
       });
       this.getDts();
     });
@@ -26,7 +26,7 @@ export default class WsAdapter {
       const filename = this.server.config?.viteburner?.dts ?? 'NescriptDefinitions.d.ts';
       const fullpath = path.resolve(root, filename);
       await fs.promises.writeFile(fullpath, data);
-      this.server.config.logger.info(formatNormal('dts updated', fullpath));
+      this.server.config.logger.info(formatNormal('dts change', fullpath));
     } catch (e) {
       this.server.config.logger.error(formatError(`error getting dts file: ${e}`));
     }
