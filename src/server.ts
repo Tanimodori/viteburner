@@ -40,7 +40,7 @@ export async function createViteServer(config: ViteBurnerConfig) {
 }
 
 export interface ViteBurnerServer extends ViteDevServer {
-  path2Id(file: string): string;
+  pathToId(file: string): string;
   fetchModule(file: string): Promise<TransformResult | null>;
   onHmrMessage(handler: (data: HmrData, server: ViteBurnerServer) => void): void;
   buildStart(): Promise<void>;
@@ -50,12 +50,12 @@ export async function createServer(config: ViteBurnerConfig) {
   const viteServer = await createViteServer(config);
   const server: ViteBurnerServer = {
     ...viteServer,
-    path2Id(file: string) {
-      const id = `/@fs/${slash(resolve(file))}`;
+    pathToId(file: string) {
+      const id = `/@fs/${slash(resolve(viteServer.config.root, file))}`;
       return normalizeRequestId(id, server.config.base);
     },
     async fetchModule(file: string) {
-      const id = server.path2Id(file);
+      const id = server.pathToId(file);
       return server.transformRequest(id);
     },
     onHmrMessage(handler: (data: HmrData, server: ViteBurnerServer) => void) {
