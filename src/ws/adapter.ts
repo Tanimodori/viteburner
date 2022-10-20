@@ -85,7 +85,8 @@ export default class WsAdapter {
         // check timestamp
         this.deleteCache(data);
       } catch (e) {
-        this.server.config.logger.error(formatError(`error pushing file: ${data.file} ${e}`));
+        this.server.config.logger.error(formatError(`error on pusing file: ${data.file} ${e}`));
+        this.server.config.logger.error(formatError(`hmr ${data.event} ${data.file} (error)`));
       }
     } else if (data.event === 'unlink') {
       try {
@@ -95,12 +96,14 @@ export default class WsAdapter {
         });
         // check timestamp
         this.deleteCache(data);
+        this.server.config.logger.info(formatNormal(`hmr ${data.event}`, data.file, pc.green('(done)')));
       } catch (e) {
-        this.server.config.logger.error(formatError(`error pushing file: ${data.file} ${e}`));
+        this.server.config.logger.error(formatError(`error on deleting file: ${data.file} ${e}`));
+        this.server.config.logger.error(formatError(`hmr ${data.event} ${data.file} (error)`));
+        return;
       }
     } else {
       throw new Error('Unknown hmr event: ' + data.event);
     }
-    this.server.config.logger.info(formatNormal(`hmr ${data.event}`, data.file, pc.green('(done)')));
   }
 }
