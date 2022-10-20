@@ -59,6 +59,22 @@ export default class WsAdapter {
       this.buffers.delete(data.file);
     }
   }
+  getFilename(data: HmrData) {
+    const defaultRename = (file: string) => {
+      if (file.startsWith('src/')) {
+        file = file.substring(4);
+      }
+      if (file.endsWith('.ts')) {
+        file = file.substring(0, file.length - 3) + '.js';
+      }
+      return file;
+    };
+    const rename = this.server.config?.viteburner?.watch?.[data.type]?.rename ?? defaultRename;
+    const forceStartingSlash = (s: string) => {
+      return s.startsWith('/') ? s : '/' + s;
+    };
+    return forceStartingSlash(rename(data.file));
+  }
   async transmitData(data: HmrData) {
     if (data.event === 'add' || data.event === 'change') {
       let content = '';
@@ -78,12 +94,13 @@ export default class WsAdapter {
       }
       try {
         await this.manager.pushFile({
-          filename: data.file,
+          filename: this.getFilename(data),
           content,
           server: 'home',
         });
         // check timestamp
         this.deleteCache(data);
+        this.server.config.logger.info(formatNormal(`hmr ${data.event}`, data.file, pc.green('(done)')));
       } catch (e) {
         this.server.config.logger.error(formatError(`error on pusing file: ${data.file} ${e}`));
         this.server.config.logger.error(formatError(`hmr ${data.event} ${data.file} (error)`));
@@ -91,7 +108,7 @@ export default class WsAdapter {
     } else if (data.event === 'unlink') {
       try {
         await this.manager.deleteFile({
-          filename: data.file,
+          filename: this.getFilename(data),
           server: 'home',
         });
         // check timestamp

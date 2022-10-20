@@ -16,6 +16,7 @@ export interface HmrOptions {
     [key: string]: {
       pattern: string;
       transform: boolean;
+      rename?: (file: string) => string;
     };
   };
 }
