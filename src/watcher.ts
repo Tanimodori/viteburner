@@ -12,21 +12,22 @@ export async function watch(config: ViteBurnerConfig) {
   console.log(formatNormal('creating WebSocket server...'));
   const wsManager = new WsManager({ port, timeout: config.timeout });
   console.log(formatNormal(`WebSocket server listening on localhost:${pc.magenta(String(port))}`));
-  const wsAdapter = new WsAdapter(wsManager);
 
   // create vite server
   console.log(formatNormal('creating dev server...'));
   const server = await createServer(config);
   server.config.logger.info(formatNormal('watching for file changes...'));
 
+  const wsAdapter = new WsAdapter(wsManager, server);
+
   // store initial HMR datas
   let buildStarted = false;
   const initialDatas: HmrData[] = [];
-  server.onHmrMessage(async (data, server) => {
+  server.onHmrMessage(async (data) => {
     if (!buildStarted) {
       initialDatas.push(data);
     } else {
-      await wsAdapter.handleHmrMessage(data, server);
+      await wsAdapter.handleHmrMessage(data);
     }
   });
 
@@ -36,6 +37,6 @@ export async function watch(config: ViteBurnerConfig) {
 
   // process initial HMR datas
   for (const data of initialDatas) {
-    await wsAdapter.handleHmrMessage(data, server);
+    await wsAdapter.handleHmrMessage(data);
   }
 }

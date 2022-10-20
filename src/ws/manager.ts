@@ -60,7 +60,11 @@ export default class WsManager {
     return this.ws?.readyState === WebSocket.OPEN;
   }
   onConnected(cb: (ws: WebSocket) => void) {
-    this.wss.on('connection', cb);
+    this.wss.on('connection', (ws) => {
+      // ensure ws is saved before any sendMessage calls
+      this.ws = ws;
+      cb(ws);
+    });
   }
   onDisconneted(cb: () => void) {
     this.wss.on('close', cb);
