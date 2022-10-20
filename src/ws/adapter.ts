@@ -23,10 +23,10 @@ export default class WsAdapter {
     try {
       const data = await this.manager.getDefinitionFile();
       const root = this.server.config.root ?? process.cwd();
-      const filename = this.server.config?.viteburner?.dts ?? 'NescriptDefinitions.d.ts';
+      const filename = this.server.config?.viteburner?.dts ?? 'NetscriptDefinitions.d.ts';
       const fullpath = path.resolve(root, filename);
       await fs.promises.writeFile(fullpath, data);
-      this.server.config.logger.info(formatNormal('dts change', fullpath));
+      this.server.config.logger.info(formatNormal('dts change', filename));
     } catch (e) {
       this.server.config.logger.error(formatError(`error getting dts file: ${e}`));
     }
