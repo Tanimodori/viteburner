@@ -1,6 +1,6 @@
 {
   "name": "viteburner",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Bitburner template using vite",
   "main": "dist/entry.js",
   "module": "dist/entry.mjs",
