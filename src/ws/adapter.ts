@@ -1,6 +1,7 @@
-import { getSourceMapString, HmrData, ViteBurnerServer } from '..';
+import { formatNormal, getSourceMapString, HmrData, ViteBurnerServer } from '..';
 import WsManager from './manager';
 import fs from 'fs';
+import pc from 'picocolors';
 
 export default class WsAdapter {
   buffers: Map<string, HmrData> = new Map();
@@ -8,14 +9,29 @@ export default class WsAdapter {
   constructor(manager: WsManager) {
     this.manager = manager;
   }
-  handleHmrMessage(data: HmrData, server: ViteBurnerServer) {
-    this.buffers.set(data.file, data);
-    if (!this.manager.connected) {
+  async handleHmrMessage(data: HmrData | HmrData[], server: ViteBurnerServer) {
+    const connected = this.manager.connected;
+    if (!Array.isArray(data)) {
+      data = [data];
+    }
+    for (const item of data) {
+      this.buffers.set(item.file, item);
+      server.config.logger.info(formatNormal(`hmr ${item.event}`, item.file, pc.yellow('(pending)')));
+    }
+    if (!connected) {
       return;
     }
     // transmit buffered data
     if (this.buffers.size) {
-      this.buffers.forEach((data) => this.transmitData(data, server));
+      for (const item of this.buffers.values()) {
+        await this.transmitData(item, server);
+      }
+    }
+  }
+  deleteCache(data: HmrData) {
+    const currentData = this.buffers.get(data.file);
+    if (currentData && data.timestamp === currentData.timestamp) {
+      this.buffers.delete(data.file);
     }
   }
   async transmitData(data: HmrData, server: ViteBurnerServer) {
@@ -42,13 +58,24 @@ export default class WsAdapter {
           server: 'home',
         });
         // check timestamp
-        const currentData = this.buffers.get(data.file);
-        if (currentData && data.timestamp === currentData.timestamp) {
-          this.buffers.delete(data.file);
-        }
+        this.deleteCache(data);
       } catch (e) {
         server.config.logger.error(`[viteburner] error pushing file: ${data.file} ${e}`);
       }
+    } else if (data.event === 'unlink') {
+      try {
+        await this.manager.deleteFile({
+          filename: data.file,
+          server: 'home',
+        });
+        // check timestamp
+        this.deleteCache(data);
+      } catch (e) {
+        server.config.logger.error(`[viteburner] error pushing file: ${data.file} ${e}`);
+      }
+    } else {
+      throw new Error('Unknown hmr event: ' + data.event);
     }
+    server.config.logger.info(formatNormal(`hmr ${data.event}`, data.file, pc.green('(done)')));
   }
 }
