@@ -30,14 +30,24 @@ export interface MessageSchema<P = undefined, R extends z.ZodTypeAny = z.ZodType
   validator?: R;
 }
 
+export interface WsManagerOptions {
+  port: number;
+  timeout?: number;
+}
+
 export default class WsManager {
+  options: Required<WsManagerOptions>;
   ws: WebSocket | undefined;
   wss: WebSocketServer;
   trackers: PromiseHolder[];
-  constructor(port: number) {
+  constructor(options: WsManagerOptions) {
+    this.options = {
+      timeout: 10000,
+      ...options,
+    };
     this.trackers = [];
     this.ws = undefined;
-    this.wss = new WebSocketServer({ port });
+    this.wss = new WebSocketServer({ port: this.options.port });
     this.wss.on('connection', (ws) => {
       this.ws = ws;
       ws.on('message', this.handleMessage);
@@ -68,16 +78,22 @@ export default class WsManager {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async sendMessage<P = undefined, R extends z.ZodTypeAny = z.ZodTypeAny>(options: MessageSchema<P, R>) {
     const params = options.params;
+
+    // preflight check
     if (!this.ws || !this.connected) {
       throw new Error('No connection');
     }
     const id = this.nextId;
+
+    // send message
     this.ws.send({
       jsonrpc: '2.0',
       id,
       method: options.method,
       ...(params && { params }),
     });
+
+    // constructing the result
     const result = new Promise<z.infer<R>>((resolve, reject) => {
       const onResolve = (data: unknown) => {
         try {
@@ -97,6 +113,16 @@ export default class WsManager {
         reject: onReject,
       };
     });
+
+    // timeout
+    if (this.options.timeout) {
+      setTimeout(() => {
+        if (this.trackers[id]) {
+          this.trackers[id].reject(new Error(`Timeout after ${this.options.timeout}ms`));
+        }
+      }, this.options.timeout);
+    }
+
     return result;
   }
   async pushFile(params: PushFileParams) {
