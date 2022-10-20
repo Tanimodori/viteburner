@@ -83,7 +83,8 @@ export default class WsAdapter {
   }
   async transmitData(data: HmrData) {
     const formatFileChange = (from: string, to: string, serverName: string) => {
-      return `${pc.dim(from)} ${pc.reset('->')} @${pc.dim(serverName)} ${pc.dim(to)}`;
+      const dest = `@${serverName}:${to}`;
+      return `${pc.dim(from)} ${pc.reset('->')} ${pc.dim(dest)}`;
     };
     if (data.event === 'add' || data.event === 'change') {
       let content = '';
@@ -98,7 +99,7 @@ export default class WsAdapter {
           content += getSourceMapString(module.map);
         }
       } else {
-        const buffer = await fs.promises.readFile(data.file);
+        const buffer = await fs.promises.readFile(path.resolve(this.server.config.root, data.file));
         content = buffer.toString();
       }
       try {
