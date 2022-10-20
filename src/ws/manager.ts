@@ -1,4 +1,4 @@
-import { WebSocket, WebSocketServer } from 'ws';
+import { RawData, WebSocket, WebSocketServer } from 'ws';
 import {
   wsResponseSchema,
   PushFileParams,
@@ -50,7 +50,7 @@ export default class WsManager {
     this.wss = new WebSocketServer({ port: this.options.port });
     this.wss.on('connection', (ws) => {
       this.ws = ws;
-      ws.on('message', this.handleMessage);
+      ws.on('message', (response) => this.handleMessage(response));
     });
   }
   get nextId() {
@@ -69,8 +69,9 @@ export default class WsManager {
   onDisconneted(cb: () => void) {
     this.wss.on('close', cb);
   }
-  handleMessage(response: string) {
-    const { id, result, error } = wsResponseSchema.parse(JSON.parse(response));
+  handleMessage(response: RawData) {
+    const parsed = wsResponseSchema.parse(JSON.parse(response.toString()));
+    const { id, result, error } = parsed;
     if (!this.trackers[id]) {
       return;
     }
@@ -90,12 +91,14 @@ export default class WsManager {
     const id = this.nextId;
 
     // send message
-    this.ws.send({
-      jsonrpc: '2.0',
-      id,
-      method: options.method,
-      ...(params && { params }),
-    });
+    this.ws.send(
+      JSON.stringify({
+        jsonrpc: '2.0',
+        id,
+        method: options.method,
+        ...(params && { params }),
+      }),
+    );
 
     // constructing the result
     const result = new Promise<z.infer<R>>((resolve, reject) => {
