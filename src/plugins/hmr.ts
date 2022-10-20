@@ -37,9 +37,10 @@ const parseOptions = (options: HmrOptions = {}) => {
 
 export const hmrPluginName = 'viteburner:hmr';
 
-export function hmrPlugin(options: HmrOptions = {}): Plugin {
-  const { watch } = parseOptions(options);
+export function hmrPlugin(): Plugin {
+  let options: HmrOptions = {};
   const findMatchedType = (file: string) => {
+    const watch = options?.watch ?? {};
     for (const type in watch) {
       if (isMatch(file, watch[type].pattern)) {
         return type;
@@ -50,7 +51,12 @@ export function hmrPlugin(options: HmrOptions = {}): Plugin {
 
   return {
     name: hmrPluginName,
+    configResolved(config) {
+      options = parseOptions(config.viteburner);
+    },
     configureServer(server) {
+      const watch = options?.watch ?? {};
+
       // emitter
       server.emitter = new EventEmitter();
       // events for watching

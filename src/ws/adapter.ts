@@ -1,4 +1,4 @@
-import { HmrData, ViteBurnerServer } from '..';
+import { getSourceMapString, HmrData, ViteBurnerServer } from '..';
 import WsManager from './manager';
 import fs from 'fs';
 
@@ -27,8 +27,10 @@ export default class WsAdapter {
           server.config.logger.error('[viteburner] module not found: ' + data.file);
           return;
         }
-        // TODO sourcemap
         content = module.code;
+        if (server.config?.viteburner?.sourcemap === 'inline' && module.map) {
+          content += getSourceMapString(module.map);
+        }
       } else {
         const buffer = await fs.promises.readFile(data.file);
         content = buffer.toString();

@@ -1,5 +1,5 @@
 import { loadConfig as loadConfigRaw } from 'unconfig';
-
+import { UserConfig } from 'vite';
 import { HmrOptions } from './plugins/hmr';
 
 export interface ViteBurnerUserConfig extends HmrOptions {
@@ -8,6 +8,9 @@ export interface ViteBurnerUserConfig extends HmrOptions {
   timeout?: number;
 }
 
+export interface ViteBurnerViteConfig extends UserConfig {
+  viteburner?: ViteBurnerConfig;
+}
 export interface ViteBurnerInlineConfig {
   cwd: string;
   port?: number;

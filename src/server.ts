@@ -35,7 +35,7 @@ export async function createViteServer(config: ViteBurnerConfig) {
       middlewareMode: true,
     },
     viteburner: config,
-    plugins: [entryPlugin(), hmrPlugin(config)],
+    plugins: [entryPlugin(), hmrPlugin()],
   });
 }
 
@@ -48,7 +48,6 @@ export interface ViteBurnerServer extends ViteDevServer {
 
 export async function createServer(config: ViteBurnerConfig) {
   const viteServer = await createViteServer(config);
-  console.log(viteServer.config);
   const server: ViteBurnerServer = {
     ...viteServer,
     path2Id(file: string) {
