@@ -76,10 +76,7 @@ export default class WsAdapter {
       return file;
     };
     const rename = this.server.config?.viteburner?.watch?.[data.type]?.rename ?? defaultRename;
-    const forceStartingSlash = (s: string) => {
-      return s.startsWith('/') ? s : '/' + s;
-    };
-    return forceStartingSlash(rename(data.file));
+    return rename(data.file);
   }
   async transmitData(data: HmrData) {
     const formatFileChange = (from: string, to: string, serverName: string) => {
