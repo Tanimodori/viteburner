@@ -22,7 +22,7 @@ export async function watch(config: ViteBurnerConfig) {
   // create ws server
   const port = config.port ?? 12525;
   console.log(formatNormal('creating WebSocket server...'));
-  const wsManager = new WsManager(port);
+  const wsManager = new WsManager({ port, timeout: config.timeout });
   console.log(formatNormal(`WebSocket server listening on localhost:${pc.magenta(String(port))}`));
 
   // create vite server
