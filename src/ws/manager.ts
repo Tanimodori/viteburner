@@ -40,21 +40,20 @@ export default class WsManager {
   ws: WebSocket | undefined;
   wss: WebSocketServer;
   trackers: PromiseHolder[];
+  nextId: number;
   constructor(options: WsManagerOptions) {
     this.options = {
       timeout: 10000,
       ...options,
     };
     this.trackers = [];
+    this.nextId = 0;
     this.ws = undefined;
     this.wss = new WebSocketServer({ port: this.options.port });
     this.wss.on('connection', (ws) => {
       this.ws = ws;
       ws.on('message', (response) => this.handleMessage(response));
     });
-  }
-  get nextId() {
-    return this.trackers.length;
   }
   get connected() {
     return this.ws?.readyState === WebSocket.OPEN;
@@ -75,10 +74,12 @@ export default class WsManager {
     if (!this.trackers[id]) {
       return;
     }
+    // get those functions before deleting the tracker
+    const { resolve, reject } = this.trackers[id];
     if (error) {
-      this.trackers[id].reject(error);
+      reject(error);
     }
-    this.trackers[id].resolve(result);
+    resolve(result);
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async sendMessage<P = undefined, R extends z.ZodTypeAny = z.ZodTypeAny>(options: MessageSchema<P, R>) {
@@ -88,7 +89,7 @@ export default class WsManager {
     if (!this.ws || !this.connected) {
       throw new Error('No connection');
     }
-    const id = this.nextId;
+    const id = ++this.nextId;
 
     // send message
     this.ws.send(
