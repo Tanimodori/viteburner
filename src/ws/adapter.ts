@@ -12,13 +12,19 @@ export default class WsAdapter {
     this.manager = manager;
     this.server = server;
     this.manager.onConnected(async (ws) => {
-      this.server.config.logger.info(formatNormal('conn', '', 'connected'));
+      this.info('conn', '', 'connected');
       ws.on('close', () => {
-        this.server.config.logger.info(formatNormal('conn', '', pc.yellow('disconnected')));
+        this.info('conn', '', pc.yellow('disconnected'));
       });
       await this.getDts();
       await this.handleHmrMessage();
     });
+  }
+  info(...msg: string[]) {
+    this.server.config.logger.info(formatNormal(...msg));
+  }
+  error(msg: string) {
+    this.server.config.logger.error(formatError(msg));
   }
   async getDts() {
     try {
@@ -27,9 +33,9 @@ export default class WsAdapter {
       const filename = this.server.config?.viteburner?.dts ?? 'NetscriptDefinitions.d.ts';
       const fullpath = path.resolve(root, filename);
       await fs.promises.writeFile(fullpath, data);
-      this.server.config.logger.info(formatNormal('dts change', filename));
+      this.info('dts change', filename);
     } catch (e) {
-      this.server.config.logger.error(formatError(`error getting dts file: ${e}`));
+      this.error(`error getting dts file: ${e}`);
     }
   }
   async handleHmrMessage(data?: HmrData | HmrData[]) {
@@ -41,7 +47,7 @@ export default class WsAdapter {
     const connected = this.manager.connected;
     for (const item of data) {
       this.buffers.set(item.file, item);
-      this.server.config.logger.info(formatNormal(`hmr ${item.event}`, item.file, pc.yellow('(pending)')));
+      this.info(`hmr ${item.event}`, item.file, pc.yellow('(pending)'));
     }
     if (!connected) {
       return;
@@ -76,6 +82,9 @@ export default class WsAdapter {
     return forceStartingSlash(rename(data.file));
   }
   async transmitData(data: HmrData) {
+    const formatFileChange = (from: string, to: string, serverName: string) => {
+      return `${pc.dim(from)} ${pc.reset('->')} @${pc.dim(serverName)} ${pc.dim(to)}`;
+    };
     if (data.event === 'add' || data.event === 'change') {
       let content = '';
       if (data.transform) {
@@ -93,30 +102,36 @@ export default class WsAdapter {
         content = buffer.toString();
       }
       try {
+        const filename = this.getFilename(data);
+        const serverName = 'home';
         await this.manager.pushFile({
-          filename: this.getFilename(data),
+          filename,
           content,
-          server: 'home',
+          server: serverName,
         });
         // check timestamp
         this.deleteCache(data);
-        this.server.config.logger.info(formatNormal(`hmr ${data.event}`, data.file, pc.green('(done)')));
+        const fileChangeStr = formatFileChange(data.file, filename, serverName);
+        this.info(`hmr ${data.event}`, fileChangeStr, pc.green('(done)'));
       } catch (e) {
-        this.server.config.logger.error(formatError(`error on pusing file: ${data.file} ${e}`));
-        this.server.config.logger.error(formatError(`hmr ${data.event} ${data.file} (error)`));
+        this.error(`error on pusing file: ${data.file} ${e}`);
+        this.error(`hmr ${data.event} ${data.file} (error)`);
       }
     } else if (data.event === 'unlink') {
       try {
+        const filename = this.getFilename(data);
+        const serverName = 'home';
         await this.manager.deleteFile({
-          filename: this.getFilename(data),
-          server: 'home',
+          filename,
+          server: serverName,
         });
         // check timestamp
         this.deleteCache(data);
-        this.server.config.logger.info(formatNormal(`hmr ${data.event}`, data.file, pc.green('(done)')));
+        const fileChangeStr = formatFileChange(data.file, filename, serverName);
+        this.info(`hmr ${data.event}`, fileChangeStr, pc.green('(done)'));
       } catch (e) {
-        this.server.config.logger.error(formatError(`error on deleting file: ${data.file} ${e}`));
-        this.server.config.logger.error(formatError(`hmr ${data.event} ${data.file} (error)`));
+        this.error(`error on deleting file: ${data.file} ${e}`);
+        this.error(`hmr ${data.event} ${data.file} (error)`);
         return;
       }
     } else {
