@@ -25,6 +25,7 @@ export interface HmrData {
   type: string;
   transform: boolean;
   initial: boolean;
+  timestamp: number;
 }
 
 const parseOptions = (options: HmrOptions = {}) => {
@@ -83,6 +84,7 @@ export function hmrPlugin(options: HmrOptions = {}): Plugin {
               type,
               transform: watch[type].transform,
               initial,
+              timestamp: Date.now(),
             });
           } else {
             throw new Error(`File ${file} does not match any patterns`);
