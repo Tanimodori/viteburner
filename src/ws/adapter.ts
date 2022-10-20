@@ -11,12 +11,13 @@ export default class WsAdapter {
   constructor(manager: WsManager, server: ViteBurnerServer) {
     this.manager = manager;
     this.server = server;
-    this.manager.onConnected((ws) => {
+    this.manager.onConnected(async (ws) => {
       this.server.config.logger.info(formatNormal('conn', '', 'connected'));
       ws.on('close', () => {
         this.server.config.logger.info(formatNormal('conn', '', pc.yellow('disconnected')));
       });
-      this.getDts();
+      await this.getDts();
+      await this.handleHmrMessage();
     });
   }
   async getDts() {
@@ -31,11 +32,13 @@ export default class WsAdapter {
       this.server.config.logger.error(formatError(`error getting dts file: ${e}`));
     }
   }
-  async handleHmrMessage(data: HmrData | HmrData[]) {
-    const connected = this.manager.connected;
-    if (!Array.isArray(data)) {
+  async handleHmrMessage(data?: HmrData | HmrData[]) {
+    if (!data) {
+      data = [];
+    } else if (!Array.isArray(data)) {
       data = [data];
     }
+    const connected = this.manager.connected;
     for (const item of data) {
       this.buffers.set(item.file, item);
       this.server.config.logger.info(formatNormal(`hmr ${item.event}`, item.file, pc.yellow('(pending)')));
