@@ -47,7 +47,7 @@ export default class WsManager {
     return this.trackers.length;
   }
   get connected() {
-    return this.wss.clients.size > 0;
+    return this.ws?.readyState === WebSocket.OPEN;
   }
   onConnected(cb: (ws: WebSocket) => void) {
     this.wss.on('connection', cb);
@@ -68,7 +68,7 @@ export default class WsManager {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async sendMessage<P = undefined, R extends z.ZodTypeAny = z.ZodTypeAny>(options: MessageSchema<P, R>) {
     const params = options.params;
-    if (!this.connected || !this.ws) {
+    if (!this.ws || !this.connected) {
       throw new Error('No connection');
     }
     const id = this.nextId;
