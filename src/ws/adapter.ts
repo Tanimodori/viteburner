@@ -79,9 +79,9 @@ export default class WsAdapter {
     return rename(data.file);
   }
   async transmitData(data: HmrData) {
-    const formatFileChange = (from: string, to: string, serverName: string) => {
+    const formatFileChange = (from: string, to: string, serverName: string, styled = true) => {
       const dest = `@${serverName}:${to}`;
-      return `${pc.dim(from)} ${pc.reset('->')} ${pc.dim(dest)}`;
+      return styled ? `${pc.dim(from)} ${pc.reset('->')} ${pc.dim(dest)}` : `${from} -> ${dest}`;
     };
     if (data.event === 'add' || data.event === 'change') {
       let content = '';
@@ -99,9 +99,9 @@ export default class WsAdapter {
         const buffer = await fs.promises.readFile(path.resolve(this.server.config.root, data.file));
         content = buffer.toString();
       }
+      const filename = this.getFilename(data);
+      const serverName = 'home';
       try {
-        const filename = this.getFilename(data);
-        const serverName = 'home';
         await this.manager.pushFile({
           filename,
           content,
@@ -112,13 +112,14 @@ export default class WsAdapter {
         const fileChangeStr = formatFileChange(data.file, filename, serverName);
         this.info(`hmr ${data.event}`, fileChangeStr, pc.green('(done)'));
       } catch (e) {
-        this.error(`error on pusing file: ${data.file} ${e}`);
+        const fileChangeStr = formatFileChange(data.file, filename, serverName, false);
+        this.error(`error on pusing file: ${fileChangeStr} ${e}`);
         this.error(`hmr ${data.event} ${data.file} (error)`);
       }
     } else if (data.event === 'unlink') {
+      const filename = this.getFilename(data);
+      const serverName = 'home';
       try {
-        const filename = this.getFilename(data);
-        const serverName = 'home';
         await this.manager.deleteFile({
           filename,
           server: serverName,
@@ -128,7 +129,8 @@ export default class WsAdapter {
         const fileChangeStr = formatFileChange(data.file, filename, serverName);
         this.info(`hmr ${data.event}`, fileChangeStr, pc.green('(done)'));
       } catch (e) {
-        this.error(`error on deleting file: ${data.file} ${e}`);
+        const fileChangeStr = formatFileChange(data.file, filename, serverName, false);
+        this.error(`error on deleting file: ${fileChangeStr} ${e}`);
         this.error(`hmr ${data.event} ${data.file} (error)`);
         return;
       }
