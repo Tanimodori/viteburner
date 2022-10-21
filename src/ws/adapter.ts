@@ -43,7 +43,7 @@ const resolveHmrData = (data: HmrData) => {
   }
   return result.map((r) => {
     if (typeof r === 'string') {
-      return { filename: forceStartingSlash(r), server: 'home' };
+      return { filename: forceStartingSlashNonRoot(r), server: 'home' };
     } else {
       return r;
     }
