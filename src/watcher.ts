@@ -1,6 +1,6 @@
 import pc from 'picocolors';
 import { HmrData } from './plugins';
-import { logger } from './console';
+import { logger, onKeypress } from './console';
 import { ViteBurnerConfig } from './config';
 import { createServer } from './server';
 import { WsManager, WsAdapter } from './ws';
@@ -36,4 +36,19 @@ export async function watch(config: ViteBurnerConfig) {
 
   // process initial HMR datas
   await wsAdapter.handleHmrMessage(initialDatas);
+
+  const displayStatus = () => {};
+
+  displayStatus();
+
+  // h to show help
+  // s to show status
+  // u to update all
+  // d to download all
+  // q, ctrl-c to quit
+  onKeypress((str, key) => {
+    if (key.name === 'q' || (key.name === 'c' && key.ctrl)) {
+      process.exit();
+    }
+  });
 }

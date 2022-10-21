@@ -1,4 +1,5 @@
 import pc from 'picocolors';
+import readline from 'readline';
 
 export const prefix = '[viteburner]';
 
@@ -31,3 +32,20 @@ export function createLogger() {
 }
 
 export const logger = createLogger();
+
+export interface KeyInfo {
+  sequence: string;
+  name: string;
+  ctrl: boolean;
+  meta: boolean;
+  shift: boolean;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function onKeypress(handler: (str: string, key: KeyInfo) => void) {
+  readline.emitKeypressEvents(process.stdin);
+  if (process.stdin.isTTY) {
+    process.stdin.setRawMode(true);
+  }
+  process.stdin.on('keypress', handler);
+}
