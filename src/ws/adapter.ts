@@ -39,8 +39,8 @@ export const formatUpload = (from: string, to: string, serverName: string) => {
 };
 
 export const formatDownload = (from: string, to: string, serverName: string) => {
-  to = forceStartingSlash(to);
-  const src = `@${serverName}:${from}`;
+  to = removeStartingSlash(to);
+  const src = `@${serverName}:/${from}`;
   return {
     styled: `${pc.dim(src)} ${pc.reset('->')} ${pc.dim(to)}`,
     raw: `${src} -> ${to}`,
@@ -239,6 +239,7 @@ export class WsAdapter {
         file.filename = removeStartingSlash(file.filename);
         const location = locationFn(file.filename, server);
         if (!location) {
+          logger.info(`download`, `@${server}:/${file.filename}`, pc.dim('(ignored)'));
           continue;
         }
         const resolvedLocation = resolve(this.server.config.root, location);
@@ -250,6 +251,7 @@ export class WsAdapter {
             resolvedLocation.endsWith('.js') &&
             fs.existsSync(resolvedLocation.substring(0, resolvedLocation.length - 3) + '.ts')
           ) {
+            logger.info(`download`, fileChangeStrs.raw, pc.dim('(ignored)'));
             continue;
           }
           // copy
