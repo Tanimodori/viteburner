@@ -11,27 +11,25 @@ declare module 'vite' {
   }
 }
 
-export interface HmrOptions {
-  watch?: {
-    [key: string]: {
-      pattern: string;
-      transform: boolean;
-      rename?: (file: string) => string;
-    };
-  };
+export interface WatchItem {
+  pattern: string;
+  transform?: boolean;
+  rename?: (file: string) => string;
 }
 
-export interface HmrData {
+export interface HmrOptions {
+  watch?: WatchItem[];
+}
+
+export interface HmrData extends WatchItem {
   file: string;
   event: string;
-  type: string;
-  transform: boolean;
   initial: boolean;
   timestamp: number;
 }
 
 const parseOptions = (options: HmrOptions = {}) => {
-  const watch = options.watch || {};
+  const watch = options.watch || [];
   return {
     watch,
   };
@@ -41,24 +39,27 @@ export const hmrPluginName = 'viteburner:hmr';
 
 export function hmrPlugin(): Plugin {
   let options: HmrOptions = {};
-  const findMatchedType = (file: string) => {
-    const watch = options?.watch ?? {};
-    for (const type in watch) {
-      if (isMatch(file, watch[type].pattern)) {
-        return type;
+  const findMatchedItem = (file: string) => {
+    const watch = options?.watch ?? [];
+    for (const item of watch) {
+      if (isMatch(file, item.pattern)) {
+        return item;
       }
     }
     return undefined;
   };
 
+  let watch: WatchItem[] = [];
+
   return {
     name: hmrPluginName,
     configResolved(config) {
       options = parseOptions(config.viteburner);
+      if (options.watch) {
+        watch = options.watch;
+      }
     },
     configureServer(server) {
-      const watch = options?.watch ?? {};
-
       // emitter
       server.emitter = new EventEmitter();
       // events for watching
@@ -67,7 +68,7 @@ export function hmrPlugin(): Plugin {
       // watchers that are ready
       let initial = true;
 
-      const patterns = Object.values(watch).map((item) => item.pattern);
+      const patterns = watch.map((item) => item.pattern);
       // create watcher
       const watcher = chokidar.watch(patterns, {
         cwd: server.config.root,
@@ -84,13 +85,12 @@ export function hmrPlugin(): Plugin {
       for (const event of events) {
         watcher.on(event, (file: string) => {
           // emit the event
-          const type = findMatchedType(file);
-          if (type) {
+          const item = findMatchedItem(file);
+          if (item) {
             server.emitter.emit(hmrPluginName, {
+              ...item,
               file: slash(file),
               event,
-              type,
-              transform: watch[type].transform,
               initial,
               timestamp: Date.now(),
             });
@@ -103,7 +103,7 @@ export function hmrPlugin(): Plugin {
     handleHotUpdate(context: HmrContext) {
       const file = relative(context.server.config.root, context.file);
       // using micromatch to test if the file matches any of the patterns
-      const matched = findMatchedType(file);
+      const matched = findMatchedItem(file);
       // if matched, ignore hmr and return
       if (matched) {
         return [];

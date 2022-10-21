@@ -75,7 +75,7 @@ export default class WsAdapter {
       }
       return file;
     };
-    const rename = this.server.config?.viteburner?.watch?.[data.type]?.rename ?? defaultRename;
+    const rename = data?.rename ?? defaultRename;
     /** Enforce starting slash if file is not in root dir */
     const forceStartingSlash = (s: string) => {
       return s.indexOf('/') !== -1 && !s.startsWith('/') ? '/' + s : s;
