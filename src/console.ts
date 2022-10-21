@@ -14,11 +14,11 @@ export function formatNormal(first = '', second = '', third = '') {
 }
 
 export function formatWarn(msg: string) {
-  return pc.yellow(`[viteburner] ${msg}`);
+  return pc.yellow(`${msg}`);
 }
 
 export function formatError(msg: string) {
-  return pc.red(`[viteburner] ${msg}`);
+  return pc.red(`${msg}`);
 }
 
 export function createLogger() {
