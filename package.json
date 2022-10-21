@@ -51,6 +51,7 @@
   "dependencies": {
     "cac": "^6.7.14",
     "chokidar": "^3.5.3",
+    "fast-glob": "^3.2.12",
     "micromatch": "^4.0.5",
     "pathe": "^0.3.9",
     "picocolors": "^1.0.0",

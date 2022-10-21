@@ -20,6 +20,7 @@ export default defineConfig({
         // exclede all node builtins and dependencies
         'cac',
         'chokidar',
+        'fast-glob',
         'micromatch',
         'pathe',
         'picocolors',
