@@ -1,4 +1,4 @@
-import { getSourceMapString, HmrData, logger, ViteBurnerServer } from '..';
+import { getSourceMapString, HmrData, logger, RenameOutputObject, ViteBurnerServer } from '..';
 import WsManager from './manager';
 import fs from 'fs';
 import pc from 'picocolors';
@@ -23,39 +23,31 @@ const formatFileChange = (from: string, to: string, serverName: string) => {
   };
 };
 
-const resolveFilename = (data: HmrData) => {
-  const defaultRename = (file: string) => {
-    if (file.startsWith('src/')) {
-      file = file.substring(4);
-    }
-    if (file.endsWith('.ts')) {
-      file = file.substring(0, file.length - 3) + '.js';
-    }
-    return file;
-  };
-  const rename = data?.rename ?? defaultRename;
-  return forceStartingSlashNonRoot(rename(data.file));
-};
-
-const resolveServers = (data: HmrData) => {
-  if (!data.server) {
-    return ['home'];
+const defaultRename = (file: string) => {
+  if (file.startsWith('src/')) {
+    file = file.substring(4);
   }
-  let servers = data.server;
-  if (typeof servers === 'function') {
-    servers = servers(data.file);
+  if (file.endsWith('.ts')) {
+    file = file.substring(0, file.length - 3) + '.js';
   }
-  if (typeof servers === 'string') {
-    servers = [servers];
-  }
-  return servers;
+  return file;
 };
 
 const resolveHmrData = (data: HmrData) => {
-  return {
-    filename: resolveFilename(data),
-    servers: resolveServers(data),
-  };
+  let result = data.rename ?? defaultRename;
+  if (typeof result === 'function') {
+    result = result(data.file);
+  }
+  if (!Array.isArray(result)) {
+    result = [result];
+  }
+  return result.map((r) => {
+    if (typeof r === 'string') {
+      return { filename: forceStartingSlash(r), server: 'home' };
+    } else {
+      return r;
+    }
+  });
 };
 
 export default class WsAdapter {
@@ -119,19 +111,6 @@ export default class WsAdapter {
       this.buffers.delete(data.file);
     }
   }
-  getFilename(data: HmrData) {
-    const defaultRename = (file: string) => {
-      if (file.startsWith('src/')) {
-        file = file.substring(4);
-      }
-      if (file.endsWith('.ts')) {
-        file = file.substring(0, file.length - 3) + '.js';
-      }
-      return file;
-    };
-    const rename = data?.rename ?? defaultRename;
-    return forceStartingSlashNonRoot(rename(data.file));
-  }
   async fetchModule(data: HmrData) {
     let content = '';
     if (data.transform) {
@@ -165,8 +144,8 @@ export default class WsAdapter {
     }
 
     // resolve actual filename and servers
-    const { filename, servers } = resolveHmrData(data);
-    for (const serverName of servers) {
+    const payloads = resolveHmrData(data);
+    for (const { filename, server: serverName } of payloads) {
       const fileChangeStrs = formatFileChange(data.file, filename, serverName);
       try {
         if (isAdd) {
