@@ -1,4 +1,4 @@
-import { formatError, formatNormal, getSourceMapString, HmrData, ViteBurnerServer } from '..';
+import { getSourceMapString, HmrData, logger, ViteBurnerServer } from '..';
 import WsManager from './manager';
 import fs from 'fs';
 import pc from 'picocolors';
@@ -12,19 +12,13 @@ export default class WsAdapter {
     this.manager = manager;
     this.server = server;
     this.manager.onConnected(async (ws) => {
-      this.info('conn', '', 'connected');
+      logger.info('conn', '', 'connected');
       ws.on('close', () => {
-        this.info('conn', '', pc.yellow('disconnected'));
+        logger.info('conn', '', pc.yellow('disconnected'));
       });
       await this.getDts();
       await this.handleHmrMessage();
     });
-  }
-  info(...msg: string[]) {
-    this.server.config.logger.info(formatNormal(...msg));
-  }
-  error(msg: string) {
-    this.server.config.logger.error(formatError(msg));
   }
   async getDts() {
     try {
@@ -33,9 +27,9 @@ export default class WsAdapter {
       const filename = this.server.config?.viteburner?.dts ?? 'NetscriptDefinitions.d.ts';
       const fullpath = path.resolve(root, filename);
       await fs.promises.writeFile(fullpath, data);
-      this.info('dts change', filename);
+      logger.info('dts change', filename);
     } catch (e) {
-      this.error(`error getting dts file: ${e}`);
+      logger.error(`error getting dts file: ${e}`);
     }
   }
   async handleHmrMessage(data?: HmrData | HmrData[]) {
@@ -47,7 +41,7 @@ export default class WsAdapter {
     const connected = this.manager.connected;
     for (const item of data) {
       this.buffers.set(item.file, item);
-      this.info(`hmr ${item.event}`, item.file, pc.yellow('(pending)'));
+      logger.info(`hmr ${item.event}`, item.file, pc.yellow('(pending)'));
     }
     if (!connected) {
       return;
@@ -92,7 +86,7 @@ export default class WsAdapter {
       if (data.transform) {
         const module = await this.server.fetchModule(data.file);
         if (!module) {
-          this.server.config.logger.error('module not found: ' + data.file);
+          logger.error('module not found: ' + data.file);
           return;
         }
         content = module.code;
@@ -114,11 +108,11 @@ export default class WsAdapter {
         // check timestamp
         this.deleteCache(data);
         const fileChangeStr = formatFileChange(data.file, filename, serverName);
-        this.info(`hmr ${data.event}`, fileChangeStr, pc.green('(done)'));
+        logger.info(`hmr ${data.event}`, fileChangeStr, pc.green('(done)'));
       } catch (e) {
         const fileChangeStr = formatFileChange(data.file, filename, serverName, false);
-        this.error(`error on pusing file: ${fileChangeStr} ${e}`);
-        this.error(`hmr ${data.event} ${data.file} (error)`);
+        logger.error(`error on pusing file: ${fileChangeStr} ${e}`);
+        logger.error(`hmr ${data.event} ${data.file} (error)`);
       }
     } else if (data.event === 'unlink') {
       const filename = this.getFilename(data);
@@ -131,11 +125,11 @@ export default class WsAdapter {
         // check timestamp
         this.deleteCache(data);
         const fileChangeStr = formatFileChange(data.file, filename, serverName);
-        this.info(`hmr ${data.event}`, fileChangeStr, pc.green('(done)'));
+        logger.info(`hmr ${data.event}`, fileChangeStr, pc.green('(done)'));
       } catch (e) {
         const fileChangeStr = formatFileChange(data.file, filename, serverName, false);
-        this.error(`error on deleting file: ${fileChangeStr} ${e}`);
-        this.error(`hmr ${data.event} ${data.file} (error)`);
+        logger.error(`error on deleting file: ${fileChangeStr} ${e}`);
+        logger.error(`hmr ${data.event} ${data.file} (error)`);
         return;
       }
     } else {

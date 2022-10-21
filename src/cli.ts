@@ -1,7 +1,7 @@
 import { watch } from './watcher';
 import cac from 'cac';
 import { loadConfig, ViteBurnerInlineConfig } from './config';
-import { formatNormal } from './console';
+import { logger } from './console';
 import pkg from '../package.json';
 
 const cli = cac('viteburner');
@@ -27,9 +27,9 @@ export async function startDev(options: any) {
   };
 
   // resolve config
-  console.log(formatNormal('config', 'resolving user config...'));
+  logger.info('config', 'resolving user config...');
   const config = await loadConfig(resolveInlineConfig);
-  console.log(formatNormal('config', 'config resolved'));
+  logger.info('config', 'config resolved');
 
   watch(config);
 }

@@ -1,6 +1,6 @@
 import pc from 'picocolors';
 import { HmrData } from './plugins';
-import { formatNormal } from './console';
+import { logger } from './console';
 import { ViteBurnerConfig } from './config';
 import { createServer } from './server';
 import WsManager from './ws/manager';
@@ -9,14 +9,16 @@ import WsAdapter from './ws/adapter';
 export async function watch(config: ViteBurnerConfig) {
   // create ws server
   const port = config.port ?? 12525;
-  console.log(formatNormal('ws', 'creating WebSocket server...'));
+  logger.info('ws', 'creating WebSocket server...');
   const wsManager = new WsManager({ port, timeout: config.timeout });
-  console.log(formatNormal('ws', `WebSocket server listening on`, `localhost:${pc.magenta(String(port))}`));
+  logger.info('ws', `WebSocket server listening on`, `localhost:${pc.magenta(String(port))}`);
 
   // create vite server
-  console.log(formatNormal('vite', 'creating dev server...'));
+  logger.info('vite', 'creating dev server...');
   const server = await createServer(config);
-  server.config.logger.info(formatNormal('vite', 'watching for file changes...'));
+  // using vite's logger as base logger
+  logger.base = server.config.logger;
+  logger.info('vite', 'watching for file changes...');
 
   const wsAdapter = new WsAdapter(wsManager, server);
 

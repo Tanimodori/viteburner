@@ -19,3 +19,21 @@ export function formatWarn(msg: string) {
 export function formatError(msg: string) {
   return pc.red(`[viteburner] ${msg}`);
 }
+
+export interface LoggerLike {
+  info(msg: string): void;
+  warn(msg: string): void;
+  error(msg: string): void;
+}
+
+export function createLogger() {
+  const logger = {
+    base: console as LoggerLike,
+    info: (...msg: string[]) => logger.base.info(formatNormal(...msg)),
+    warn: (...msg: string[]) => logger.base.warn(formatWarn(msg.join(' '))),
+    error: (...msg: string[]) => logger.base.error(formatError(msg.join(' '))),
+  };
+  return logger;
+}
+
+export const logger = createLogger();
