@@ -23,10 +23,10 @@ export function formatError(msg: string) {
 
 export function createLogger() {
   const logger = {
-    base: createLoggerRaw('info', { prefix }),
-    info: (...msg: string[]) => logger.base.info(formatNormal(...msg), { timestamp: true }),
-    warn: (...msg: string[]) => logger.base.warn(formatWarn(msg.join(' ')), { timestamp: true }),
-    error: (...msg: string[]) => logger.base.error(formatError(msg.join(' ')), { timestamp: true }),
+    base: createLoggerRaw('info', { prefix, allowClearScreen: false }),
+    info: (...msg: string[]) => logger.base.info(formatNormal(...msg), { timestamp: true, clear: false }),
+    warn: (...msg: string[]) => logger.base.warn(formatWarn(msg.join(' ')), { timestamp: true, clear: false }),
+    error: (...msg: string[]) => logger.base.error(formatError(msg.join(' ')), { timestamp: true, clear: false }),
   };
   return logger;
 }
