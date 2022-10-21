@@ -4,6 +4,25 @@ import fs from 'fs';
 import pc from 'picocolors';
 import path from 'path';
 
+/** Enforce starting slash */
+const forceStartingSlash = (s: string) => {
+  return s.startsWith('/') ? s : '/' + s;
+};
+
+/** Enforce starting slash if file is not in root dir */
+const forceStartingSlashNonRoot = (s: string) => {
+  return s.indexOf('/') !== -1 && !s.startsWith('/') ? '/' + s : s;
+};
+
+const formatFileChange = (from: string, to: string, serverName: string) => {
+  to = forceStartingSlash(to);
+  const dest = `@${serverName}:${to}`;
+  return {
+    styled: `${pc.dim(from)} ${pc.reset('->')} ${pc.dim(dest)}`,
+    raw: `${from} -> ${dest}`,
+  };
+};
+
 export default class WsAdapter {
   buffers: Map<string, HmrData> = new Map();
   manager: WsManager;
@@ -70,17 +89,9 @@ export default class WsAdapter {
       return file;
     };
     const rename = data?.rename ?? defaultRename;
-    /** Enforce starting slash if file is not in root dir */
-    const forceStartingSlash = (s: string) => {
-      return s.indexOf('/') !== -1 && !s.startsWith('/') ? '/' + s : s;
-    };
-    return forceStartingSlash(rename(data.file));
+    return forceStartingSlashNonRoot(rename(data.file));
   }
   async transmitData(data: HmrData) {
-    const formatFileChange = (from: string, to: string, serverName: string, styled = true) => {
-      const dest = `@${serverName}:${to}`;
-      return styled ? `${pc.dim(from)} ${pc.reset('->')} ${pc.dim(dest)}` : `${from} -> ${dest}`;
-    };
     if (data.event === 'add' || data.event === 'change') {
       let content = '';
       if (data.transform) {
@@ -99,6 +110,7 @@ export default class WsAdapter {
       }
       const filename = this.getFilename(data);
       const serverName = 'home';
+      const fileChangeStrs = formatFileChange(data.file, filename, serverName);
       try {
         await this.manager.pushFile({
           filename,
@@ -107,16 +119,15 @@ export default class WsAdapter {
         });
         // check timestamp
         this.deleteCache(data);
-        const fileChangeStr = formatFileChange(data.file, filename, serverName);
-        logger.info(`hmr ${data.event}`, fileChangeStr, pc.green('(done)'));
+        logger.info(`hmr ${data.event}`, fileChangeStrs.styled, pc.green('(done)'));
       } catch (e) {
-        const fileChangeStr = formatFileChange(data.file, filename, serverName, false);
-        logger.error(`error on pusing file: ${fileChangeStr} ${e}`);
+        logger.error(`error on pusing file: ${fileChangeStrs.raw} ${e}`);
         logger.error(`hmr ${data.event} ${data.file} (error)`);
       }
     } else if (data.event === 'unlink') {
       const filename = this.getFilename(data);
       const serverName = 'home';
+      const fileChangeStrs = formatFileChange(data.file, filename, serverName);
       try {
         await this.manager.deleteFile({
           filename,
@@ -124,11 +135,9 @@ export default class WsAdapter {
         });
         // check timestamp
         this.deleteCache(data);
-        const fileChangeStr = formatFileChange(data.file, filename, serverName);
-        logger.info(`hmr ${data.event}`, fileChangeStr, pc.green('(done)'));
+        logger.info(`hmr ${data.event}`, fileChangeStrs.styled, pc.green('(done)'));
       } catch (e) {
-        const fileChangeStr = formatFileChange(data.file, filename, serverName, false);
-        logger.error(`error on deleting file: ${fileChangeStr} ${e}`);
+        logger.error(`error on deleting file: ${fileChangeStrs.raw} ${e}`);
         logger.error(`hmr ${data.event} ${data.file} (error)`);
         return;
       }
