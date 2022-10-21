@@ -7,7 +7,7 @@ import { slash } from 'vite-node/utils';
 
 declare module 'vite' {
   interface ViteDevServer {
-    emitter: EventEmitter;
+    viteburnerEmitter: EventEmitter;
   }
 }
 
@@ -66,8 +66,8 @@ export function hmrPlugin(): Plugin {
       }
     },
     configureServer(server) {
-      // emitter
-      server.emitter = new EventEmitter();
+      // viteburnerEmitter
+      server.viteburnerEmitter = new EventEmitter();
       // events for watching
       const events = ['add', 'unlink', 'change'] as const;
 
@@ -93,7 +93,7 @@ export function hmrPlugin(): Plugin {
           // emit the event
           const item = findMatchedItem(file);
           if (item) {
-            server.emitter.emit(hmrPluginName, {
+            server.viteburnerEmitter.emit(hmrPluginName, {
               ...item,
               file: slash(file),
               event,
