@@ -37,6 +37,11 @@ export async function watch(config: ViteBurnerConfig) {
   // process initial HMR datas
   await wsAdapter.handleHmrMessage(initialDatas);
 
+  handleKeyInput(wsAdapter);
+}
+
+export async function handleKeyInput(wsAdapter: WsAdapter) {
+  const port = wsAdapter.server.config?.viteburner?.port ?? 12525;
   const padding = 18;
   const printStatus = (tag: string, msg: string) => {
     logger.info('status', pc.reset(tag.padStart(padding)), msg);
@@ -44,7 +49,7 @@ export async function watch(config: ViteBurnerConfig) {
   const displayStatus = () => {
     logger.info('status');
     logger.info('status', ' '.repeat(padding - 4) + pc.reset(pc.bold(pc.inverse(pc.green(' STATUS ')))));
-    printStatus('connection:', wsManager.connected ? pc.green('connected') : pc.yellow('disconnected'));
+    printStatus('connection:', wsAdapter.manager.connected ? pc.green('connected') : pc.yellow('disconnected'));
     printStatus('port:', pc.magenta(String(port)));
     const pending = wsAdapter.buffers.size;
     const pendingStr = `${pending} file${pending === 1 ? '' : 's'}`;
@@ -84,7 +89,7 @@ export async function watch(config: ViteBurnerConfig) {
 
   const fullReload = () => {
     logger.info('reload', pc.reset('force full-reload triggered'));
-    server.viteburnerEmitter.emit('full-reload');
+    wsAdapter.server.viteburnerEmitter.emit('full-reload');
   };
 
   // d to download all
