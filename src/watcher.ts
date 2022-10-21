@@ -82,7 +82,11 @@ export async function watch(config: ViteBurnerConfig) {
     logger.info('status', pc.dim('')); // avoid (x2)
   };
 
-  // u to update all
+  const fullReload = () => {
+    logger.info('reload', pc.reset('force full-reload triggered'));
+    server.viteburnerEmitter.emit('full-reload');
+  };
+
   // d to download all
   onKeypress((str, key) => {
     if (key.name === 'q' || (key.name === 'c' && key.ctrl)) {
@@ -95,6 +99,9 @@ export async function watch(config: ViteBurnerConfig) {
     } else if (key.name === 'h') {
       // h to show help
       displayHelp();
+    } else if (key.name === 'u') {
+      // u to update all
+      fullReload();
     }
   });
 }

@@ -1,8 +1,9 @@
-import { HmrContext, Plugin } from 'vite';
+import { HmrContext, Plugin, ViteDevServer } from 'vite';
 import { isMatch } from 'micromatch';
 import chokidar from 'chokidar';
 import { relative } from 'path';
 import EventEmitter from 'events';
+import fg from 'fast-glob';
 import { slash } from 'vite-node/utils';
 import { ViteBurnerConfig } from '..';
 
@@ -47,6 +48,8 @@ export const hmrPluginName = 'viteburner:hmr';
 
 export function hmrPlugin(): Plugin {
   let options = {} as ReturnType<typeof parseOptions>;
+  let initial = true;
+
   const findMatchedItem = (file: string) => {
     const watch = options?.watch ?? [];
     for (const item of watch) {
@@ -55,6 +58,22 @@ export function hmrPlugin(): Plugin {
       }
     }
     return undefined;
+  };
+
+  const triggerHmr = (server: ViteDevServer, file: string, event: string) => {
+    // emit the event
+    const item = findMatchedItem(file);
+    if (item) {
+      server.viteburnerEmitter.emit(hmrPluginName, {
+        ...item,
+        file: slash(file),
+        event,
+        initial,
+        timestamp: Date.now(),
+      });
+    } else {
+      throw new Error(`File ${file} does not match any patterns`);
+    }
   };
 
   return {
@@ -67,9 +86,6 @@ export function hmrPlugin(): Plugin {
       server.viteburnerEmitter = new EventEmitter();
       // events for watching
       const events = ['add', 'unlink', 'change'] as const;
-
-      // watchers that are ready
-      let initial = true;
 
       const patterns = options.watch.map((item) => item.pattern);
       // create watcher
@@ -87,21 +103,17 @@ export function hmrPlugin(): Plugin {
       // for each event, create a handler
       for (const event of events) {
         watcher.on(event, (file: string) => {
-          // emit the event
-          const item = findMatchedItem(file);
-          if (item) {
-            server.viteburnerEmitter.emit(hmrPluginName, {
-              ...item,
-              file: slash(file),
-              event,
-              initial,
-              timestamp: Date.now(),
-            });
-          } else {
-            throw new Error(`File ${file} does not match any patterns`);
-          }
+          triggerHmr(server, file, event);
         });
       }
+
+      // full reload
+      server.viteburnerEmitter.on('full-reload', async () => {
+        const files = await fg(patterns, { cwd: server.config.root });
+        for (const file of files) {
+          triggerHmr(server, file, 'change');
+        }
+      });
     },
     handleHotUpdate(context: HmrContext) {
       const file = relative(context.server.config.root, context.file);
