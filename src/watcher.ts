@@ -37,39 +37,64 @@ export async function watch(config: ViteBurnerConfig) {
   // process initial HMR datas
   await wsAdapter.handleHmrMessage(initialDatas);
 
-  const padding = 15;
+  const padding = 18;
   const printStatus = (tag: string, msg: string) => {
     logger.info('status', pc.reset(tag.padStart(padding)), msg);
   };
   const displayStatus = () => {
     logger.info('status');
-    logger.info('status', ' '.repeat(padding - 4) + pc.bold(pc.inverse(pc.green(' STATUS '))));
+    logger.info('status', ' '.repeat(padding - 4) + pc.reset(pc.bold(pc.inverse(pc.green(' STATUS ')))));
     printStatus('connection:', wsManager.connected ? pc.green('connected') : pc.yellow('disconnected'));
     printStatus('port:', pc.magenta(String(port)));
     const pending = wsAdapter.buffers.size;
     const pendingStr = `${pending} file${pending === 1 ? '' : 's'}`;
     const pendingStrStyled = pending ? pc.yellow(pendingStr) : pc.dim(pendingStr);
     printStatus('pending:', pendingStrStyled);
-    logger.info('status');
+    logger.info('status', pc.dim('')); // avoid (x2)
+  };
+
+  const displayKeyHelpHint = () => {
     logger.info(
       'status',
-      pc.dim('press ') + pc.reset('h') + pc.dim(' to show help, press ') + pc.reset('q') + pc.dim(' to exit'),
+      pc.dim('press ') +
+        pc.reset(pc.bold('h')) +
+        pc.dim(' to show help, press ') +
+        pc.reset(pc.bold('q')) +
+        pc.dim(' to exit'),
     );
   };
 
   displayStatus();
+  displayKeyHelpHint();
 
-  // h to show help
+  const displayHelp = () => {
+    logger.info('status');
+    const commands = [
+      ['u', 'upload all files'],
+      ['d', 'download all files'],
+      ['s', 'show status'],
+      ['q', 'quit'],
+    ];
+    logger.info('status', pc.reset(pc.bold('Watch Usage')));
+    for (const [key, desc] of commands) {
+      logger.info('status', `press ${pc.reset(pc.bold(key))}${pc.dim(' to ')}${desc}`);
+    }
+    logger.info('status', pc.dim('')); // avoid (x2)
+  };
+
   // u to update all
   // d to download all
   onKeypress((str, key) => {
-    // q, ctrl-c to quit
     if (key.name === 'q' || (key.name === 'c' && key.ctrl)) {
+      // q, ctrl-c to quit
       logger.info('bye');
       process.exit();
-      // s to show status
     } else if (key.name === 's') {
+      // s to show status
       displayStatus();
+    } else if (key.name === 'h') {
+      // h to show help
+      displayHelp();
     }
   });
 }
