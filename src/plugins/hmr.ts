@@ -4,6 +4,7 @@ import chokidar from 'chokidar';
 import { relative } from 'path';
 import EventEmitter from 'events';
 import { slash } from 'vite-node/utils';
+import { ViteBurnerConfig } from '..';
 
 declare module 'vite' {
   interface ViteDevServer {
@@ -34,17 +35,18 @@ export interface HmrData extends WatchItem {
   timestamp: number;
 }
 
-const parseOptions = (options: HmrOptions = {}) => {
-  const watch = options.watch || [];
+const parseOptions = (options?: ViteBurnerConfig) => {
   return {
-    watch,
+    watch: [],
+    initial: true,
+    ...options,
   };
 };
 
 export const hmrPluginName = 'viteburner:hmr';
 
 export function hmrPlugin(): Plugin {
-  let options: HmrOptions = {};
+  let options = {} as ReturnType<typeof parseOptions>;
   const findMatchedItem = (file: string) => {
     const watch = options?.watch ?? [];
     for (const item of watch) {
@@ -55,15 +57,10 @@ export function hmrPlugin(): Plugin {
     return undefined;
   };
 
-  let watch: WatchItem[] = [];
-
   return {
     name: hmrPluginName,
     configResolved(config) {
       options = parseOptions(config.viteburner);
-      if (options.watch) {
-        watch = options.watch;
-      }
     },
     configureServer(server) {
       // viteburnerEmitter
@@ -74,11 +71,11 @@ export function hmrPlugin(): Plugin {
       // watchers that are ready
       let initial = true;
 
-      const patterns = watch.map((item) => item.pattern);
+      const patterns = options.watch.map((item) => item.pattern);
       // create watcher
       const watcher = chokidar.watch(patterns, {
         cwd: server.config.root,
-        ignoreInitial: false,
+        ignoreInitial: !options.initial,
         persistent: true,
       });
 

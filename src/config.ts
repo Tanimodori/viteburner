@@ -7,6 +7,7 @@ export interface ViteBurnerUserConfig extends HmrOptions {
   port?: number;
   timeout?: number;
   dts?: string | boolean;
+  initial?: boolean;
 }
 
 export interface ViteBurnerViteConfig extends UserConfig {
