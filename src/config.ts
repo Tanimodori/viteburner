@@ -10,7 +10,7 @@ export interface ViteBurnerUserConfig extends HmrOptions {
   ignoreInitial?: boolean;
   download?: {
     server?: string | string[];
-    location?: (file: string, server: string) => string;
+    location?: (file: string, server: string) => string | null | undefined;
     ignoreTs?: boolean;
   };
 }

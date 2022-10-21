@@ -2,7 +2,7 @@ import { getSourceMapString, HmrData, logger, ViteBurnerServer } from '..';
 import { WsManager } from './manager';
 import fs from 'fs';
 import pc from 'picocolors';
-import path from 'path';
+import path, { resolve } from 'path';
 
 /** Enforce starting slash */
 export const forceStartingSlash = (s: string) => {
@@ -20,7 +20,12 @@ export const fixStartingSlash = (s: string) => {
   }
 };
 
-export const formatFileChange = (from: string, to: string, serverName: string) => {
+/** Remove starting slash on download */
+export const removeStartingSlash = (s: string) => {
+  return s.startsWith('/') ? s.substring(1) : s;
+};
+
+export const formatUpload = (from: string, to: string, serverName: string) => {
   to = forceStartingSlash(to);
   const dest = `@${serverName}:${to}`;
   return {
@@ -29,7 +34,16 @@ export const formatFileChange = (from: string, to: string, serverName: string) =
   };
 };
 
-export const defaultLocation = (file: string) => {
+export const formatDownload = (from: string, to: string, serverName: string) => {
+  to = forceStartingSlash(to);
+  const src = `@${serverName}:${from}`;
+  return {
+    styled: `${pc.dim(src)} ${pc.reset('->')} ${pc.dim(to)}`,
+    raw: `${src} -> ${to}`,
+  };
+};
+
+export const defaultUploadLocation = (file: string) => {
   if (file.startsWith('src/')) {
     file = file.substring(4);
   }
@@ -40,7 +54,7 @@ export const defaultLocation = (file: string) => {
 };
 
 export const resolveHmrData = (data: HmrData) => {
-  const defaultFilename = defaultLocation(data.file);
+  const defaultFilename = defaultUploadLocation(data.file);
   let result = data.location ?? 'home';
   if (typeof result === 'function') {
     result = result(data.file);
@@ -59,6 +73,15 @@ export const resolveHmrData = (data: HmrData) => {
   });
 };
 
+export interface FileContent {
+  filename: string;
+  content: string;
+}
+
+export const defaultDownloadLocation = (file: string) => {
+  return 'src/' + file;
+};
+
 export class WsAdapter {
   buffers: Map<string, HmrData> = new Map();
   manager: WsManager;
@@ -73,6 +96,9 @@ export class WsAdapter {
       });
       await this.getDts();
       await this.handleHmrMessage();
+    });
+    this.server.viteburnerEmitter.on('full-download', () => {
+      this.fullDownload();
     });
   }
   async getDts() {
@@ -155,7 +181,7 @@ export class WsAdapter {
     // resolve actual filename and servers
     const payloads = resolveHmrData(data);
     for (const { filename, server: serverName } of payloads) {
-      const fileChangeStrs = formatFileChange(data.file, filename, serverName);
+      const fileChangeStrs = formatUpload(data.file, filename, serverName);
       try {
         if (isAdd) {
           await this.manager.pushFile({
@@ -176,6 +202,56 @@ export class WsAdapter {
         logger.error(`error ${data.event}: ${fileChangeStrs.raw} ${e}`);
         logger.error(`hmr ${data.event} ${data.file} (error)`);
         continue;
+      }
+    }
+  }
+  async fullDownload() {
+    // get servers
+    let servers = this.server.config.viteburner?.download?.server ?? 'home';
+    if (!Array.isArray(servers)) {
+      servers = [servers];
+    }
+
+    // get files
+    const filesMap = new Map<string, FileContent[]>();
+    for (const server of servers) {
+      try {
+        filesMap.set(server, await this.manager.getAllFiles({ server }));
+      } catch (e) {
+        logger.error(`error: connot get filelist from server ${server}: ${e}`);
+        continue;
+      }
+    }
+
+    for (const [server, files] of filesMap) {
+      const locationFn = this.server.config.viteburner?.download?.location ?? defaultDownloadLocation;
+      const ignoreTs = this.server.config.viteburner?.download?.ignoreTs ?? true;
+      for (const file of files) {
+        file.filename = removeStartingSlash(file.filename);
+        const location = locationFn(file.filename, server);
+        if (!location) {
+          continue;
+        }
+        const resolvedLocation = resolve(this.server.config.root, location);
+        const fileChangeStrs = formatDownload(file.filename, location, server);
+        try {
+          // ignoreTs
+          if (
+            ignoreTs &&
+            resolvedLocation.endsWith('.js') &&
+            fs.existsSync(resolvedLocation.substring(0, resolvedLocation.length - 3) + '.ts')
+          ) {
+            continue;
+          }
+          // copy
+          await fs.promises.writeFile(resolvedLocation, file.content, {
+            flag: 'w',
+            encoding: 'utf8',
+          });
+          logger.info(`download`, fileChangeStrs.styled, pc.green('(done)'));
+        } catch (e) {
+          logger.error(`download`, fileChangeStrs.raw, '(error)');
+        }
       }
     }
   }
