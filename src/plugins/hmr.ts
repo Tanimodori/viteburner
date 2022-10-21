@@ -13,15 +13,15 @@ declare module 'vite' {
 }
 
 export type RenameOutputObject = {
-  filename: string;
-  server: string;
+  filename?: string;
+  server?: string;
 };
 export type RenameOutput = string | RenameOutputObject | Array<string | RenameOutputObject>;
 
 export interface WatchItem {
   pattern: string;
   transform?: boolean;
-  rename?: RenameOutput | ((file: string) => RenameOutput);
+  location?: RenameOutput | ((file: string) => RenameOutput);
 }
 
 export interface HmrOptions {

@@ -5,16 +5,22 @@ import pc from 'picocolors';
 import path from 'path';
 
 /** Enforce starting slash */
-const forceStartingSlash = (s: string) => {
+export const forceStartingSlash = (s: string) => {
   return s.startsWith('/') ? s : '/' + s;
 };
 
 /** Enforce starting slash if file is not in root dir */
-const forceStartingSlashNonRoot = (s: string) => {
-  return s.indexOf('/') !== -1 && !s.startsWith('/') ? '/' + s : s;
+export const fixStartingSlash = (s: string) => {
+  if (s.lastIndexOf('/') === 0) {
+    // if file is in root dir, don't add starting slash
+    return s.substring(1);
+  } else {
+    // if file is not in root dir, add starting slash
+    return forceStartingSlash(s);
+  }
 };
 
-const formatFileChange = (from: string, to: string, serverName: string) => {
+export const formatFileChange = (from: string, to: string, serverName: string) => {
   to = forceStartingSlash(to);
   const dest = `@${serverName}:${to}`;
   return {
@@ -23,7 +29,7 @@ const formatFileChange = (from: string, to: string, serverName: string) => {
   };
 };
 
-const defaultRename = (file: string) => {
+export const defaultLocation = (file: string) => {
   if (file.startsWith('src/')) {
     file = file.substring(4);
   }
@@ -33,8 +39,9 @@ const defaultRename = (file: string) => {
   return file;
 };
 
-const resolveHmrData = (data: HmrData) => {
-  let result = data.rename ?? defaultRename;
+export const resolveHmrData = (data: HmrData) => {
+  const defaultFilename = defaultLocation(data.file);
+  let result = data.location ?? 'home';
   if (typeof result === 'function') {
     result = result(data.file);
   }
@@ -42,11 +49,13 @@ const resolveHmrData = (data: HmrData) => {
     result = [result];
   }
   return result.map((r) => {
-    if (typeof r === 'string') {
-      return { filename: forceStartingSlashNonRoot(r), server: 'home' };
-    } else {
-      return r;
-    }
+    const itemResult = {
+      filename: defaultFilename,
+      server: 'home',
+      ...(typeof r === 'string' ? { server: r } : r),
+    };
+    itemResult.filename = fixStartingSlash(itemResult.filename);
+    return itemResult;
   });
 };
 
