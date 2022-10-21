@@ -1,5 +1,5 @@
 import { getSourceMapString, HmrData, logger, ViteBurnerServer } from '..';
-import WsManager from './manager';
+import { WsManager } from './manager';
 import fs from 'fs';
 import pc from 'picocolors';
 import path from 'path';
@@ -50,7 +50,7 @@ const resolveHmrData = (data: HmrData) => {
   });
 };
 
-export default class WsAdapter {
+export class WsAdapter {
   buffers: Map<string, HmrData> = new Map();
   manager: WsManager;
   server: ViteBurnerServer;

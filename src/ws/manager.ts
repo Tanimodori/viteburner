@@ -35,7 +35,7 @@ export interface WsManagerOptions {
   timeout?: number;
 }
 
-export default class WsManager {
+export class WsManager {
   options: Required<WsManagerOptions>;
   ws: WebSocket | undefined;
   wss: WebSocketServer;

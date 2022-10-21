@@ -5,3 +5,4 @@ export * from './plugins';
 export * from './server';
 export * from './utils';
 export * from './watcher';
+export * from './ws';

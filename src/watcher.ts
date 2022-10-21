@@ -3,8 +3,7 @@ import { HmrData } from './plugins';
 import { logger } from './console';
 import { ViteBurnerConfig } from './config';
 import { createServer } from './server';
-import WsManager from './ws/manager';
-import WsAdapter from './ws/adapter';
+import { WsManager, WsAdapter } from './ws';
 
 export async function watch(config: ViteBurnerConfig) {
   // create ws server
