@@ -23,6 +23,41 @@ const formatFileChange = (from: string, to: string, serverName: string) => {
   };
 };
 
+const resolveFilename = (data: HmrData) => {
+  const defaultRename = (file: string) => {
+    if (file.startsWith('src/')) {
+      file = file.substring(4);
+    }
+    if (file.endsWith('.ts')) {
+      file = file.substring(0, file.length - 3) + '.js';
+    }
+    return file;
+  };
+  const rename = data?.rename ?? defaultRename;
+  return forceStartingSlashNonRoot(rename(data.file));
+};
+
+const resolveServers = (data: HmrData) => {
+  if (!data.server) {
+    return ['home'];
+  }
+  let servers = data.server;
+  if (typeof servers === 'function') {
+    servers = servers(data.file);
+  }
+  if (typeof servers === 'string') {
+    servers = [servers];
+  }
+  return servers;
+};
+
+const resolveHmrData = (data: HmrData) => {
+  return {
+    filename: resolveFilename(data),
+    servers: resolveServers(data),
+  };
+};
+
 export default class WsAdapter {
   buffers: Map<string, HmrData> = new Map();
   manager: WsManager;
@@ -97,55 +132,66 @@ export default class WsAdapter {
     const rename = data?.rename ?? defaultRename;
     return forceStartingSlashNonRoot(rename(data.file));
   }
+  async fetchModule(data: HmrData) {
+    let content = '';
+    if (data.transform) {
+      const module = await this.server.fetchModule(data.file);
+      if (!module) {
+        throw new Error('module not found: ' + data.file);
+      }
+      content = module.code;
+      if (this.server.config?.viteburner?.sourcemap === 'inline' && module.map) {
+        content += getSourceMapString(module.map);
+      }
+    } else {
+      const buffer = await fs.promises.readFile(path.resolve(this.server.config.root, data.file));
+      content = buffer.toString();
+    }
+    return content;
+  }
   async transmitData(data: HmrData) {
     if (data.event === 'add' || data.event === 'change') {
       let content = '';
-      if (data.transform) {
-        const module = await this.server.fetchModule(data.file);
-        if (!module) {
-          logger.error('module not found: ' + data.file);
-          return;
-        }
-        content = module.code;
-        if (this.server.config?.viteburner?.sourcemap === 'inline' && module.map) {
-          content += getSourceMapString(module.map);
-        }
-      } else {
-        const buffer = await fs.promises.readFile(path.resolve(this.server.config.root, data.file));
-        content = buffer.toString();
-      }
-      const filename = this.getFilename(data);
-      const serverName = 'home';
-      const fileChangeStrs = formatFileChange(data.file, filename, serverName);
       try {
-        await this.manager.pushFile({
-          filename,
-          content,
-          server: serverName,
-        });
-        // check timestamp
-        this.deleteCache(data);
-        logger.info(`hmr ${data.event}`, fileChangeStrs.styled, pc.green('(done)'));
-      } catch (e) {
-        logger.error(`error on pusing file: ${fileChangeStrs.raw} ${e}`);
-        logger.error(`hmr ${data.event} ${data.file} (error)`);
+        content = await this.fetchModule(data);
+      } catch (e: unknown) {
+        logger.error(String(e));
+      }
+      const { filename, servers } = resolveHmrData(data);
+      for (const serverName of servers) {
+        const fileChangeStrs = formatFileChange(data.file, filename, serverName);
+        try {
+          await this.manager.pushFile({
+            filename,
+            content,
+            server: serverName,
+          });
+          // check timestamp
+          this.deleteCache(data);
+          logger.info(`hmr ${data.event}`, fileChangeStrs.styled, pc.green('(done)'));
+        } catch (e) {
+          logger.error(`error on pusing file: ${fileChangeStrs.raw} ${e}`);
+          logger.error(`hmr ${data.event} ${data.file} (error)`);
+          continue;
+        }
       }
     } else if (data.event === 'unlink') {
-      const filename = this.getFilename(data);
-      const serverName = 'home';
-      const fileChangeStrs = formatFileChange(data.file, filename, serverName);
-      try {
-        await this.manager.deleteFile({
-          filename,
-          server: serverName,
-        });
-        // check timestamp
-        this.deleteCache(data);
-        logger.info(`hmr ${data.event}`, fileChangeStrs.styled, pc.green('(done)'));
-      } catch (e) {
-        logger.error(`error on deleting file: ${fileChangeStrs.raw} ${e}`);
-        logger.error(`hmr ${data.event} ${data.file} (error)`);
-        return;
+      const { filename, servers } = resolveHmrData(data);
+      for (const serverName of servers) {
+        const fileChangeStrs = formatFileChange(data.file, filename, serverName);
+        try {
+          await this.manager.deleteFile({
+            filename,
+            server: serverName,
+          });
+          // check timestamp
+          this.deleteCache(data);
+          logger.info(`hmr ${data.event}`, fileChangeStrs.styled, pc.green('(done)'));
+        } catch (e) {
+          logger.error(`error on deleting file: ${fileChangeStrs.raw} ${e}`);
+          logger.error(`hmr ${data.event} ${data.file} (error)`);
+          continue;
+        }
       }
     } else {
       throw new Error('Unknown hmr event: ' + data.event);

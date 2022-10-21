@@ -15,6 +15,7 @@ export interface WatchItem {
   pattern: string;
   transform?: boolean;
   rename?: (file: string) => string;
+  server?: string | string[] | ((file: string) => string | string[]);
 }
 
 export interface HmrOptions {
