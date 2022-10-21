@@ -88,12 +88,12 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
   };
 
   const fullUpload = () => {
-    logger.info('reload', pc.reset('force full-upload triggered'));
+    logger.info('upload', pc.reset('force full-upload triggered'));
     wsAdapter.server.viteburnerEmitter.emit('full-upload');
   };
 
   const fullDownload = () => {
-    logger.info('reload', pc.reset('force full-upload triggered'));
+    logger.info('download', pc.reset('force full-download triggered'));
     wsAdapter.server.viteburnerEmitter.emit('full-download');
   };
 
