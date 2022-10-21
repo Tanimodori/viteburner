@@ -40,10 +40,16 @@ export default class WsAdapter {
     });
   }
   async getDts() {
+    let filename = this.server.config?.viteburner?.dts;
+    if (filename === false) {
+      return;
+    }
+    if (filename === undefined || filename === true) {
+      filename = 'NetscriptDefinitions.d.ts';
+    }
     try {
       const data = await this.manager.getDefinitionFile();
       const root = this.server.config.root ?? process.cwd();
-      const filename = this.server.config?.viteburner?.dts ?? 'NetscriptDefinitions.d.ts';
       const fullpath = path.resolve(root, filename);
       await fs.promises.writeFile(fullpath, data);
       logger.info('dts change', filename);

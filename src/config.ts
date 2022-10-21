@@ -6,7 +6,7 @@ export interface ViteBurnerUserConfig extends HmrOptions {
   sourcemap?: boolean | 'inline' | 'hidden';
   port?: number;
   timeout?: number;
-  dts?: string;
+  dts?: string | boolean;
 }
 
 export interface ViteBurnerViteConfig extends UserConfig {
