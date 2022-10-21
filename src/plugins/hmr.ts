@@ -38,7 +38,7 @@ export interface HmrData extends WatchItem {
 const parseOptions = (options?: ViteBurnerConfig) => {
   return {
     watch: [],
-    initial: true,
+    ignoreInitial: false,
     ...options,
   };
 };
@@ -75,7 +75,7 @@ export function hmrPlugin(): Plugin {
       // create watcher
       const watcher = chokidar.watch(patterns, {
         cwd: server.config.root,
-        ignoreInitial: !options.initial,
+        ignoreInitial: options.ignoreInitial,
         persistent: true,
       });
 
