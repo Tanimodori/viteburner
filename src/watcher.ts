@@ -36,7 +36,5 @@ export async function watch(config: ViteBurnerConfig) {
   buildStarted = true;
 
   // process initial HMR datas
-  for (const data of initialDatas) {
-    await wsAdapter.handleHmrMessage(data);
-  }
+  await wsAdapter.handleHmrMessage(initialDatas);
 }
