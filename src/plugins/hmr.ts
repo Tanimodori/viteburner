@@ -49,6 +49,7 @@ export const hmrPluginName = 'viteburner:hmr';
 export function hmrPlugin(): Plugin {
   let options = {} as ReturnType<typeof parseOptions>;
   let initial = true;
+  let enabled = true;
 
   const findMatchedItem = (file: string) => {
     const watch = options?.watch ?? [];
@@ -61,6 +62,9 @@ export function hmrPlugin(): Plugin {
   };
 
   const triggerHmr = (server: ViteDevServer, file: string, event: string) => {
+    if (!enabled) {
+      return false;
+    }
     // emit the event
     const item = findMatchedItem(file);
     if (item) {
@@ -113,6 +117,11 @@ export function hmrPlugin(): Plugin {
         for (const file of files) {
           triggerHmr(server, file, 'change');
         }
+      });
+
+      // enable watch
+      server.viteburnerEmitter.on('enable-watch', (value: boolean) => {
+        enabled = value;
       });
     },
     handleHotUpdate(context: HmrContext) {

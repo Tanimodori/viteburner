@@ -15,7 +15,7 @@ export async function watch(config: ViteBurnerConfig) {
   // create vite server
   logger.info('vite', 'creating dev server...');
   const server = await createServer(config);
-  logger.info('vite', 'watching for file changes...');
+  logger.info('vite', pc.reset('watching for file changes...'));
 
   const wsAdapter = new WsAdapter(wsManager, server);
 
