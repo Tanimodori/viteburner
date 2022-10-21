@@ -168,6 +168,9 @@ export class WsAdapter {
     return content;
   }
   async uploadFile(data: HmrData) {
+    // check timestamp and clear cache to prevent repeated entries
+    this.deleteCache(data);
+
     // if true, we need to transmit the file
     const isAdd = data.event !== 'unlink';
 
@@ -199,8 +202,6 @@ export class WsAdapter {
             server: serverName,
           });
         }
-        // check timestamp
-        this.deleteCache(data);
         logger.info(`hmr ${data.event}`, fileChangeStrs.styled, pc.green('(done)'));
       } catch (e) {
         logger.error(`error ${data.event}: ${fileChangeStrs.raw} ${e}`);
