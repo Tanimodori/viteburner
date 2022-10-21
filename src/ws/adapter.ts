@@ -150,51 +150,45 @@ export default class WsAdapter {
     return content;
   }
   async transmitData(data: HmrData) {
-    if (data.event === 'add' || data.event === 'change') {
-      let content = '';
+    // if true, we need to transmit the file
+    const isAdd = data.event !== 'unlink';
+
+    // try to get the file content
+    let content = '';
+    if (isAdd) {
       try {
         content = await this.fetchModule(data);
       } catch (e: unknown) {
         logger.error(String(e));
+        return;
       }
-      const { filename, servers } = resolveHmrData(data);
-      for (const serverName of servers) {
-        const fileChangeStrs = formatFileChange(data.file, filename, serverName);
-        try {
+    }
+
+    // resolve actual filename and servers
+    const { filename, servers } = resolveHmrData(data);
+    for (const serverName of servers) {
+      const fileChangeStrs = formatFileChange(data.file, filename, serverName);
+      try {
+        if (isAdd) {
           await this.manager.pushFile({
             filename,
             content,
             server: serverName,
           });
-          // check timestamp
-          this.deleteCache(data);
-          logger.info(`hmr ${data.event}`, fileChangeStrs.styled, pc.green('(done)'));
-        } catch (e) {
-          logger.error(`error on pusing file: ${fileChangeStrs.raw} ${e}`);
-          logger.error(`hmr ${data.event} ${data.file} (error)`);
-          continue;
-        }
-      }
-    } else if (data.event === 'unlink') {
-      const { filename, servers } = resolveHmrData(data);
-      for (const serverName of servers) {
-        const fileChangeStrs = formatFileChange(data.file, filename, serverName);
-        try {
+        } else {
           await this.manager.deleteFile({
             filename,
             server: serverName,
           });
-          // check timestamp
-          this.deleteCache(data);
-          logger.info(`hmr ${data.event}`, fileChangeStrs.styled, pc.green('(done)'));
-        } catch (e) {
-          logger.error(`error on deleting file: ${fileChangeStrs.raw} ${e}`);
-          logger.error(`hmr ${data.event} ${data.file} (error)`);
-          continue;
         }
+        // check timestamp
+        this.deleteCache(data);
+        logger.info(`hmr ${data.event}`, fileChangeStrs.styled, pc.green('(done)'));
+      } catch (e) {
+        logger.error(`error ${data.event}: ${fileChangeStrs.raw} ${e}`);
+        logger.error(`hmr ${data.event} ${data.file} (error)`);
+        continue;
       }
-    } else {
-      throw new Error('Unknown hmr event: ' + data.event);
     }
   }
 }
