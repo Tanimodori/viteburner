@@ -11,12 +11,16 @@ export const forceStartingSlash = (s: string) => {
 
 /** Enforce starting slash if file is not in root dir */
 export const fixStartingSlash = (s: string) => {
-  if (s.lastIndexOf('/') === 0) {
-    // if file is in root dir, don't add starting slash
+  const index = s.lastIndexOf('/');
+  if (index === 0) {
+    // if file is in root dir with starting slash, remove it
     return s.substring(1);
-  } else {
+  } else if (index !== -1) {
     // if file is not in root dir, add starting slash
     return forceStartingSlash(s);
+  } else {
+    // if file is in root dir without starting slash, keep it as-is
+    return s;
   }
 };
 
@@ -136,7 +140,7 @@ export class WsAdapter {
     // transmit buffered data
     if (this.buffers.size) {
       for (const item of this.buffers.values()) {
-        await this.transmitData(item);
+        await this.uploadFile(item);
       }
     }
   }
@@ -163,7 +167,7 @@ export class WsAdapter {
     }
     return content;
   }
-  async transmitData(data: HmrData) {
+  async uploadFile(data: HmrData) {
     // if true, we need to transmit the file
     const isAdd = data.event !== 'unlink';
 
