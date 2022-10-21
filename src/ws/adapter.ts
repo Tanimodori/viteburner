@@ -1,4 +1,4 @@
-import { getSourceMapString, HmrData, logger, RenameOutputObject, ViteBurnerServer } from '..';
+import { getSourceMapString, HmrData, logger, ViteBurnerServer } from '..';
 import WsManager from './manager';
 import fs from 'fs';
 import pc from 'picocolors';
