@@ -87,12 +87,16 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
     logger.info('status', pc.dim('')); // avoid (x2)
   };
 
-  const fullReload = () => {
-    logger.info('reload', pc.reset('force full-reload triggered'));
-    wsAdapter.server.viteburnerEmitter.emit('full-reload');
+  const fullUpload = () => {
+    logger.info('reload', pc.reset('force full-upload triggered'));
+    wsAdapter.server.viteburnerEmitter.emit('full-upload');
   };
 
-  // d to download all
+  const fullDownload = () => {
+    logger.info('reload', pc.reset('force full-upload triggered'));
+    wsAdapter.server.viteburnerEmitter.emit('full-download');
+  };
+
   onKeypress((str, key) => {
     if (key.name === 'q' || (key.name === 'c' && key.ctrl)) {
       // q, ctrl-c to quit
@@ -106,7 +110,10 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
       displayHelp();
     } else if (key.name === 'u') {
       // u to update all
-      fullReload();
+      fullUpload();
+    } else if (key.name === 'd') {
+      // d to download all
+      fullDownload();
     }
   });
 }

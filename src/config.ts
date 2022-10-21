@@ -8,6 +8,11 @@ export interface ViteBurnerUserConfig extends HmrOptions {
   timeout?: number;
   dts?: string | boolean;
   ignoreInitial?: boolean;
+  download?: {
+    server?: string | string[];
+    location?: (file: string, server: string) => string;
+    ignoreTs?: boolean;
+  };
 }
 
 export interface ViteBurnerViteConfig extends UserConfig {

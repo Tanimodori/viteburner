@@ -108,7 +108,7 @@ export function hmrPlugin(): Plugin {
       }
 
       // full reload
-      server.viteburnerEmitter.on('full-reload', async () => {
+      server.viteburnerEmitter.on('full-upload', async () => {
         const files = await fg(patterns, { cwd: server.config.root });
         for (const file of files) {
           triggerHmr(server, file, 'change');
