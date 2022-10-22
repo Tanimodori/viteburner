@@ -10,6 +10,22 @@ import { WsManager, WsAdapter, ResolvedData } from './ws';
 import { isScriptFile } from './utils';
 import { resolve } from 'path';
 
+export function displayKeyHelpHint() {
+  logger.info(
+    'help',
+    pc.dim('press ') +
+      pc.reset(pc.bold('h')) +
+      pc.dim(' to show help, press ') +
+      pc.reset(pc.bold('q')) +
+      pc.dim(' to exit'),
+  );
+}
+
+export function displayWatchAndHelp() {
+  logger.info('vite', pc.reset('watching for file changes...'));
+  displayKeyHelpHint();
+}
+
 export async function watch(config: ViteBurnerConfig) {
   // create ws server
   const port = config.port ?? 12525;
@@ -19,7 +35,6 @@ export async function watch(config: ViteBurnerConfig) {
   // create vite server
   logger.info('vite', 'creating dev server...');
   const server = await createServer(config);
-  logger.info('vite', pc.reset('watching for file changes...'));
 
   const wsAdapter = new WsAdapter(wsManager, server);
 
@@ -62,22 +77,11 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
     logger.info('status', pc.dim('')); // avoid (x2)
   };
 
-  const displayKeyHelpHint = () => {
-    logger.info(
-      'status',
-      pc.dim('press ') +
-        pc.reset(pc.bold('h')) +
-        pc.dim(' to show help, press ') +
-        pc.reset(pc.bold('q')) +
-        pc.dim(' to exit'),
-    );
-  };
-
   displayStatus();
-  displayKeyHelpHint();
+  displayWatchAndHelp();
 
   const displayHelp = () => {
-    logger.info('status');
+    logger.info('help');
     const commands = [
       ['u', 'upload all files'],
       ['d', 'download all files'],
@@ -85,11 +89,11 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
       ['r', 'show RAM usage of scripts'],
       ['q', 'quit'],
     ];
-    logger.info('status', pc.reset(pc.bold('Watch Usage')));
+    logger.info('help', pc.reset(pc.bold('Watch Usage')));
     for (const [key, desc] of commands) {
-      logger.info('status', `press ${pc.reset(pc.bold(key))}${pc.dim(' to ')}${desc}`);
+      logger.info('help', `press ${pc.reset(pc.bold(key))}${pc.dim(' to ')}${desc}`);
     }
-    logger.info('status', pc.dim('')); // avoid (x2)
+    logger.info('help', pc.dim('')); // avoid (x2)
   };
 
   const checkConnection = () => {
@@ -259,5 +263,8 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
       // f to show ram usage
       checkConnection() && (await showRamUsage(ctx));
     }
+
+    // tailing info
+    displayWatchAndHelp();
   });
 }
