@@ -269,7 +269,7 @@ export class WsAdapter {
             return ignoreSourcemap && file.content.match(/\/\/# sourceMappingURL=\S+\s*$/g);
           };
           if (isIgnoreTs() || isIgnoreSourceMap()) {
-            logger.info(`download`, fileChangeStrs.raw, pc.dim('(ignored)'));
+            logger.info(`download`, fileChangeStrs.styled, pc.dim('(ignored)'));
             continue;
           }
           // copy
