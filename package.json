@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "description": "Bitburner template using vite",
   "bin": {
-    "viteburner": "./bin/viteburner"
+    "viteburner": "bin/viteburner.js"
   },
   "main": "./dist/entry.js",
   "module": "./dist/entry.mjs",
