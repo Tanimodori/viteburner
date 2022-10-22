@@ -1,8 +1,9 @@
-import { getSourceMapString, HmrData, logger, ViteBurnerServer } from '..';
+import { getSourceMapString, HmrData, logger, ViteBurnerServer, writeFile } from '..';
 import { WsManager } from './manager';
 import fs from 'fs';
 import pc from 'picocolors';
 import path, { resolve } from 'path';
+import { slash } from 'vite-node/utils';
 
 /** Enforce starting slash */
 export const forceStartingSlash = (s: string) => {
@@ -27,6 +28,10 @@ export const fixStartingSlash = (s: string) => {
 /** Remove starting slash on download */
 export const removeStartingSlash = (s: string) => {
   return s.startsWith('/') ? s.substring(1) : s;
+};
+
+export const formatDump = (from: string, to: string) => {
+  return `${pc.dim(from)} ${pc.reset('->')} ${pc.dim(to)}`;
 };
 
 export const formatUpload = (from: string, to: string, serverName: string) => {
@@ -89,7 +94,6 @@ export interface FileContent {
 export const defaultDownloadLocation = (file: string) => {
   return 'src/' + file;
 };
-
 export class WsAdapter {
   buffers: Map<string, HmrData> = new Map();
   manager: WsManager;
@@ -121,7 +125,7 @@ export class WsAdapter {
       const data = await this.manager.getDefinitionFile();
       const root = this.server.config.root ?? process.cwd();
       const fullpath = path.resolve(root, filename);
-      await fs.promises.writeFile(fullpath, data);
+      await writeFile(fullpath, data);
       logger.info('dts change', filename);
     } catch (e) {
       logger.error(`error getting dts file: ${e}`);
@@ -154,6 +158,24 @@ export class WsAdapter {
       this.buffers.delete(data.file);
     }
   }
+  async dumpFile(data: HmrData, content: string) {
+    const dump = this.server.config?.viteburner?.dumpFiles;
+    if (!dump) {
+      return;
+    }
+    let relative: string | null | undefined = undefined;
+    if (typeof dump === 'function') {
+      relative = dump(data.file);
+    } else {
+      relative = path.join(dump, data.file);
+    }
+    if (!relative) {
+      return;
+    }
+    const fullpath = path.resolve(this.server.config.root, relative);
+    await writeFile(fullpath, content);
+    logger.info('dump', formatDump(data.file, slash(relative)));
+  }
   async fetchModule(data: HmrData) {
     let content = '';
     if (data.transform) {
@@ -169,6 +191,8 @@ export class WsAdapter {
       const buffer = await fs.promises.readFile(path.resolve(this.server.config.root, data.file));
       content = buffer.toString();
     }
+    // dump file
+    this.dumpFile(data, content);
     return content;
   }
   async uploadFile(data: HmrData) {
@@ -273,10 +297,7 @@ export class WsAdapter {
             continue;
           }
           // copy
-          await fs.promises.writeFile(resolvedLocation, file.content, {
-            flag: 'w',
-            encoding: 'utf8',
-          });
+          await writeFile(resolvedLocation, file.content);
           logger.info(`download`, fileChangeStrs.styled, pc.green('(done)'));
         } catch (e) {
           logger.error(`download`, fileChangeStrs.raw, '(error)');

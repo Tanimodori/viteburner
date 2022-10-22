@@ -14,6 +14,7 @@ export interface ViteBurnerUserConfig extends HmrOptions {
     ignoreTs?: boolean;
     ignoreSourcemap?: boolean;
   };
+  dumpFiles?: string | null | undefined | ((file: string) => string | null | undefined);
 }
 
 export interface ViteBurnerViteConfig extends UserConfig {
