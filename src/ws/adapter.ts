@@ -53,13 +53,7 @@ export const formatDownload = (from: string, to: string, serverName: string) => 
 };
 
 export const defaultUploadLocation = (file: string) => {
-  if (file.startsWith('src/')) {
-    file = file.substring(4);
-  }
-  if (file.endsWith('.ts')) {
-    file = file.substring(0, file.length - 3) + '.js';
-  }
-  return file;
+  return file.replace(/^src\//, '').replace(/\.ts$/, '.js');
 };
 
 export const resolveHmrData = (data: HmrData) => {
