@@ -6,3 +6,4 @@ playground/**/*
 src/**
 vite.config.ts
 NetscriptDefinitions.d.ts
+test/**
