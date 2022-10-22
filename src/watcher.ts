@@ -88,6 +88,14 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
     logger.info('status', pc.dim('')); // avoid (x2)
   };
 
+  const checkConnection = () => {
+    if (!wsAdapter.manager.connected) {
+      logger.error('conn', pc.red('no connection'));
+      return false;
+    }
+    return true;
+  };
+
   const fullUpload = () => {
     logger.info('upload', pc.reset('force full-upload triggered'));
     wsAdapter.server.viteburnerEmitter.emit('full-upload');
@@ -135,13 +143,13 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
       displayHelp();
     } else if (key.name === 'u') {
       // u to update all
-      fullUpload();
+      checkConnection() && fullUpload();
     } else if (key.name === 'd') {
       // d to download all
-      fullDownload();
+      checkConnection() && fullDownload();
     } else if (key.name === 'r') {
       // f to show ram usage
-      await showRamUsage(ctx);
+      checkConnection() && (await showRamUsage(ctx));
     }
   });
 }
