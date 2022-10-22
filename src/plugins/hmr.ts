@@ -1,11 +1,12 @@
 import { HmrContext, Plugin, ViteDevServer } from 'vite';
 import { isMatch } from 'micromatch';
 import chokidar from 'chokidar';
-import { relative } from 'path';
+import { relative, resolve } from 'path';
 import EventEmitter from 'events';
 import fg from 'fast-glob';
 import { slash } from 'vite-node/utils';
 import { ViteBurnerConfig } from '..';
+import fs from 'fs';
 
 declare module 'vite' {
   interface ViteDevServer {
@@ -50,6 +51,7 @@ export function hmrPlugin(): Plugin {
   let options = {} as ReturnType<typeof parseOptions>;
   let initial = true;
   let enabled = true;
+  let enabledTimeStamp = 0;
 
   const findMatchedItem = (file: string) => {
     const watch = options?.watch ?? [];
@@ -62,8 +64,13 @@ export function hmrPlugin(): Plugin {
   };
 
   const triggerHmr = (server: ViteDevServer, file: string, event: string) => {
+    // not enabled
     if (!enabled) {
-      return false;
+      return;
+    }
+    // This file is modified during hmr disabled
+    if (event !== 'unlink' && fs.statSync(resolve(server.config.root, file)).mtimeMs <= enabledTimeStamp) {
+      return;
     }
     // emit the event
     const item = findMatchedItem(file);
@@ -122,6 +129,9 @@ export function hmrPlugin(): Plugin {
       // enable watch
       server.viteburnerEmitter.on('enable-watch', (value: boolean) => {
         enabled = value;
+        if (value) {
+          enabledTimeStamp = Date.now();
+        }
       });
     },
     handleHotUpdate(context: HmrContext) {
