@@ -340,17 +340,38 @@ export class WsAdapter {
         initial: false,
         timestamp: Date.now(),
       });
-      const { filename, server } = resolvedData[0];
-      // if not a scipt file after filename resolve, skip
-      if (!filename.endsWith('.js') && !filename.endsWith('.script')) {
-        logger.info('ram', `${file}`, pc.dim('(ignored)'));
+      // loop through all resolved data
+      let isScript = false;
+      let ramUsage = -1;
+      if (resolvedData.length === 0) {
+        logger.info('ram', `${file} (ignored)`);
         continue;
       }
-      try {
-        const ramUsage = await this.manager.calculateRam({ filename, server });
-        logger.info('ram', pc.reset(`${file}: ${ramUsage} GB`));
-      } catch (e) {
-        logger.error(`ram`, formatUpload(file, filename, server).raw, `(${e})`);
+      for (const { filename, server } of resolvedData) {
+        const formatUploadStrs = formatUpload(file, filename, server);
+        // if not a scipt file after filename resolve, skip
+        if (!filename.endsWith('.js') && !filename.endsWith('.script')) {
+          continue;
+        }
+        // if it is mapped as a script file, mark it
+        isScript = true;
+        try {
+          ramUsage = await this.manager.calculateRam({ filename, server });
+          logger.info('ram', pc.reset(`${file}: ${ramUsage} GB`));
+          break; // resolved
+        } catch (e) {
+          logger.warn(`ram`, formatUploadStrs.raw, `(${e})`);
+        }
+      }
+      // if isScript is true and no ramUsage fetched
+      // throws an error
+      if (isScript) {
+        if (ramUsage === -1) {
+          logger.warn(`ram`, file, `(no target found)`);
+        }
+      } else {
+        // not a script, print an ignore message
+        logger.info('ram', file, pc.dim('(ignored)'));
       }
     }
   }
