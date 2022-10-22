@@ -89,6 +89,13 @@ export interface FileContent {
   content: string;
 }
 
+export interface ResolvedDataItem {
+  filename: string;
+  server: string;
+}
+
+export type ResolvedData = ResolvedDataItem[];
+
 export const defaultDownloadLocation = (file: string) => {
   return 'src/' + file;
 };
@@ -337,26 +344,25 @@ export class WsAdapter {
 
     // get ram usage
     for (const file of files) {
-      await this.getRamUsageLocal(file, patterns[0]);
+      await this.getRamUsageLocal(file);
     }
   }
-  async getRamUsageLocal(file: string, pattern: string) {
+  getRamUsageLocalData(file: string) {
     file = slash(file);
-    let item = findMatchedItem(this.server.config.viteburner?.watch ?? [], file);
+    const item = findMatchedItem(this.server.config.viteburner?.watch ?? [], file);
     // fallback
     if (!item) {
-      item = {
-        pattern,
-        location: 'home',
-      };
+      return [];
     }
-    const resolvedData = resolveHmrData({
+    return resolveHmrData({
       ...item,
       file,
       event: 'change',
       initial: false,
       timestamp: Date.now(),
     });
+  }
+  async getRamUsageLocalRaw(file: string, resolvedData: ResolvedData) {
     // loop through all resolved data
     let isScript = false;
     let ramUsage = -1;
@@ -392,6 +398,10 @@ export class WsAdapter {
       logger.info('ram', file, pc.dim('(ignored)'));
     }
     return true;
+  }
+  async getRamUsageLocal(file: string) {
+    const resolvedData = this.getRamUsageLocalData(file);
+    return this.getRamUsageLocalRaw(file, resolvedData);
   }
   async getRamUsageRemote(server: string, filename: string) {
     const resolvedFilename = fixStartingSlash(filename);

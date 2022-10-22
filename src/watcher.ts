@@ -6,7 +6,7 @@ import { HmrData } from './plugins';
 import { KeyHandlerContext, logger, onKeypress } from './console';
 import { ViteBurnerConfig } from './config';
 import { createServer } from './server';
-import { WsManager, WsAdapter } from './ws';
+import { WsManager, WsAdapter, ResolvedData } from './ws';
 import { isScriptFile } from './utils';
 import { resolve } from 'path';
 
@@ -135,15 +135,23 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
     const pattern = '**/*.{js,ts,script}';
     const files = await fg(pattern, { cwd: wsAdapter.server.config.root });
     files.sort();
+    // filter out non-script files, dts, and deadends
+    const fileMap = new Map<string, ResolvedData>();
+    for (const file of files) {
+      if (file.endsWith('.d.ts') || file === wsAdapter.resolveDts()) {
+        continue;
+      }
+      const resolvedData = wsAdapter.getRamUsageLocalData(file);
+      if (resolvedData.length === 0) {
+        continue;
+      }
+      fileMap.set(file, resolvedData);
+    }
     const { file } = await prompt({
       type: 'autocomplete',
       name: 'file',
       message: 'Enter a filename',
-      choices: files
-        .filter((file) => {
-          return !file.endsWith('.d.ts') && file !== wsAdapter.resolveDts();
-        })
-        .map((title) => ({ title })),
+      choices: [...fileMap.keys()].map((title) => ({ title })),
     });
     if (!file) {
       return false;
@@ -152,7 +160,12 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
       logger.error('ram', `file ${file} does not exist`);
       return false;
     }
-    await wsAdapter.getRamUsageLocal(file, pattern);
+    // check if file in filemap
+    if (fileMap.has(file)) {
+      await wsAdapter.getRamUsageLocalRaw(file, fileMap.get(file) as ResolvedData);
+    } else {
+      await wsAdapter.getRamUsageLocal(file);
+    }
     return true;
   };
 
