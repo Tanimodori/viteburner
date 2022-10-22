@@ -33,6 +33,10 @@ declare module 'vite' {
   }
 }
 
+export function defineConfig(config: ViteBurnerViteConfig): ViteBurnerViteConfig {
+  return config;
+}
+
 export async function loadConfig(inlineConfig: ViteBurnerInlineConfig) {
   const { config } = await loadConfigRaw<ViteBurnerUserConfig>({
     sources: [
