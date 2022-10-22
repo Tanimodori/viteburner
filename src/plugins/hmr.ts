@@ -111,11 +111,11 @@ export function hmrPlugin(): Plugin {
         });
       }
 
-      // full reload
+      // full upload
       server.viteburnerEmitter.on('full-upload', async () => {
-        const files = await fg(patterns, { cwd: server.config.root });
-        for (const file of files) {
-          triggerHmr(server, file, 'change');
+        const stream = fg.stream(patterns, { cwd: server.config.root });
+        for await (const file of stream) {
+          triggerHmr(server, file as string, 'change');
         }
       });
 
