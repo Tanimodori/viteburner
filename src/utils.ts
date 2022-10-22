@@ -18,3 +18,7 @@ export async function writeFile(file: string, content: string) {
     encoding: 'utf8',
   });
 }
+
+export function isScriptFile(filename: string) {
+  return filename.endsWith('.js') || filename.endsWith('.script');
+}

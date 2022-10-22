@@ -1,4 +1,4 @@
-import { findMatchedItem, getSourceMapString, HmrData, logger, ViteBurnerServer, writeFile } from '..';
+import { findMatchedItem, getSourceMapString, HmrData, logger, ViteBurnerServer, writeFile, isScriptFile } from '..';
 import { WsManager } from './manager';
 import fs from 'fs';
 import pc from 'picocolors';
@@ -350,7 +350,7 @@ export class WsAdapter {
       for (const { filename, server } of resolvedData) {
         const formatUploadStrs = formatUpload(file, filename, server);
         // if not a scipt file after filename resolve, skip
-        if (!filename.endsWith('.js') && !filename.endsWith('.script')) {
+        if (!isScriptFile(filename)) {
           continue;
         }
         // if it is mapped as a script file, mark it
@@ -383,6 +383,15 @@ export class WsAdapter {
       logger.info('ram', pc.reset(`@${server}/${filename}: ${ramUsage} GB`));
     } catch (e) {
       logger.error(`ram`, `@${server}/${filename}: ${e}`);
+    }
+  }
+  async getFileNames(server: string) {
+    try {
+      const filenames = await this.manager.getFileNames({ server });
+      return filenames.map(removeStartingSlash);
+    } catch (e) {
+      logger.error(`list`, `cannot fetch filenames from server ${server}: ${e}`);
+      return null;
     }
   }
 }

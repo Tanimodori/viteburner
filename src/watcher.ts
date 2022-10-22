@@ -4,7 +4,8 @@ import { HmrData } from './plugins';
 import { KeyHandlerContext, logger, onKeypress } from './console';
 import { ViteBurnerConfig } from './config';
 import { createServer } from './server';
-import { WsManager, WsAdapter, fixStartingSlash } from './ws';
+import { WsManager, WsAdapter } from './ws';
+import { isScriptFile } from './utils';
 
 export async function watch(config: ViteBurnerConfig) {
   // create ws server
@@ -106,9 +107,55 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
     wsAdapter.server.viteburnerEmitter.emit('full-download');
   };
 
-  const showRamUsage = async (ctx: KeyHandlerContext) => {
-    ctx.off();
-    // TODO: allowing patterns
+  const showRamUsageAll = async () => {
+    logger.info('ram', pc.reset('fetching ram usage of scripts...'));
+    await wsAdapter.getRamUsage();
+    return true;
+  };
+
+  const showRamUsageGlob = async () => {
+    const { pattern } = await prompt({
+      type: 'text',
+      name: 'pattern',
+      message: 'Enter a glob pattern',
+      initial: 'src/**/*.{ts,js}',
+    });
+    if (!pattern) {
+      return false;
+    }
+    logger.info('ram', pc.reset('fetching ram usage of scripts...'));
+    await wsAdapter.getRamUsage(pattern);
+    return true;
+  };
+
+  const showRamUsageServer = async () => {
+    const { server } = await prompt({
+      type: 'text',
+      name: 'server',
+      message: 'Enter a server name',
+      initial: 'home',
+    });
+    if (!server) {
+      return false;
+    }
+    const filenames = await wsAdapter.getFileNames(server);
+    if (!filenames) {
+      return false;
+    }
+    const { filename } = await prompt({
+      type: 'autocomplete',
+      name: 'filename',
+      message: 'Enter a filename',
+      choices: filenames.filter(isScriptFile).map((title) => ({ title })),
+    });
+    if (!filename) {
+      return false;
+    }
+    await wsAdapter.getRamUsageRaw(server, filename);
+    return true;
+  };
+
+  const showRamUsageRaw = async (): Promise<boolean> => {
     const { filter } = await prompt({
       type: 'select',
       name: 'filter',
@@ -121,46 +168,28 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
       ],
     });
     if (!filter) {
-      // canceled
-      logger.info('ram', 'operation cancelled');
-    } else if (filter === 'all') {
-      logger.info('ram', pc.reset('fetching ram usage of scripts...'));
-      await wsAdapter.getRamUsage();
-    } else if (filter === 'glob') {
-      const { pattern } = await prompt({
-        type: 'text',
-        name: 'pattern',
-        message: 'Enter a glob pattern',
-        initial: 'src/**/*.{ts,js}',
-      });
-      if (!pattern) {
-        logger.info('ram', 'operation cancelled');
-      } else {
-        logger.info('ram', pc.reset('fetching ram usage of scripts...'));
-        await wsAdapter.getRamUsage(pattern);
-      }
-    } else {
-      const { server, filename } = await prompt([
-        {
-          type: 'text',
-          name: 'server',
-          message: 'Enter a server name',
-          initial: 'home',
-        },
-        {
-          type: 'text',
-          name: 'filename',
-          message: 'Enter a filename',
-          initial: 'template.js',
-        },
-      ]);
-      if (!server || !filename) {
-        logger.info('ram', 'operation cancelled');
-      } else {
-        await wsAdapter.getRamUsageRaw(server, filename);
-      }
+      return false; // cancelled
     }
-    logger.info('ram', 'done');
+
+    if (filter === 'all') {
+      return showRamUsageAll();
+    } else if (filter === 'glob') {
+      return showRamUsageGlob();
+    } else if (filter === 'server') {
+      return showRamUsageServer();
+    }
+
+    return false;
+  };
+
+  const showRamUsage = async (ctx: KeyHandlerContext) => {
+    ctx.off();
+    const result = await showRamUsageRaw();
+    if (result) {
+      logger.info('ram', 'done');
+    } else {
+      logger.info('ram', 'operation cancelled');
+    }
     ctx.on();
   };
 
