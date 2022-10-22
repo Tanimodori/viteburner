@@ -4,7 +4,7 @@ import { HmrData } from './plugins';
 import { KeyHandlerContext, logger, onKeypress } from './console';
 import { ViteBurnerConfig } from './config';
 import { createServer } from './server';
-import { WsManager, WsAdapter } from './ws';
+import { WsManager, WsAdapter, fixStartingSlash } from './ws';
 
 export async function watch(config: ViteBurnerConfig) {
   // create ws server
@@ -113,19 +113,54 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
       type: 'select',
       name: 'filter',
       message: 'Select a filter',
-      initial: (prev) => prev ?? 0,
+      initial: 0,
       choices: [
-        { title: 'all scripts', value: 'all' },
-        { title: 'source code glob pattern', value: 'glob' },
-        { title: 'script on server', value: 'server' },
+        { title: 'All scripts', value: 'all' },
+        { title: 'Source code glob pattern', value: 'glob' },
+        { title: 'Scripts on server', value: 'server' },
       ],
     });
     if (!filter) {
+      // canceled
       logger.info('ram', 'operation cancelled');
     } else if (filter === 'all') {
       logger.info('ram', pc.reset('fetching ram usage of scripts...'));
       await wsAdapter.getRamUsage();
+    } else if (filter === 'glob') {
+      const { pattern } = await prompt({
+        type: 'text',
+        name: 'pattern',
+        message: 'Enter a glob pattern',
+        initial: 'src/**/*.{ts,js}',
+      });
+      if (!pattern) {
+        logger.info('ram', 'operation cancelled');
+      } else {
+        logger.info('ram', pc.reset('fetching ram usage of scripts...'));
+        await wsAdapter.getRamUsage(pattern);
+      }
+    } else {
+      const { server, filename } = await prompt([
+        {
+          type: 'text',
+          name: 'server',
+          message: 'Enter a server name',
+          initial: 'home',
+        },
+        {
+          type: 'text',
+          name: 'filename',
+          message: 'Enter a filename',
+          initial: 'template.js',
+        },
+      ]);
+      if (!server || !filename) {
+        logger.info('ram', 'operation cancelled');
+      } else {
+        await wsAdapter.getRamUsageRaw(server, filename);
+      }
     }
+    logger.info('ram', 'done');
     ctx.on();
   };
 

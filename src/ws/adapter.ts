@@ -375,4 +375,14 @@ export class WsAdapter {
       }
     }
   }
+  async getRamUsageRaw(server: string, filename: string) {
+    const resolvedFilename = fixStartingSlash(filename);
+    logger.info('ram', pc.reset('fetching ram usage of scripts...'));
+    try {
+      const ramUsage = await this.manager.calculateRam({ filename: resolvedFilename, server });
+      logger.info('ram', pc.reset(`@${server}/${filename}: ${ramUsage} GB`));
+    } catch (e) {
+      logger.error(`ram`, `@${server}/${filename}: ${e}`);
+    }
+  }
 }
