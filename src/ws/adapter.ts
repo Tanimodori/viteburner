@@ -61,7 +61,11 @@ export const resolveHmrData = (data: HmrData) => {
   const defaultFilename = defaultUploadLocation(data.file);
   let result = data.location ?? 'home';
   if (typeof result === 'function') {
-    result = result(data.file);
+    const resolved = result(data.file);
+    if (!resolved) {
+      return [];
+    }
+    result = resolved;
   }
   if (!Array.isArray(result)) {
     result = [result];
@@ -187,6 +191,12 @@ export class WsAdapter {
 
     // resolve actual filename and servers
     const payloads = resolveHmrData(data);
+    // no payload, skip
+    if (!payloads.length) {
+      logger.info(`hmr ${data.event}`, data.file, pc.dim('(ignored)'));
+      return;
+    }
+    // for each payload execute upload/delete tasks
     for (const { filename, server: serverName } of payloads) {
       const fileChangeStrs = formatUpload(data.file, filename, serverName);
       try {
@@ -212,7 +222,7 @@ export class WsAdapter {
   }
   async fullDownload() {
     // stop watching
-    logger.info('vite', pc.reset('stop watching for file changes while download'));
+    logger.info('vite', pc.reset('stop watching for file changes while downloading'));
     this.server.viteburnerEmitter.emit('enable-watch', false);
 
     // get servers

@@ -17,7 +17,7 @@ export type RenameOutputObject = {
   filename?: string;
   server?: string;
 };
-export type RenameOutput = string | RenameOutputObject | Array<string | RenameOutputObject>;
+export type RenameOutput = string | RenameOutputObject | Array<string | RenameOutputObject> | null | undefined;
 
 export interface WatchItem {
   pattern: string;
