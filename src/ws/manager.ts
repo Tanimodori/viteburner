@@ -16,6 +16,7 @@ import {
   getDefinitionFileResponseSchema,
 } from './messages';
 import { z } from 'zod';
+import { logger } from '..';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface PromiseHolder<T = any> {
@@ -53,6 +54,15 @@ export class WsManager {
     this.wss.on('connection', (ws) => {
       this.ws = ws;
       ws.on('message', (response) => this.handleMessage(response));
+    });
+    this.wss.on('error', (e) => {
+      const err = String(e);
+      if (err.indexOf('EADDRINUSE') !== -1) {
+        logger.error('ws', `fatal: port ${this.options.port} is already in use`);
+        process.exit(1);
+      } else {
+        logger.error('ws', `${err}`);
+      }
     });
   }
   get connected() {

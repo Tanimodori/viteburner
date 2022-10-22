@@ -8,9 +8,8 @@ import { WsManager, WsAdapter } from './ws';
 export async function watch(config: ViteBurnerConfig) {
   // create ws server
   const port = config.port ?? 12525;
-  logger.info('ws', 'creating WebSocket server...');
+  logger.info('ws', 'creating ws server...');
   const wsManager = new WsManager({ port, timeout: config.timeout });
-  logger.info('ws', `WebSocket server listening on`, `localhost:${pc.magenta(String(port))}`);
 
   // create vite server
   logger.info('vite', 'creating dev server...');
