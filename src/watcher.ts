@@ -243,6 +243,7 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
 
   onKeypress(async (ctx) => {
     const { key } = ctx;
+    let isKeyHandled = true;
     if (key.name === 'q') {
       // q to quit
       logger.info('bye');
@@ -262,9 +263,13 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
     } else if (key.name === 'r') {
       // f to show ram usage
       checkConnection() && (await showRamUsage(ctx));
+    } else {
+      isKeyHandled = false;
     }
 
     // tailing info
-    displayWatchAndHelp();
+    if (isKeyHandled) {
+      displayWatchAndHelp();
+    }
   });
 }
