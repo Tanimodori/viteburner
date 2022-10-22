@@ -126,7 +126,7 @@ export interface ViteBurnerViteConfig extends UserConfig {
  */
 export interface ViteBurnerInlineConfig {
   /** current working dir */
-  cwd: string;
+  cwd?: string;
   /** the port that WebSocket server listens to */
   port?: number;
 }
