@@ -120,6 +120,8 @@ export function hmrPlugin(): Plugin {
 
       // full upload
       server.viteburnerEmitter.on('full-upload', async () => {
+        // skip timestamp check
+        enabledTimeStamp = 0;
         const stream = fg.stream(patterns, { cwd: server.config.root });
         for await (const file of stream) {
           triggerHmr(server, file as string, 'change');
