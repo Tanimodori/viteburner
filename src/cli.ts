@@ -26,6 +26,8 @@ export async function startDev(options: any) {
     ...(port && { port }),
   };
 
+  logger.info('version', pkg.version);
+
   // resolve config
   logger.info('config', 'resolving user config...');
   const config = await loadConfig(resolveInlineConfig);
