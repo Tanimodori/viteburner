@@ -77,6 +77,7 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
       ['u', 'upload all files'],
       ['d', 'download all files'],
       ['s', 'show status'],
+      ['r', 'show RAM usage of scripts'],
       ['q', 'quit'],
     ];
     logger.info('status', pc.reset(pc.bold('Watch Usage')));
@@ -96,6 +97,12 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
     wsAdapter.server.viteburnerEmitter.emit('full-download');
   };
 
+  const showRamUsage = () => {
+    logger.info('ram', pc.reset('fetching ram usage of scripts...'));
+    // TODO: allowing patterns
+    wsAdapter.getRamUsage();
+  };
+
   onKeypress((str, key) => {
     if (key.name === 'q' || (key.name === 'c' && key.ctrl)) {
       // q, ctrl-c to quit
@@ -113,6 +120,9 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
     } else if (key.name === 'd') {
       // d to download all
       fullDownload();
+    } else if (key.name === 'r') {
+      // f to show ram usage
+      showRamUsage();
     }
   });
 }

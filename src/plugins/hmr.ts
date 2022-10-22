@@ -47,21 +47,22 @@ const parseOptions = (options?: ViteBurnerConfig) => {
 
 export const hmrPluginName = 'viteburner:hmr';
 
+export function findMatchedItem(watch: WatchItem[], file: string) {
+  for (const item of watch) {
+    if (isMatch(file, item.pattern)) {
+      return item;
+    }
+  }
+  return undefined;
+}
+
 export function hmrPlugin(): Plugin {
   let options = {} as ReturnType<typeof parseOptions>;
   let initial = true;
   let enabled = true;
   let enabledTimeStamp = 0;
 
-  const findMatchedItem = (file: string) => {
-    const watch = options?.watch ?? [];
-    for (const item of watch) {
-      if (isMatch(file, item.pattern)) {
-        return item;
-      }
-    }
-    return undefined;
-  };
+  const findItem = (file: string) => findMatchedItem(options?.watch ?? [], file);
 
   const triggerHmr = (server: ViteDevServer, file: string, event: string) => {
     // not enabled
@@ -73,7 +74,7 @@ export function hmrPlugin(): Plugin {
       return;
     }
     // emit the event
-    const item = findMatchedItem(file);
+    const item = findItem(file);
     if (item) {
       server.viteburnerEmitter.emit(hmrPluginName, {
         ...item,
@@ -139,7 +140,7 @@ export function hmrPlugin(): Plugin {
     handleHotUpdate(context: HmrContext) {
       const file = relative(context.server.config.root, context.file);
       // using micromatch to test if the file matches any of the patterns
-      const matched = findMatchedItem(file);
+      const matched = findItem(file);
       // if matched, ignore hmr and return
       if (matched) {
         return [];

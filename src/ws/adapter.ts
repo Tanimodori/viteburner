@@ -1,9 +1,10 @@
-import { getSourceMapString, HmrData, logger, ViteBurnerServer, writeFile } from '..';
+import { findMatchedItem, getSourceMapString, HmrData, logger, ViteBurnerServer, writeFile } from '..';
 import { WsManager } from './manager';
 import fs from 'fs';
 import pc from 'picocolors';
 import path, { resolve } from 'path';
 import { slash } from 'vite-node/utils';
+import fg from 'fast-glob';
 
 /** Enforce starting slash */
 export const forceStartingSlash = (s: string) => {
@@ -31,7 +32,10 @@ export const removeStartingSlash = (s: string) => {
 };
 
 export const formatDump = (from: string, to: string) => {
-  return `${pc.dim(from)} ${pc.reset('->')} ${pc.dim(to)}`;
+  return {
+    styled: `${pc.dim(from)} ${pc.reset('->')} ${pc.dim(to)}`,
+    raw: `${from} -> ${to}`,
+  };
 };
 
 export const formatUpload = (from: string, to: string, serverName: string) => {
@@ -168,7 +172,7 @@ export class WsAdapter {
     }
     const fullpath = path.resolve(this.server.config.root, relative);
     await writeFile(fullpath, content);
-    logger.info('dump', formatDump(data.file, slash(relative)));
+    logger.info('dump', formatDump(data.file, slash(relative)).styled);
   }
   async fetchModule(data: HmrData) {
     let content = '';
@@ -294,12 +298,60 @@ export class WsAdapter {
           await writeFile(resolvedLocation, file.content);
           logger.info(`download`, fileChangeStrs.styled, pc.green('(done)'));
         } catch (e) {
-          logger.error(`download`, fileChangeStrs.raw, '(error)');
+          logger.error(`download`, fileChangeStrs.raw, `(${e})`);
         }
       }
     }
 
     logger.info('vite', pc.reset('download completed, watching for file changes...'));
     this.server.viteburnerEmitter.emit('enable-watch', true);
+  }
+  async getRamUsage(pattern?: string) {
+    // get patterns
+    const patterns = pattern ?? this.server.config.viteburner?.watch?.map((item) => item.pattern);
+    if (!patterns) {
+      logger.warn('ram', 'no pattern found');
+      return;
+    }
+
+    // get files
+    const files = await fg(patterns, { cwd: this.server.config.root });
+    if (files.length === 0) {
+      logger.warn('ram', 'no file found');
+      return;
+    }
+    files.sort();
+
+    // get ram usage
+    for (let file of files) {
+      file = slash(file);
+      let item = findMatchedItem(this.server.config.viteburner?.watch ?? [], file);
+      // fallback
+      if (!item) {
+        item = {
+          pattern: patterns[0],
+          location: 'home',
+        };
+      }
+      const resolvedData = resolveHmrData({
+        ...item,
+        file,
+        event: 'change',
+        initial: false,
+        timestamp: Date.now(),
+      });
+      const { filename, server } = resolvedData[0];
+      // if not a scipt file after filename resolve, skip
+      if (!filename.endsWith('.js') && !filename.endsWith('.script')) {
+        logger.info('ram', `${file}`, pc.dim('(ignored)'));
+        continue;
+      }
+      try {
+        const ramUsage = await this.manager.calculateRam({ filename, server });
+        logger.info('ram', pc.reset(`${file}: ${ramUsage} GB`));
+      } catch (e) {
+        logger.error(`ram`, formatUpload(file, filename, server).raw, `(${e})`);
+      }
+    }
   }
 }
