@@ -24,6 +24,7 @@ export default defineConfig({
         'micromatch',
         'pathe',
         'picocolors',
+        'prompts',
         'unconfig',
         'vite',
         'ws',
