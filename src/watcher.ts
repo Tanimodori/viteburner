@@ -1,6 +1,7 @@
 import pc from 'picocolors';
+import prompt from 'prompts';
 import { HmrData } from './plugins';
-import { logger, onKeypress } from './console';
+import { KeyHandlerContext, logger, onKeypress } from './console';
 import { ViteBurnerConfig } from './config';
 import { createServer } from './server';
 import { WsManager, WsAdapter } from './ws';
@@ -97,13 +98,31 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
     wsAdapter.server.viteburnerEmitter.emit('full-download');
   };
 
-  const showRamUsage = () => {
-    logger.info('ram', pc.reset('fetching ram usage of scripts...'));
+  const showRamUsage = async (ctx: KeyHandlerContext) => {
+    ctx.off();
     // TODO: allowing patterns
-    wsAdapter.getRamUsage();
+    const { filter } = await prompt({
+      type: 'select',
+      name: 'filter',
+      message: 'Select a filter',
+      initial: (prev) => prev ?? 0,
+      choices: [
+        { title: 'all scripts', value: 'all' },
+        { title: 'source code glob pattern', value: 'glob' },
+        { title: 'script on server', value: 'server' },
+      ],
+    });
+    if (!filter) {
+      logger.info('ram', 'operation cancelled');
+    } else if (filter === 'all') {
+      logger.info('ram', pc.reset('fetching ram usage of scripts...'));
+      await wsAdapter.getRamUsage();
+    }
+    ctx.on();
   };
 
-  onKeypress((str, key) => {
+  onKeypress(async (ctx) => {
+    const { key } = ctx;
     if (key.name === 'q') {
       // q to quit
       logger.info('bye');
@@ -122,7 +141,7 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
       fullDownload();
     } else if (key.name === 'r') {
       // f to show ram usage
-      showRamUsage();
+      await showRamUsage(ctx);
     }
   });
 }

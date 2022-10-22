@@ -41,9 +41,17 @@ export interface KeyInfo {
   shift: boolean;
 }
 
-export type KeypressHandler = (str: string, key: KeyInfo) => void | Promise<void>;
+export interface KeyHandlerContext {
+  str: string;
+  key: KeyInfo;
+  on(): void;
+  off(): void;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type KeypressHandler = (ctx: KeyHandlerContext) => void | Promise<void>;
+
+// source: https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/node/stdin.ts
+// MIT License
 export function onKeypress(handler: KeypressHandler) {
   let running = false;
   async function callback(str: string, key: KeyInfo) {
@@ -56,18 +64,22 @@ export function onKeypress(handler: KeypressHandler) {
       return;
     }
     running = true;
-    await handler(str, key);
+    await handler({ str, key, on, off });
     running = false;
   }
+  let rl: readline.Interface | undefined;
   function on() {
     off();
+    rl = readline.createInterface({ input: process.stdin });
+    readline.emitKeypressEvents(process.stdin);
     if (process.stdin.isTTY) {
       process.stdin.setRawMode(true);
     }
-    readline.emitKeypressEvents(process.stdin);
     process.stdin.on('keypress', callback);
   }
   function off() {
+    rl?.close();
+    rl = undefined;
     process.stdin.off('keypress', callback);
     if (process.stdin.isTTY) {
       process.stdin.setRawMode(false);
