@@ -5,25 +5,13 @@ import { relative, resolve } from 'path';
 import EventEmitter from 'events';
 import fg from 'fast-glob';
 import { slash } from 'vite-node/utils';
-import { ViteBurnerConfig } from '..';
+import { ViteBurnerConfig, WatchItem } from '..';
 import fs from 'fs';
 
 declare module 'vite' {
   interface ViteDevServer {
     viteburnerEmitter: EventEmitter;
   }
-}
-
-export type RenameOutputObject = {
-  filename?: string;
-  server?: string;
-};
-export type RenameOutput = string | RenameOutputObject | Array<string | RenameOutputObject> | null | undefined;
-
-export interface WatchItem {
-  pattern: string;
-  transform?: boolean;
-  location?: RenameOutput | ((file: string) => RenameOutput);
 }
 
 export interface HmrOptions {
