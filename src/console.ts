@@ -43,9 +43,24 @@ export interface KeyInfo {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function onKeypress(handler: (str: string, key: KeyInfo) => void) {
-  readline.emitKeypressEvents(process.stdin);
-  if (process.stdin.isTTY) {
-    process.stdin.setRawMode(true);
+  function callback(str: string, key: KeyInfo) {
+    off();
+    handler(str, key);
+    on();
   }
-  process.stdin.on('keypress', handler);
+  function on() {
+    off();
+    if (process.stdin.isTTY) {
+      process.stdin.setRawMode(true);
+    }
+    readline.emitKeypressEvents(process.stdin);
+    process.stdin.on('keypress', callback);
+  }
+  function off() {
+    process.stdin.off('keypress', callback);
+    if (process.stdin.isTTY) {
+      process.stdin.setRawMode(false);
+    }
+  }
+  on();
 }
