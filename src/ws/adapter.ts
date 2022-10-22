@@ -92,10 +92,13 @@ export interface FileContent {
 export const defaultDownloadLocation = (file: string) => {
   return 'src/' + file;
 };
+
+export const defaultDts = 'NetscriptDefinitions.d.ts';
 export class WsAdapter {
   buffers: Map<string, HmrData> = new Map();
   manager: WsManager;
   server: ViteBurnerServer;
+  resolvedDts: string | undefined;
   constructor(manager: WsManager, server: ViteBurnerServer) {
     this.manager = manager;
     this.server = server;
@@ -111,13 +114,23 @@ export class WsAdapter {
       this.fullDownload();
     });
   }
-  async getDts() {
+  resolveDts() {
+    if (this.resolvedDts) {
+      return this.resolvedDts;
+    }
     let filename = this.server.config?.viteburner?.dts;
     if (filename === false) {
       return;
     }
     if (filename === undefined || filename === true) {
-      filename = 'NetscriptDefinitions.d.ts';
+      filename = defaultDts;
+    }
+    return filename;
+  }
+  async getDts() {
+    const filename = this.resolveDts();
+    if (!filename) {
+      return;
     }
     try {
       const data = await this.manager.getDefinitionFile();
@@ -323,59 +336,64 @@ export class WsAdapter {
     files.sort();
 
     // get ram usage
-    for (let file of files) {
-      file = slash(file);
-      let item = findMatchedItem(this.server.config.viteburner?.watch ?? [], file);
-      // fallback
-      if (!item) {
-        item = {
-          pattern: patterns[0],
-          location: 'home',
-        };
-      }
-      const resolvedData = resolveHmrData({
-        ...item,
-        file,
-        event: 'change',
-        initial: false,
-        timestamp: Date.now(),
-      });
-      // loop through all resolved data
-      let isScript = false;
-      let ramUsage = -1;
-      if (resolvedData.length === 0) {
-        logger.info('ram', `${file} (ignored)`);
-        continue;
-      }
-      for (const { filename, server } of resolvedData) {
-        const formatUploadStrs = formatUpload(file, filename, server);
-        // if not a scipt file after filename resolve, skip
-        if (!isScriptFile(filename)) {
-          continue;
-        }
-        // if it is mapped as a script file, mark it
-        isScript = true;
-        try {
-          ramUsage = await this.manager.calculateRam({ filename, server });
-          logger.info('ram', pc.reset(`${file}: ${ramUsage} GB`));
-          break; // resolved
-        } catch (e) {
-          logger.warn(`ram`, formatUploadStrs.raw, `(${e})`);
-        }
-      }
-      // if isScript is true and no ramUsage fetched
-      // throws an error
-      if (isScript) {
-        if (ramUsage === -1) {
-          logger.warn(`ram`, file, `(no target found)`);
-        }
-      } else {
-        // not a script, print an ignore message
-        logger.info('ram', file, pc.dim('(ignored)'));
-      }
+    for (const file of files) {
+      await this.getRamUsageLocal(file, patterns[0]);
     }
   }
-  async getRamUsageRaw(server: string, filename: string) {
+  async getRamUsageLocal(file: string, pattern: string) {
+    file = slash(file);
+    let item = findMatchedItem(this.server.config.viteburner?.watch ?? [], file);
+    // fallback
+    if (!item) {
+      item = {
+        pattern,
+        location: 'home',
+      };
+    }
+    const resolvedData = resolveHmrData({
+      ...item,
+      file,
+      event: 'change',
+      initial: false,
+      timestamp: Date.now(),
+    });
+    // loop through all resolved data
+    let isScript = false;
+    let ramUsage = -1;
+    if (resolvedData.length === 0) {
+      logger.info('ram', `${file} (ignored)`);
+      return true;
+    }
+    for (const { filename, server } of resolvedData) {
+      const formatUploadStrs = formatUpload(file, filename, server);
+      // if not a scipt file after filename resolve, skip
+      if (!isScriptFile(filename)) {
+        continue;
+      }
+      // if it is mapped as a script file, mark it
+      isScript = true;
+      try {
+        ramUsage = await this.manager.calculateRam({ filename, server });
+        logger.info('ram', pc.reset(`${file}: ${ramUsage} GB`));
+        break; // resolved
+      } catch (e) {
+        logger.warn(`ram`, formatUploadStrs.raw, `(${e})`);
+      }
+    }
+    // if isScript is true and no ramUsage fetched
+    // throws an error
+    if (isScript) {
+      if (ramUsage === -1) {
+        logger.warn(`ram`, file, `(no target found)`);
+        return false;
+      }
+    } else {
+      // not a script, print an ignore message
+      logger.info('ram', file, pc.dim('(ignored)'));
+    }
+    return true;
+  }
+  async getRamUsageRemote(server: string, filename: string) {
     const resolvedFilename = fixStartingSlash(filename);
     logger.info('ram', pc.reset('fetching ram usage of scripts...'));
     try {

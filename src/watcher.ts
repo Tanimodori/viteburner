@@ -1,11 +1,14 @@
 import pc from 'picocolors';
 import prompt from 'prompts';
+import fg from 'fast-glob';
+import fs from 'fs';
 import { HmrData } from './plugins';
 import { KeyHandlerContext, logger, onKeypress } from './console';
 import { ViteBurnerConfig } from './config';
 import { createServer } from './server';
 import { WsManager, WsAdapter } from './ws';
 import { isScriptFile } from './utils';
+import { resolve } from 'path';
 
 export async function watch(config: ViteBurnerConfig) {
   // create ws server
@@ -128,7 +131,32 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
     return true;
   };
 
-  const showRamUsageServer = async () => {
+  const showRamUsageLocal = async () => {
+    const pattern = '**/*.{js,ts,script}';
+    const files = await fg(pattern, { cwd: wsAdapter.server.config.root });
+    files.sort();
+    const { file } = await prompt({
+      type: 'autocomplete',
+      name: 'file',
+      message: 'Enter a filename',
+      choices: files
+        .filter((file) => {
+          return !file.endsWith('.d.ts') && file !== wsAdapter.resolveDts();
+        })
+        .map((title) => ({ title })),
+    });
+    if (!file) {
+      return false;
+    }
+    if (!fs.existsSync(resolve(wsAdapter.server.config.root, file))) {
+      logger.error('ram', `file ${file} does not exist`);
+      return false;
+    }
+    await wsAdapter.getRamUsageLocal(file, pattern);
+    return true;
+  };
+
+  const showRamUsageRemote = async () => {
     const { server } = await prompt({
       type: 'text',
       name: 'server',
@@ -151,7 +179,7 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
     if (!filename) {
       return false;
     }
-    await wsAdapter.getRamUsageRaw(server, filename);
+    await wsAdapter.getRamUsageRemote(server, filename);
     return true;
   };
 
@@ -159,12 +187,13 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
     const { filter } = await prompt({
       type: 'select',
       name: 'filter',
-      message: 'Select a filter',
+      message: 'Which script do you want to check?',
       initial: 0,
       choices: [
-        { title: 'All scripts', value: 'all' },
-        { title: 'Source code glob pattern', value: 'glob' },
-        { title: 'Scripts on server', value: 'server' },
+        { title: 'All local scripts', value: 'all' },
+        { title: 'Filter local script by glob pattern', value: 'glob' },
+        { title: 'Find a local script', value: 'local' },
+        { title: 'Find a remote script', value: 'remote' },
       ],
     });
     if (!filter) {
@@ -175,8 +204,10 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
       return showRamUsageAll();
     } else if (filter === 'glob') {
       return showRamUsageGlob();
-    } else if (filter === 'server') {
-      return showRamUsageServer();
+    } else if (filter === 'local') {
+      return showRamUsageLocal();
+    } else if (filter === 'remote') {
+      return showRamUsageRemote();
     }
 
     return false;
@@ -188,7 +219,7 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
     if (result) {
       logger.info('ram', 'done');
     } else {
-      logger.info('ram', 'operation cancelled');
+      logger.info('ram', 'cancelled');
     }
     ctx.on();
   };
