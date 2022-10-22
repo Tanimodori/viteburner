@@ -41,12 +41,23 @@ export interface KeyInfo {
   shift: boolean;
 }
 
+export type KeypressHandler = (str: string, key: KeyInfo) => void | Promise<void>;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function onKeypress(handler: (str: string, key: KeyInfo) => void) {
-  function callback(str: string, key: KeyInfo) {
-    off();
-    handler(str, key);
-    on();
+export function onKeypress(handler: KeypressHandler) {
+  let running = false;
+  async function callback(str: string, key: KeyInfo) {
+    // esc, ctrl+d or ctrl+c to force exit
+    if (str === '\x03' || str === '\x1B' || (key && key.ctrl && key.name === 'c')) {
+      logger.info('sigterm');
+      process.exit(1);
+    }
+    if (running) {
+      return;
+    }
+    running = true;
+    await handler(str, key);
+    running = false;
   }
   function on() {
     off();

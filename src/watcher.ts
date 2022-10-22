@@ -104,8 +104,8 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
   };
 
   onKeypress((str, key) => {
-    if (key.name === 'q' || (key.name === 'c' && key.ctrl)) {
-      // q, ctrl-c to quit
+    if (key.name === 'q') {
+      // q to quit
       logger.info('bye');
       process.exit();
     } else if (key.name === 's') {
