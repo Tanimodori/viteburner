@@ -18,7 +18,8 @@
     "build": "vite build",
     "test": "vitest run",
     "test:playground": "vite-node ./src/entry.ts -- --cwd ./playground",
-    "format": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,json}\""
+    "format": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,json}\"",
+    "postversion": "npm run build"
   },
   "repository": {
     "type": "git",
