@@ -126,4 +126,5 @@ Thank them for inspiring this package.
 * [vite-node](https://www.npmjs.com/package/vite-node)
 
 ## License
+
 [MIT License](LICENSE) © 2022-present Tanimodori
