@@ -16,7 +16,7 @@
   "typings": "dist/typings/index.d.ts",
   "scripts": {
     "build": "vite build",
-    "test": "vitest",
+    "test": "vitest run",
     "test:playground": "vite-node ./src/entry.ts -- --cwd ./playground",
     "format": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,json}\""
   },
