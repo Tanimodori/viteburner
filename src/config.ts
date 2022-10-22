@@ -12,6 +12,7 @@ export interface ViteBurnerUserConfig extends HmrOptions {
     server?: string | string[];
     location?: (file: string, server: string) => string | null | undefined;
     ignoreTs?: boolean;
+    ignoreSourcemap?: boolean;
   };
 }
 

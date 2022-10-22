@@ -245,6 +245,7 @@ export class WsAdapter {
     for (const [server, files] of filesMap) {
       const locationFn = this.server.config.viteburner?.download?.location ?? defaultDownloadLocation;
       const ignoreTs = this.server.config.viteburner?.download?.ignoreTs ?? true;
+      const ignoreSourcemap = this.server.config.viteburner?.download?.ignoreSourcemap ?? true;
       for (const file of files) {
         file.filename = removeStartingSlash(file.filename);
         const location = locationFn(file.filename, server);
@@ -256,11 +257,18 @@ export class WsAdapter {
         const fileChangeStrs = formatDownload(file.filename, location, server);
         try {
           // ignoreTs
-          if (
-            ignoreTs &&
-            resolvedLocation.endsWith('.js') &&
-            fs.existsSync(resolvedLocation.substring(0, resolvedLocation.length - 3) + '.ts')
-          ) {
+          const isIgnoreTs = () => {
+            return (
+              ignoreTs &&
+              resolvedLocation.endsWith('.js') &&
+              fs.existsSync(resolvedLocation.substring(0, resolvedLocation.length - 3) + '.ts')
+            );
+          };
+          // ignoreSourcemap
+          const isIgnoreSourceMap = () => {
+            return ignoreSourcemap && file.content.match(/\/\/# sourceMappingURL=\S+\s*$/g);
+          };
+          if (isIgnoreTs() || isIgnoreSourceMap()) {
             logger.info(`download`, fileChangeStrs.raw, pc.dim('(ignored)'));
             continue;
           }
