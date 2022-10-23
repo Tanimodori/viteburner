@@ -12,7 +12,7 @@
     "sourceType": "module"
   },
   "plugins": ["@typescript-eslint"],
-  "ignorePatterns": ["node_modules/**", "dist/**", "bin/**", "NetscriptDefinitions.d.ts"],
+  "ignorePatterns": ["node_modules/**", "dist/**", "bin/**", "NetscriptDefinitions.d.ts", "playground/dist/**"],
   "rules": {
     "no-constant-condition": ["off"]
   }
