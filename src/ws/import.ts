@@ -52,8 +52,8 @@ export function fixImportPath(options: FixImportPathOptions) {
   for (const statement of estree.body) {
     if (statement.type === 'ImportDeclaration') {
       const source = statement.source;
+      const raw = source.raw as string;
       const value = source.value as string;
-      console.log(source);
       // get the import path on the server
       const importPath = getFilename(options, value);
       // get the relative path
@@ -61,10 +61,11 @@ export function fixImportPath(options: FixImportPathOptions) {
       if (!relativePath.startsWith('..')) {
         relativePath = './' + relativePath;
       }
-      console.log(relativePath);
+      const quote = raw[0];
+      magicString.overwrite(source.start, source.end, quote + relativePath + quote);
     }
   }
 
   // TODO: return sourcemap
-  return options.content;
+  return magicString.toString();
 }
