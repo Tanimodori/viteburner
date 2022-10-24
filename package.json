@@ -16,10 +16,15 @@
   "typings": "dist/typings/index.d.ts",
   "scripts": {
     "build": "vite build",
-    "test": "vitest run",
+    "test": "npm run lint && npm run test:spec",
+    "test:spec": "vitest run",
     "test:playground": "vite-node ./src/entry.ts -- --cwd ./playground",
-    "format": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,json}\"",
-    "postversion": "npm run build"
+    "postversion": "npm run build",
+    "lint": "npm run lint:ts && npm run lint:eslint && npm run lint:prettier",
+    "lint:ts": "tsc --noEmit",
+    "lint:eslint": "eslint --ext .ts,.tsx,.js,.jsx .",
+    "lint:prettier": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,json}\"",
+    "format": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,json}\""
   },
   "repository": {
     "type": "git",
