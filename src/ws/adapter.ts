@@ -1,4 +1,4 @@
-import { findMatchedItem, getSourceMapString, HmrData, logger, ViteBurnerServer, writeFile, isScriptFile } from '..';
+import { getSourceMapString, HmrData, logger, ViteBurnerServer, writeFile, isScriptFile } from '..';
 import { WsManager } from './manager';
 import fs from 'fs';
 import pc from 'picocolors';
@@ -117,7 +117,7 @@ export class WsAdapter {
       await this.getDts();
       await this.handleHmrMessage();
     });
-    this.server.viteburnerEmitter.on('full-download', () => {
+    this.server.watchManager.emitter.on('full-download', () => {
       this.fullDownload();
     });
   }
@@ -265,7 +265,7 @@ export class WsAdapter {
   async fullDownload() {
     // stop watching
     logger.info('vite', pc.reset('stop watching for file changes while downloading'));
-    this.server.viteburnerEmitter.emit('enable-watch', false);
+    this.server.watchManager.setEnabled(false);
 
     // get servers
     let servers = this.server.config.viteburner?.download?.server ?? 'home';
@@ -324,7 +324,7 @@ export class WsAdapter {
     }
 
     logger.info('vite', pc.reset('download completed, watching for file changes...'));
-    this.server.viteburnerEmitter.emit('enable-watch', true);
+    this.server.watchManager.setEnabled(true);
   }
   async getRamUsage(pattern?: string) {
     // get patterns
@@ -349,7 +349,7 @@ export class WsAdapter {
   }
   getRamUsageLocalData(file: string) {
     file = slash(file);
-    const item = findMatchedItem(this.server.config.viteburner?.watch ?? [], file);
+    const item = this.server.watchManager.findItem(file);
     // fallback
     if (!item) {
       return [];

@@ -59,7 +59,7 @@ export async function createServer(config: ViteBurnerConfig) {
       return server.transformRequest(id);
     },
     onHmrMessage(handler: (data: HmrData, server: ViteBurnerServer) => void) {
-      server.viteburnerEmitter.on(hmrPluginName, (data: HmrData) => handler(data, server));
+      server.watchManager.emitter.on(hmrPluginName, (data: HmrData) => handler(data, server));
     },
     async buildStart() {
       return server.pluginContainer.buildStart({});

@@ -48,6 +48,7 @@ export async function watch(config: ViteBurnerConfig) {
       await wsAdapter.handleHmrMessage(data);
     }
   });
+  server.watchManager.init();
 
   // init plugins
   await server.buildStart();
@@ -106,12 +107,12 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
 
   const fullUpload = () => {
     logger.info('upload', pc.reset('force full-upload triggered'));
-    wsAdapter.server.viteburnerEmitter.emit('full-upload');
+    wsAdapter.server.watchManager.fullReload();
   };
 
   const fullDownload = () => {
     logger.info('download', pc.reset('force full-download triggered'));
-    wsAdapter.server.viteburnerEmitter.emit('full-download');
+    wsAdapter.server.watchManager.emitter.emit('full-download');
   };
 
   const showRamUsageAll = async () => {
