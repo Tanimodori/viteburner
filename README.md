@@ -116,6 +116,7 @@ For detailed documentation, checkout the TSDoc of [`config.ts`](src/config.ts).
 
 Thank them for inspiring this package.
 
+- [acorn](https://github.com/acornjs/acorn)
 - [bitburner](https://github.com/danielyxie/bitburner)
 - [bitburner-filesync](https://github.com/bitburner-official/bitburner-filesync)
 - [unconfig](https://github.com/antfu/unconfig)
