@@ -121,6 +121,6 @@ export class WatchManager {
   /** Shoutcut of `getUploadFilenames(filename).find(server) */
   getUploadFilenamesByServer(filename: string, server: string) {
     const filenames = this.getUploadFilenames(filename);
-    return filenames.find((item) => item.server === server);
+    return filenames.find((item) => item.server === server)?.filename;
   }
 }
