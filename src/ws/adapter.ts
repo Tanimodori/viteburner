@@ -5,6 +5,7 @@ import pc from 'picocolors';
 import path, { resolve } from 'path';
 import { slash } from 'vite-node/utils';
 import fg from 'fast-glob';
+import { fixImportPath } from './import';
 
 /** Enforce starting slash */
 export const forceStartingSlash = (s: string) => {
@@ -213,6 +214,18 @@ export class WsAdapter {
     this.dumpFile(data, content);
     return content;
   }
+  fixImport(content: string, data: HmrData, serverName: string) {
+    if (data.transform) {
+      return fixImportPath({
+        content,
+        filename: data.file,
+        server: serverName,
+        manager: this.server.watchManager,
+      });
+    } else {
+      return content;
+    }
+  }
   async uploadFile(data: HmrData) {
     // check timestamp and clear cache to prevent repeated entries
     this.deleteCache(data);
@@ -243,6 +256,8 @@ export class WsAdapter {
       const fileChangeStrs = formatUpload(data.file, filename, serverName);
       try {
         if (isAdd) {
+          // fix import path
+          content = this.fixImport(content, data, serverName);
           await this.manager.pushFile({
             filename,
             content,
