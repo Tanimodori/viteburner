@@ -36,6 +36,7 @@
   },
   "homepage": "https://github.com/Tanimodori/viteburner#readme",
   "devDependencies": {
+    "@types/estree": "^1.0.0",
     "@types/micromatch": "^4.0.2",
     "@types/node": "^18.8.2",
     "@types/prompts": "^2.4.1",
@@ -54,6 +55,7 @@
     "vitest": "^0.24.3"
   },
   "dependencies": {
+    "acorn": "^8.8.0",
     "cac": "^6.7.14",
     "chokidar": "^3.5.3",
     "fast-glob": "^3.2.12",

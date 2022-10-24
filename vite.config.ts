@@ -18,6 +18,7 @@ export default defineConfig({
     rollupOptions: {
       external: [
         // exclede all node builtins and dependencies
+        'acorn',
         'cac',
         'chokidar',
         'fast-glob',
