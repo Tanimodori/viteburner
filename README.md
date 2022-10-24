@@ -4,14 +4,14 @@ Daemon tools of bitburner using vite for script transform, file syncing, RAM mon
 
 ## Why viteburner
 
-* Write dynamic config in TypeScript and JavaScript.
-* No need to monitor your `dist` folder anymore.
-* Manual upload/download any time you wish.
-* Monitor RAM usage of your selected scripts easily.
-* Interactive CLI and well-formatted outputs.
-* IDE and system independent.
-* Vite is faster than tsc for TypeScript transform.
-* Utilize various vite plugins.
+- Write dynamic config in TypeScript and JavaScript.
+- No need to monitor your `dist` folder anymore.
+- Manual upload/download any time you wish.
+- Monitor RAM usage of your selected scripts easily.
+- Interactive CLI and well-formatted outputs.
+- IDE and system independent.
+- Vite is faster than tsc for TypeScript transform.
+- Utilize various vite plugins.
 
 ## Quick start
 
@@ -30,54 +30,52 @@ In bitburner, select "Options > Remote API", enter the port of viteburner displa
 
 ### Install viteburner to your existing project
 
+1. Install devDependencies
+
 ```bash
 npm i -D viteburner vite
 ```
 
-In your `vite.config.ts` / `vite.config.js`:
+2. (a) Sync-only setup
+
+In `vite.config.ts`
+
+```ts
+import { defineConfig } from 'viteburner';
+export default defineConfig({
+  viteburner: {
+    watch: [{ pattern: 'src/**/*.{js,script,txt}' }],
+  },
+});
+```
+
+2.  (b) TS or mixed TS+JS setup
+
+In `vite.config.ts`
 
 ```ts
 import { defineConfig } from 'viteburner'
-
 export default defineConfig({
-  build: {
-    outDir: 'dist',
-    minify: false,
-  },
   viteburner: {
     watch: [
       { pattern: 'src/**/*.{js,ts}', transform: true },
       { pattern: 'src/**/*.{script,txt}' }
     ],
-    // ...
   }
 });
 ```
 
-Or in your `viteburner.config.ts` / `viteburner.config.js`:
-
-```ts
-import { ViteBurnerUserConfig } from 'viteburner'
-
-const config: ViteBurnerUserConfig = {
-  watch: [/** same as above */],
-  // ...
-};
-
-export default config;
-```
-
-In your `package.json`:
+3. configure `package.json`
 
 ```json
 {
   "scripts": {
-    "dev": "viteburner",
+    "dev": "viteburner"
   }
 }
 ```
 
-Use `npm run dev` in your terminal to start viteburner.
+4. `npm run dev` in your terminal to start viteburner.
 
 ## API
 
@@ -118,12 +116,12 @@ For detailed documentation, checkout the TSDoc of [`config.ts`](src/config.ts).
 
 Thank them for inspiring this package.
 
-* [bitburner](https://github.com/danielyxie/bitburner)
-* [bitburner-filesync](https://github.com/bitburner-official/bitburner-filesync)
-* [unconfig](https://github.com/antfu/unconfig)
-* [vite](https://vitejs.dev/)
-* [vitest](https://vitest.dev/)
-* [vite-node](https://www.npmjs.com/package/vite-node)
+- [bitburner](https://github.com/danielyxie/bitburner)
+- [bitburner-filesync](https://github.com/bitburner-official/bitburner-filesync)
+- [unconfig](https://github.com/antfu/unconfig)
+- [vite](https://vitejs.dev/)
+- [vitest](https://vitest.dev/)
+- [vite-node](https://www.npmjs.com/package/vite-node)
 
 ## License
 
