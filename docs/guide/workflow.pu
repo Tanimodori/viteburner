@@ -1,0 +1,37 @@
+@startuml workflow
+skinparam dpi 300
+skinparam defaultFontName Source Han Sans SC
+skinparam DefaultMonospacedFontName Sarasa Fixed SC
+
+start
+:resolve user config;
+
+fork
+:start dev server;
+repeat 
+:wait until connected;
+:update dts;
+:optional initial push;
+:wait until disconnected;
+repeat while
+detach
+
+fork again
+:start fs watch;
+repeat
+:wait until file change;
+:emit hmr event;
+repeat while
+detach
+
+fork again
+:start keyboard handler;
+repeat
+:read key;
+backward :exec task;
+repeat while (quit?) is (N) not (Y)
+end fork
+
+stop
+
+@enduml
