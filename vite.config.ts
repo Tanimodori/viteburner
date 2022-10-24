@@ -22,6 +22,7 @@ export default defineConfig({
         'cac',
         'chokidar',
         'fast-glob',
+        'magic-string',
         'micromatch',
         'pathe',
         'picocolors',
