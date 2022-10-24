@@ -146,6 +146,10 @@ export function defineConfig(config: ViteBurnerViteConfig): ViteBurnerViteConfig
   return config;
 }
 
+export type Promisable<T> = T | Promise<T>;
+export type Functionable<T> = T | (() => T);
+export type ViteBurnerViteConfigInput = Functionable<Promisable<ViteBurnerViteConfig>>;
+
 export async function loadConfig(inlineConfig: ViteBurnerInlineConfig) {
   const { config } = await loadConfigRaw<ViteBurnerUserConfig>({
     sources: [
@@ -157,7 +161,7 @@ export async function loadConfig(inlineConfig: ViteBurnerInlineConfig) {
       // load inline config from `vite.config`
       {
         files: 'vite.config',
-        async rewrite(config) {
+        async rewrite(config: ViteBurnerViteConfigInput) {
           const resolvedConfig = await (typeof config === 'function' ? config() : config);
           const sourcemap = resolvedConfig?.build?.sourcemap;
           return {
