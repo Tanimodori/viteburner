@@ -1,4 +1,14 @@
-import { getSourceMapString, HmrData, logger, ViteBurnerServer, writeFile, isScriptFile } from '..';
+import {
+  getSourceMapString,
+  HmrData,
+  logger,
+  ViteBurnerServer,
+  writeFile,
+  isScriptFile,
+  fixStartingSlash,
+  forceStartingSlash,
+  removeStartingSlash,
+} from '..';
 import { WsManager } from './manager';
 import fs from 'fs';
 import pc from 'picocolors';
@@ -6,31 +16,6 @@ import path, { resolve } from 'path';
 import { slash } from 'vite-node/utils';
 import fg from 'fast-glob';
 import { fixImportPath } from './import';
-
-/** Enforce starting slash */
-export const forceStartingSlash = (s: string) => {
-  return s.startsWith('/') ? s : '/' + s;
-};
-
-/** Enforce starting slash if file is not in root dir */
-export const fixStartingSlash = (s: string) => {
-  const index = s.lastIndexOf('/');
-  if (index === 0) {
-    // if file is in root dir with starting slash, remove it
-    return s.substring(1);
-  } else if (index !== -1) {
-    // if file is not in root dir, add starting slash
-    return forceStartingSlash(s);
-  } else {
-    // if file is in root dir without starting slash, keep it as-is
-    return s;
-  }
-};
-
-/** Remove starting slash on download */
-export const removeStartingSlash = (s: string) => {
-  return s.startsWith('/') ? s.substring(1) : s;
-};
 
 export const formatDump = (from: string, to: string) => {
   return {
@@ -55,34 +40,6 @@ export const formatDownload = (from: string, to: string, serverName: string) => 
     styled: `${pc.dim(src)} ${pc.reset('->')} ${pc.dim(to)}`,
     raw: `${src} -> ${to}`,
   };
-};
-
-export const defaultUploadLocation = (file: string) => {
-  return file.replace(/^src\//, '').replace(/\.ts$/, '.js');
-};
-
-export const resolveHmrData = (data: HmrData) => {
-  const defaultFilename = defaultUploadLocation(data.file);
-  let result = data.location ?? 'home';
-  if (typeof result === 'function') {
-    const resolved = result(data.file);
-    if (!resolved) {
-      return [];
-    }
-    result = resolved;
-  }
-  if (!Array.isArray(result)) {
-    result = [result];
-  }
-  return result.map((r) => {
-    const itemResult = {
-      filename: defaultFilename,
-      server: 'home',
-      ...(typeof r === 'string' ? { server: r } : r),
-    };
-    itemResult.filename = fixStartingSlash(itemResult.filename);
-    return itemResult;
-  });
 };
 
 export interface FileContent {
@@ -245,7 +202,7 @@ export class WsAdapter {
     }
 
     // resolve actual filename and servers
-    const payloads = resolveHmrData(data);
+    const payloads = this.server.watchManager.getUploadFilenames(data.file);
     // no payload, skip
     if (!payloads.length) {
       logger.info(`hmr ${data.event}`, data.file, pc.dim('(ignored)'));
@@ -363,19 +320,7 @@ export class WsAdapter {
     }
   }
   getRamUsageLocalData(file: string) {
-    file = slash(file);
-    const item = this.server.watchManager.findItem(file);
-    // fallback
-    if (!item) {
-      return [];
-    }
-    return resolveHmrData({
-      ...item,
-      file,
-      event: 'change',
-      initial: false,
-      timestamp: Date.now(),
-    });
+    return this.server.watchManager.getUploadFilenames(file);
   }
   async getRamUsageLocalRaw(file: string, resolvedData: ResolvedData) {
     // loop through all resolved data

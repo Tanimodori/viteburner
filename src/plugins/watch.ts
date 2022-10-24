@@ -1,6 +1,6 @@
 import { FSWatcher, WatchOptions } from 'chokidar';
 import { isMatch } from 'micromatch';
-import { WatchItem } from '..';
+import { defaultUploadLocation, fixStartingSlash, removeStartingSlash, WatchItem } from '..';
 import chokidar from 'chokidar';
 import EventEmitter from 'events';
 import fs from 'fs';
@@ -83,5 +83,44 @@ export class WatchManager {
     for await (const file of stream) {
       this.triggerHmr(file as string, 'change');
     }
+  }
+  /** Get all possible filenames to upload */
+  getUploadFilenames(filename: string) {
+    // fix starting slash
+    filename = removeStartingSlash(slash(filename));
+
+    // find item
+    const item = this.findItem(filename);
+    if (!item) {
+      return [];
+    }
+
+    // get all possible filenames
+    const defaultFilename = defaultUploadLocation(filename);
+    let result = item.location ?? 'home';
+    if (typeof result === 'function') {
+      const resolved = result(filename);
+      if (!resolved) {
+        return [];
+      }
+      result = resolved;
+    }
+    if (!Array.isArray(result)) {
+      result = [result];
+    }
+    return result.map((r) => {
+      const itemResult = {
+        filename: defaultFilename,
+        server: 'home',
+        ...(typeof r === 'string' ? { server: r } : r),
+      };
+      itemResult.filename = fixStartingSlash(itemResult.filename);
+      return itemResult;
+    });
+  }
+  /** Shoutcut of `getUploadFilenames(filename).find(server) */
+  getUploadFilenamesByServer(filename: string, server: string) {
+    const filenames = this.getUploadFilenames(filename);
+    return filenames.find((item) => item.server === server);
   }
 }

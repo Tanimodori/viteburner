@@ -22,3 +22,32 @@ export async function writeFile(file: string, content: string) {
 export function isScriptFile(filename: string) {
   return filename.endsWith('.js') || filename.endsWith('.script');
 }
+
+/** Enforce starting slash */
+export const forceStartingSlash = (s: string) => {
+  return s.startsWith('/') ? s : '/' + s;
+};
+
+/** Enforce starting slash if file is not in root dir */
+export const fixStartingSlash = (s: string) => {
+  const index = s.lastIndexOf('/');
+  if (index === 0) {
+    // if file is in root dir with starting slash, remove it
+    return s.substring(1);
+  } else if (index !== -1) {
+    // if file is not in root dir, add starting slash
+    return forceStartingSlash(s);
+  } else {
+    // if file is in root dir without starting slash, keep it as-is
+    return s;
+  }
+};
+
+/** Remove starting slash on download */
+export const removeStartingSlash = (s: string) => {
+  return s.startsWith('/') ? s.substring(1) : s;
+};
+
+export const defaultUploadLocation = (file: string) => {
+  return file.replace(/^src\//, '').replace(/\.ts$/, '.js');
+};
