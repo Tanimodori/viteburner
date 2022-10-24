@@ -141,7 +141,7 @@ declare module 'vite' {
     viteburner?: ViteBurnerConfig;
   }
 }
-/** TypeScript helper for define your config */
+/** TypeScript helper to define your config */
 export function defineConfig(config: ViteBurnerViteConfig): ViteBurnerViteConfig {
   return config;
 }
