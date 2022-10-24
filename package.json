@@ -60,7 +60,7 @@
     "vitest": "^0.24.3"
   },
   "dependencies": {
-    "acorn": "^8.8.0",
+    "acorn": "^8.8.1",
     "cac": "^6.7.14",
     "chokidar": "^3.5.3",
     "fast-glob": "^3.2.12",
