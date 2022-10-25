@@ -49,6 +49,7 @@ The `location` option tells viteburner which server to upload the file to, and w
 | `string`               | `[location]` | `defaultUploadLocation` |
 | `string[]`             | `location`   | `defaultUploadLocation` |
 | `{server}[]`           | `[server]`   | `defaultUploadLocation` |
+| `{filename}[]`         | `["home"]`   | `filename`              |
 | `{server, filename}[]` | `[server]`   | `filename`              |
 | `function`             | result-based | result-based            |
 
@@ -106,3 +107,39 @@ const watchItem = {
 In this example, `src/data/foo.txt` will be uploaded to `bar.txt` on the server `home`.
 
 ### Advanced examples
+
+```ts
+const watchItem = {
+  pattern: 'src/**/*.js',
+  // `file` is the relative path to the project root
+  // without a starting slash
+  location: (file) => {
+    const match = file.match(/^src\/([^\/]+)\/(.*)$/);
+    if (match) {
+      return { server: match[1], filename: match[2] };
+    }
+    return null;
+  },
+};
+```
+
+In this example, the `location` is a function, so each file will be passed to the function, and the function will return the server and filename to upload the file to.
+
+If the function returns nullish values, the file will not be uploaded. You can use this feature to filter out some files. Otherwise the result will be treated as a non-function `location` values.
+
+So in this case, `src/home/foo/bar.js` will be uploaded to `foo/bar.js` on the server `home`, and `src/n00dles/foo/bar.js` will be uploaded to `foo/bar.js` on the server `n00dles`.
+
+When using functions, mind that the default rename behavior will not be applied. You need to implement it yourself especially when you're working with TypeScript files. The default `defaultUploadLocation` function can be imported from `viteburner`.
+
+```ts
+import { defaultUploadLocation } from 'viteburner';
+const watchItem = {
+  pattern: 'src/**/*',
+  location: (file) => {
+    if (file.startsWith('src/secret/')) {
+      return null;
+    }
+    return { filename: defaultUploadLocation(file) };
+  },
+};
+```
