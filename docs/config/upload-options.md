@@ -143,3 +143,9 @@ const watchItem = {
   },
 };
 ```
+
+### Ignore Initial Option
+
+If the `ignoreInitial` is set to `true`, viteburner will not upload files when the watcher starts. This is useful when you want to upload files only when they are changed. The default value is `false`.
+
+Note that even if `ignoreInitial` is set to `false`, viteburner will _not_ all upload files when the server reconnects.
