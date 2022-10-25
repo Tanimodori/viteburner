@@ -48,7 +48,7 @@ export interface ViteBurnerUserConfig {
     ignoreTs?: boolean;
     ignoreSourcemap?: boolean;
   };
-  dumpFiles?: string | null | undefined | ((file: string) => string | null | undefined);
+  dumpFiles?: string | null | undefined | ((file: string, server: string) => string | null | undefined);
 }
 
 export interface WatchItem {
