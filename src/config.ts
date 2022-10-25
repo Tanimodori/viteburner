@@ -161,7 +161,7 @@ export async function loadConfig(inlineConfig: ViteBurnerInlineConfig) {
       // load inline config from `vite.config`
       {
         files: 'vite.config',
-        async rewrite(config: ViteBurnerViteConfigInput) {
+        async rewrite<ViteBurnerViteConfigInput>(config: ViteBurnerViteConfigInput) {
           const resolvedConfig = await (typeof config === 'function' ? config() : config);
           const sourcemap = resolvedConfig?.build?.sourcemap;
           return {
