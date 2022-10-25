@@ -2,7 +2,7 @@
 
 ## Guide
 
-- [Getting Started](../README.md)
+- [Quick Start](guide/quick-start.md)
 - [Overview](guide/overview.md)
 - [Transform](guide/transform.md)
 
