@@ -1,0 +1,27 @@
+@startuml transform-dest
+skinparam dpi 300
+skinparam defaultFontName Sarasa Fixed SC
+skinparam DefaultMonospacedFontName Sarasa Fixed SC
+
+start
+partition dest {
+  repeat
+  :pick next dest;
+  if(should transform?) then (Y)
+  :fix import path;
+  else (N)
+  endif
+
+
+  if(should dump?) then (Y)
+  :dump;
+  else (N)
+  endif
+
+  :upload;
+
+  repeat while (more dest?)
+}
+stop
+
+@enduml

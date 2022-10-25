@@ -1,0 +1,35 @@
+@startuml transform
+skinparam dpi 300
+skinparam defaultFontName Sarasa Fixed SC
+skinparam DefaultMonospacedFontName Sarasa Fixed SC
+
+split
+-[hidden]->
+start
+:file change detected;
+split again
+-[hidden]->
+start
+:manual upload;
+end split
+
+:trigger update;
+
+if(any dest?) then (Y)
+:load file;
+else (N)
+stop
+endif
+
+if(should transform?) then (Y)
+:transform by vite;
+else (N)
+endif
+
+partition dest {
+:handle each dest;
+}
+
+stop
+
+@enduml
