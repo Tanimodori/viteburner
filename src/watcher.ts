@@ -209,7 +209,7 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
       initial: 0,
       choices: [
         { title: 'All local scripts', value: 'all' },
-        { title: 'Filter local script by glob pattern', value: 'glob' },
+        { title: 'Filter local scripts by glob pattern', value: 'glob' },
         { title: 'Find a local script', value: 'local' },
         { title: 'Find a remote script', value: 'remote' },
       ],
