@@ -54,14 +54,17 @@ export default defineConfig({
 In `vite.config.ts`
 
 ```ts
-import { defineConfig } from 'viteburner'
+import { defineConfig } from 'viteburner';
 export default defineConfig({
   viteburner: {
     watch: [
-      { pattern: 'src/**/*.{js,ts}', transform: true },
-      { pattern: 'src/**/*.{script,txt}' }
+      {
+        pattern: 'src/**/*.{js,ts}',
+        transform: true,
+      },
+      { pattern: 'src/**/*.{script,txt}' },
     ],
-  }
+  },
 });
 ```
 
