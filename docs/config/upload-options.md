@@ -2,6 +2,8 @@
 
 ## `watch`
 
+- **Type:** `WatchItem[]`
+
 Watch options tell viteburner what files to watch, should they be transformed, and where to upload them.
 
 The `watch` option is an array of `WatchItem` objects. Each `WatchItem` object has the following properties:
@@ -18,7 +20,9 @@ export interface WatchItem {
 }
 ```
 
-### `pattern`
+## `WatchItem.pattern`
+
+- **Type:** `string`
 
 For example, the following pattern will watch all files in `src` folder with `.js`, `.ts`, `.script` and `.txt` extensions.
 
@@ -33,13 +37,18 @@ src/**/*.{js,ts,script,txt}
 
 See [micromatch](https://github.com/micromatch/micromatch) for more details.
 
-### `transform`
+## `WatchItem.transform`
 
-If `transform` is `true`, viteburner will use `vite` to transform the file before uploading it. If `transform` is `false` (by default), viteburner will upload the file as-is.
+- **Type:** `boolean`
+- **Default:** `false`
+
+If `transform` is `true`, viteburner will use `vite` to transform the file before uploading it. If `transform` is `false`, viteburner will upload the file as-is.
 
 See [Guide/Transform](../guide/transform.md) for more details.
 
-### `location`
+## `WatchItem.location`
+
+- **Type:** `RenameOutput | ((file: string) => RenameOutput)`
 
 The `location` option tells viteburner which server to upload the file to, and where to put the file on the server.
 
@@ -149,6 +158,9 @@ const watchItem = {
 
 ## `ignoreInitial`
 
-If the `ignoreInitial` is set to `true`, viteburner will not upload files when the watcher starts. This is useful when you want to upload files only when they are changed. The default value is `false`.
+- **Type:** `boolean`
+- **Default:** `false`
+
+If the `ignoreInitial` is set to `true`, viteburner will not upload files when the watcher starts. This is useful when you want to upload files only when they are changed.
 
 Note that even if `ignoreInitial` is set to `false`, viteburner will _not_ all upload files when the server reconnects.
