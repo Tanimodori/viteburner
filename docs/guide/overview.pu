@@ -1,13 +1,13 @@
-@startuml workflow
+@startuml overview
 skinparam dpi 300
-skinparam defaultFontName Source Han Sans SC
+skinparam defaultFontName Sarasa Fixed SC
 skinparam DefaultMonospacedFontName Sarasa Fixed SC
 
 start
 :resolve user config;
 
 fork
-:start dev server;
+:start ws server;
 repeat 
 :wait until connected;
 :update dts;
@@ -17,10 +17,11 @@ repeat while
 detach
 
 fork again
+:start vite server;
 :start fs watch;
 repeat
 :wait until file change;
-:emit hmr event;
+:trigger hmr update;
 repeat while
 detach
 

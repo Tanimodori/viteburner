@@ -1,3 +1,0 @@
-# Workflow
-
-![workflow](workflow.png)
