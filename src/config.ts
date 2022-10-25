@@ -78,6 +78,7 @@ export interface ViteBurnerUserConfig {
   download?: {
     /**
      * servers to download from.
+     * @default "home"
      */
     server?: string | string[];
     /**
@@ -99,6 +100,7 @@ export interface ViteBurnerUserConfig {
     ignoreTs?: boolean;
     /**
      * If set to `true`, skip downloading files that have a tailing inline sourcemap.
+     * @default true
      */
     ignoreSourcemap?: boolean;
   };
