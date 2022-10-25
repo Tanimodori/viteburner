@@ -5,6 +5,7 @@
 - [Quick Start](guide/quick-start.md)
 - [Overview](guide/overview.md)
 - [Transform](guide/transform.md)
+- [RAM Usage](guide/ram-usage.md)
 
 ## Config
 
