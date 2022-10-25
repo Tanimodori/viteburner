@@ -1,6 +1,6 @@
 # Upload Options
 
-## Watch Options
+## `watch`
 
 Watch options tell viteburner what files to watch, should they be transformed, and where to upload them.
 
@@ -144,7 +144,7 @@ const watchItem = {
 };
 ```
 
-### Ignore Initial Option
+## `ignoreInitial`
 
 If the `ignoreInitial` is set to `true`, viteburner will not upload files when the watcher starts. This is useful when you want to upload files only when they are changed. The default value is `false`.
 
