@@ -12,3 +12,5 @@
 - [Upload Options](config/upload-options.md)
 - [Download Options](config/download-options.md)
 - [Server Options](config/server-options.md)
+- [Dump Options](config/dump-options.md)
+- [Transfrom Options](config/transform-options.md)
