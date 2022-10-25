@@ -112,7 +112,7 @@ export interface ViteBurnerUserConfig {
    * If the function returns `null` or `undefined`, the file will not be dumped.
    * @default undefined
    */
-  dumpFiles?: string | null | undefined | ((file: string) => string | null | undefined);
+  dumpFiles?: string | null | undefined | ((file: string, server: string) => string | null | undefined);
 }
 
 /**

@@ -17,13 +17,6 @@ import { slash } from 'vite-node/utils';
 import fg from 'fast-glob';
 import { fixImportPath } from './import';
 
-export const formatDump = (from: string, to: string) => {
-  return {
-    styled: `${pc.dim(from)} ${pc.reset('->')} ${pc.dim(to)}`,
-    raw: `${from} -> ${to}`,
-  };
-};
-
 export const formatUpload = (from: string, to: string, serverName: string) => {
   to = forceStartingSlash(to);
   const dest = `@${serverName}:${to}`;
@@ -134,14 +127,14 @@ export class WsAdapter {
       this.buffers.delete(data.file);
     }
   }
-  async dumpFile(data: HmrData, content: string) {
+  async dumpFile(data: HmrData, content: string, server: string) {
     const dump = this.server.config?.viteburner?.dumpFiles;
     if (!dump) {
       return;
     }
     let relative: string | null | undefined = undefined;
     if (typeof dump === 'function') {
-      relative = dump(data.file);
+      relative = dump(data.file, server);
     } else {
       relative = path.join(dump, data.file);
     }
@@ -150,7 +143,7 @@ export class WsAdapter {
     }
     const fullpath = path.resolve(this.server.config.root, relative);
     await writeFile(fullpath, content);
-    logger.info('dump', formatDump(data.file, slash(relative)).styled);
+    logger.info('dump', formatUpload(data.file, slash(relative), server).styled);
   }
   async fetchModule(data: HmrData) {
     let content = '';
@@ -167,8 +160,6 @@ export class WsAdapter {
       const buffer = await fs.promises.readFile(path.resolve(this.server.config.root, data.file));
       content = buffer.toString();
     }
-    // dump file
-    this.dumpFile(data, content);
     return content;
   }
   fixImport(content: string, data: HmrData, serverName: string) {
@@ -214,7 +205,11 @@ export class WsAdapter {
       try {
         if (isAdd) {
           // fix import path
-          content = this.fixImport(content, data, serverName);
+          if (data.transform) {
+            content = this.fixImport(content, data, serverName);
+          }
+          // dump file
+          this.dumpFile(data, content, serverName);
           await this.manager.pushFile({
             filename,
             content,
