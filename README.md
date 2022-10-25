@@ -113,7 +113,7 @@ export type RenameOutputObject = {
 };
 ```
 
-For detailed documentation, checkout the TSDoc of [`config.ts`](src/config.ts).
+For detailed documentation, checkout [docs](docs/index.md).
 
 ## Thanks
 
