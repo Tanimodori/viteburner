@@ -116,7 +116,10 @@ const watchItem = {
   location: (file) => {
     const match = file.match(/^src\/([^\/]+)\/(.*)$/);
     if (match) {
-      return { server: match[1], filename: match[2] };
+      return [
+        { server: match[1], filename: match[2] },
+        { server: match[1], filename: match[2] + '.backup' },
+      ];
     }
     return null;
   },
@@ -127,7 +130,7 @@ In this example, the `location` is a function, so each file will be passed to th
 
 If the function returns nullish values, the file will not be uploaded. You can use this feature to filter out some files. Otherwise the result will be treated as a non-function `location` values.
 
-So in this case, `src/home/foo/bar.js` will be uploaded to `foo/bar.js` on the server `home`, and `src/n00dles/foo/bar.js` will be uploaded to `foo/bar.js` on the server `n00dles`.
+So in this case, `src/home/foo/bar.js` will be uploaded to `foo/bar.js` and `foo/bar.js.backup` on the server `home`, and `src/n00dles/foo/bar.js` will be uploaded to `foo/bar.js` and `foo/bar.js.backup` on the server `n00dles`.
 
 When using functions, mind that the default rename behavior will not be applied. You need to implement it yourself especially when you're working with TypeScript files. The default `defaultUploadLocation` function can be imported from `viteburner`.
 
