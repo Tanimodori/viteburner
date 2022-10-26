@@ -34,7 +34,7 @@ export function resolveDts(dts: ViteBurnerConfig['dts']) {
   } else if (dts === false) {
     return undefined;
   } else {
-    return 'NetScriptDefinition.d.ts';
+    return 'NetscriptDefinitions.d.ts';
   }
 }
 

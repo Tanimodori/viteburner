@@ -19,6 +19,6 @@ The timeout in milliseconds for the WebSocket server.
 ## `dts`
 
 - **Type:** `string | boolean`
-- **Default:** `'NetScriptDefinition.d.ts'`
+- **Default:** `'NetscriptDefinitions.d.ts'`
 
 The path where to download the NetScript definition file from bitburner. Ignore this option or set it to `true` to use the default value. Set it to `false` to disable the download action.

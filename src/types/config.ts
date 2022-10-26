@@ -63,7 +63,7 @@ export interface ViteBurnerConfig {
    * The path to the file that contains bitburner type definitions.
    * Set to `true` to use the default filename.
    * Set to `false` to disable syncing type definitions from bitburner server.
-   * @default 'NetScriptDefinition.d.ts'
+   * @default 'NetscriptDefinitions.d.ts'
    */
   dts?: string | boolean;
   /**
