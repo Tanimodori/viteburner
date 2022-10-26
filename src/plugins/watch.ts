@@ -1,6 +1,6 @@
 import { FSWatcher, WatchOptions } from 'chokidar';
 import { isMatch } from 'micromatch';
-import { defaultUploadLocation, fixStartingSlash, removeStartingSlash, WatchItem } from '..';
+import { defaultUploadLocation, fixStartingSlash, removeStartingSlash } from '..';
 import chokidar from 'chokidar';
 import EventEmitter from 'events';
 import fs from 'fs';
@@ -8,6 +8,7 @@ import { resolve } from 'path';
 import { slash } from 'vite-node/utils';
 import fg from 'fast-glob';
 import { hmrPluginName } from './hmr';
+import { WatchItem } from '@/types';
 
 export class WatchManager {
   items: WatchItem[];

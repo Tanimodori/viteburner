@@ -113,7 +113,7 @@ export class WsAdapter {
     }
   }
   async dumpFile(data: HmrData, content: string, server: string) {
-    const dump = this.server.config?.viteburner?.dumpFiles;
+    const dump = this.server.config.viteburner.dumpFiles;
     if (!dump) {
       return;
     }
@@ -138,7 +138,7 @@ export class WsAdapter {
         throw new Error('module not found: ' + data.file);
       }
       content = module.code;
-      if (this.server.config?.viteburner?.sourcemap === 'inline' && module.map) {
+      if (this.server.config.viteburner.sourcemap === 'inline' && module.map) {
         content += getSourceMapString(module.map);
       }
     } else {
@@ -220,10 +220,7 @@ export class WsAdapter {
     this.server.watchManager.setEnabled(false);
 
     // get servers
-    let servers = this.server.config.viteburner?.download?.server ?? 'home';
-    if (!Array.isArray(servers)) {
-      servers = [servers];
-    }
+    const servers = this.server.config.viteburner.download.server;
 
     // get files
     const filesMap = new Map<string, FileContent[]>();
@@ -237,9 +234,7 @@ export class WsAdapter {
     }
 
     for (const [server, files] of filesMap) {
-      const locationFn = this.server.config.viteburner?.download?.location ?? defaultDownloadLocation;
-      const ignoreTs = this.server.config.viteburner?.download?.ignoreTs ?? true;
-      const ignoreSourcemap = this.server.config.viteburner?.download?.ignoreSourcemap ?? true;
+      const { location: locationFn, ignoreTs, ignoreSourcemap } = this.server.config.viteburner.download;
       for (const file of files) {
         file.filename = removeStartingSlash(file.filename);
         const location = locationFn(file.filename, server);
@@ -280,7 +275,7 @@ export class WsAdapter {
   }
   async getRamUsage(pattern?: string) {
     // get patterns
-    const patterns = pattern ?? this.server.config.viteburner?.watch?.map((item) => item.pattern);
+    const patterns = pattern ?? this.server.watchManager.patterns;
     if (!patterns) {
       logger.warn('ram', 'no pattern found');
       return;
