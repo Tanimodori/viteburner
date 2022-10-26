@@ -113,16 +113,7 @@ export class WsAdapter {
     }
   }
   async dumpFile(data: HmrData, content: string, server: string) {
-    const dump = this.server.config.viteburner.dumpFiles;
-    if (!dump) {
-      return;
-    }
-    let relative: string | null | undefined = undefined;
-    if (typeof dump === 'function') {
-      relative = dump(data.file, server);
-    } else {
-      relative = path.join(dump, data.file);
-    }
+    const relative = this.server.config.viteburner.dumpFiles?.(data.file, server);
     if (!relative) {
       return;
     }
