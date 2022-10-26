@@ -11,6 +11,7 @@ export interface HmrData extends WatchItem {
 export interface ViteBurnerServer extends Omit<ViteDevServer, 'config'> {
   config: ResolvedConfig;
   pathToId(file: string): string;
+  invalidateFile(file: string): Promise<void>;
   fetchModule(file: string): Promise<TransformResult | null>;
   onHmrMessage(handler: (data: HmrData, server: ViteBurnerServer) => void): void;
   buildStart(): Promise<void>;

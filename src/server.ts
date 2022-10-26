@@ -36,6 +36,13 @@ export async function createServer(config: ResolvedViteBurnerConfig) {
       const id = `/@fs/${slash(resolve(viteServer.config.root, file))}`;
       return normalizeRequestId(id, server.config.base);
     },
+    async invalidateFile(file: string) {
+      const id = server.pathToId(file);
+      const module = await server.moduleGraph.getModuleByUrl(id);
+      if (module) {
+        server.moduleGraph.invalidateModule(module);
+      }
+    },
     async fetchModule(file: string) {
       const id = server.pathToId(file);
       return server.transformRequest(id);

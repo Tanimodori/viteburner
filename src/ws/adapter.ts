@@ -90,6 +90,10 @@ export class WsAdapter {
     }
     const connected = this.manager.connected;
     for (const item of data) {
+      // invalidate vite cache
+      if (item.transform) {
+        this.server.invalidateFile(item.file);
+      }
       this.buffers.set(item.file, item);
       logger.info(`hmr ${item.event}`, item.file, pc.yellow('(pending)'));
     }
