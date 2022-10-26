@@ -110,7 +110,7 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
 
   const fullDownload = () => {
     logger.info('download', pc.reset('force full-download triggered'));
-    wsAdapter.server.watchManager.emitter.emit('full-download');
+    wsAdapter.fullDownload();
   };
 
   const showRamUsageAll = async () => {

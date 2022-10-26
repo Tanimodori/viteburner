@@ -66,9 +66,6 @@ export class WsAdapter {
       await this.getDts();
       await this.handleHmrMessage();
     });
-    this.server.watchManager.emitter.on('full-download', () => {
-      this.fullDownload();
-    });
   }
   async getDts() {
     const filename = this.server.config.viteburner.dts;
