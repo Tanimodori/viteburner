@@ -2,7 +2,15 @@ import { resolve } from 'path';
 import { createServer as createViteServerRaw, TransformResult, ViteDevServer } from 'vite';
 import { slash, normalizeRequestId } from 'vite-node/utils';
 import { hmrPlugin, entryPlugin, virtualModuleId, hmrPluginName, HmrData } from './plugins';
-import { ViteBurnerConfig } from './config';
+import { ResolvedViteBurnerConfig, ViteBurnerConfig } from './config';
+
+export interface ViteBurnerServer extends Omit<ViteDevServer, 'config'> {
+  config: ResolvedViteBurnerConfig;
+  pathToId(file: string): string;
+  fetchModule(file: string): Promise<TransformResult | null>;
+  onHmrMessage(handler: (data: HmrData, server: ViteBurnerServer) => void): void;
+  buildStart(): Promise<void>;
+}
 
 export async function createViteServer(config: ViteBurnerConfig) {
   const root = config.cwd;
@@ -37,13 +45,6 @@ export async function createViteServer(config: ViteBurnerConfig) {
     viteburner: config,
     plugins: [entryPlugin(), hmrPlugin()],
   });
-}
-
-export interface ViteBurnerServer extends ViteDevServer {
-  pathToId(file: string): string;
-  fetchModule(file: string): Promise<TransformResult | null>;
-  onHmrMessage(handler: (data: HmrData, server: ViteBurnerServer) => void): void;
-  buildStart(): Promise<void>;
 }
 
 export async function createServer(config: ViteBurnerConfig) {

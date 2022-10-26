@@ -1,36 +1,5 @@
-import { ResolvedConfig } from 'vite';
+import { ResolvedViteBurnerConfig, ViteBurnerConfig, WatchItem } from '@/types';
 import { defaultUploadLocation, fixStartingSlash } from '..';
-import { WatchItem, ViteBurnerConfig } from './load';
-
-export type ResolvedViteBurnerConfig = Readonly<
-  ResolvedConfig & {
-    viteburner: ResolvedViteBurnerUserConfig;
-  }
->;
-
-export type ResolvedViteBurnerUserConfig = {
-  watch: {
-    pattern: string;
-    transform: boolean;
-    location: (file: string) => {
-      filename: string;
-      server: string;
-    }[];
-  }[];
-  sourcemap: boolean | 'inline' | 'hidden';
-  port: number;
-  timeout: number;
-  dts?: string;
-  ignoreInitial: boolean;
-  download: {
-    server: string[];
-    location: (file: string, server: string) => string | null | undefined;
-    ignoreTs: boolean;
-    ignoreSourcemap: boolean;
-  };
-  dumpFiles?: (file: string, server: string) => string | null | undefined;
-  cwd: string;
-};
 
 export function resolveWatchLocation(location: WatchItem['location']) {
   return (filename: string) => {
@@ -83,7 +52,7 @@ export function resolveConfig(config: ViteBurnerConfig) {
   const watch = config.watch ?? [];
   const server = config.download?.server ?? 'home';
 
-  const resolvedConfig: ResolvedViteBurnerUserConfig = {
+  const resolvedConfig: ResolvedViteBurnerConfig = {
     watch: watch.map((item) => ({
       pattern: item.pattern,
       transform: item.transform ?? true,
