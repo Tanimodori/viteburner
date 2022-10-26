@@ -1,6 +1,5 @@
 import {
   getSourceMapString,
-  HmrData,
   logger,
   writeFile,
   isScriptFile,
@@ -15,7 +14,7 @@ import path, { resolve } from 'path';
 import { slash } from 'vite-node/utils';
 import fg from 'fast-glob';
 import { fixImportPath } from './import';
-import { ViteBurnerServer } from '@/types';
+import { ViteBurnerServer, HmrData } from '@/types';
 
 export const formatUpload = (from: string, to: string, serverName: string) => {
   to = forceStartingSlash(to);

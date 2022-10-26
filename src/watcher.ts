@@ -2,7 +2,7 @@ import pc from 'picocolors';
 import prompt from 'prompts';
 import fg from 'fast-glob';
 import fs from 'fs';
-import { HmrData } from './plugins';
+import { HmrData } from './types';
 import { KeyHandlerContext, logger, onKeypress } from './console';
 import { createServer } from './server';
 import { WsManager, WsAdapter, ResolvedData } from './ws';

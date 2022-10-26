@@ -1,33 +1,13 @@
 import { HmrContext, Plugin } from 'vite';
 import { relative } from 'path';
 import { WatchManager } from './watch';
-import { WatchItem, ViteBurnerConfig } from '@/types';
+import { ResolvedConfig } from '@/types';
 
 declare module 'vite' {
   interface ViteDevServer {
     watchManager: WatchManager;
   }
 }
-
-export interface HmrOptions {
-  watch?: WatchItem[];
-}
-
-export interface HmrData extends WatchItem {
-  file: string;
-  event: string;
-  initial: boolean;
-  timestamp: number;
-}
-
-const parseOptions = (options?: ViteBurnerConfig) => {
-  const cwd = options?.cwd;
-  return {
-    watch: options?.watch ?? [],
-    ignoreInitial: options?.ignoreInitial ?? false,
-    ...(cwd && { cwd }),
-  };
-};
 
 export const hmrPluginName = 'viteburner:hmr';
 
@@ -36,11 +16,12 @@ export function hmrPlugin(): Plugin {
   return {
     name: hmrPluginName,
     configResolved(config) {
-      const { watch, ...options } = parseOptions(config.viteburner);
+      const { root, viteburner } = config as ResolvedConfig;
+      const { watch, ignoreInitial } = viteburner;
       watchManager = new WatchManager(watch, {
-        cwd: config.root,
+        cwd: root,
         persistent: true,
-        ...options,
+        ignoreInitial,
       });
     },
     configureServer(server) {

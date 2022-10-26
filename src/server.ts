@@ -1,8 +1,8 @@
 import { resolve } from 'path';
 import { createServer as createViteServerRaw } from 'vite';
 import { slash, normalizeRequestId } from 'vite-node/utils';
-import { hmrPlugin, entryPlugin, virtualModuleId, hmrPluginName, HmrData } from './plugins';
-import { ResolvedConfig, ResolvedViteBurnerConfig, ViteBurnerServer } from './types';
+import { hmrPlugin, entryPlugin, virtualModuleId, hmrPluginName } from './plugins';
+import { HmrData, ResolvedConfig, ResolvedViteBurnerConfig, ViteBurnerServer } from './types';
 
 export async function createViteServer(config: ResolvedViteBurnerConfig) {
   const root = config.cwd;

@@ -1,6 +1,12 @@
 import { TransformResult, ViteDevServer } from 'vite';
-import { HmrData } from '..';
-import { ResolvedConfig } from './config';
+import { ResolvedConfig, WatchItem } from './config';
+
+export interface HmrData extends WatchItem {
+  file: string;
+  event: string;
+  initial: boolean;
+  timestamp: number;
+}
 
 export interface ViteBurnerServer extends Omit<ViteDevServer, 'config'> {
   config: ResolvedConfig;
