@@ -1,6 +1,6 @@
 import { FSWatcher, WatchOptions } from 'chokidar';
 import { isMatch } from 'micromatch';
-import { defaultUploadLocation, fixStartingSlash, removeStartingSlash } from '..';
+import { removeStartingSlash } from '..';
 import chokidar from 'chokidar';
 import EventEmitter from 'events';
 import fs from 'fs';
@@ -8,17 +8,17 @@ import { resolve } from 'path';
 import { slash } from 'vite-node/utils';
 import fg from 'fast-glob';
 import { hmrPluginName } from './hmr';
-import { WatchItem } from '@/types';
+import { ResolvedWatchItem } from '@/types';
 
 export class WatchManager {
-  items: WatchItem[];
+  items: ResolvedWatchItem[];
   options: WatchOptions;
   watcher?: FSWatcher;
   initial: boolean;
   enabled: boolean;
   enabledTimeStamp: number;
   emitter: EventEmitter;
-  constructor(items: WatchItem[], options: WatchOptions = {}) {
+  constructor(items: ResolvedWatchItem[], options: WatchOptions = {}) {
     this.items = items;
     this.options = options;
     this.initial = true;
@@ -96,28 +96,7 @@ export class WatchManager {
       return [];
     }
 
-    // get all possible filenames
-    const defaultFilename = defaultUploadLocation(filename);
-    let result = item.location ?? 'home';
-    if (typeof result === 'function') {
-      const resolved = result(filename);
-      if (!resolved) {
-        return [];
-      }
-      result = resolved;
-    }
-    if (!Array.isArray(result)) {
-      result = [result];
-    }
-    return result.map((r) => {
-      const itemResult = {
-        filename: defaultFilename,
-        server: 'home',
-        ...(typeof r === 'string' ? { server: r } : r),
-      };
-      itemResult.filename = fixStartingSlash(itemResult.filename);
-      return itemResult;
-    });
+    return item.location(filename);
   }
   /** Shoutcut of `getUploadFilenames(filename).find(server) */
   getUploadFilenamesByServer(filename: string, server: string) {

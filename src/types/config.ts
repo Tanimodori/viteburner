@@ -130,15 +130,17 @@ declare module 'vite' {
 
 // Resolved
 
-export type ResolvedViteBurnerConfig = {
-  watch: {
-    pattern: string;
-    transform: boolean;
-    location: (file: string) => {
-      filename: string;
-      server: string;
-    }[];
+export interface ResolvedWatchItem {
+  pattern: string;
+  transform: boolean;
+  location: (file: string) => {
+    filename: string;
+    server: string;
   }[];
+}
+
+export interface ResolvedViteBurnerConfig {
+  watch: ResolvedWatchItem[];
   sourcemap: boolean | 'inline' | 'hidden';
   port: number;
   timeout: number;
@@ -152,7 +154,7 @@ export type ResolvedViteBurnerConfig = {
   };
   dumpFiles?: (file: string, server: string) => string | null | undefined;
   cwd: string;
-};
+}
 
 export type ResolvedConfig = Readonly<
   Omit<ViteResolvedConfig, 'viteburner'> & {
