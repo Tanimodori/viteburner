@@ -141,7 +141,7 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
     // filter out non-script files, dts, and deadends
     const fileMap = new Map<string, ResolvedData>();
     for (const file of files) {
-      if (file.endsWith('.d.ts') || file === wsAdapter.resolveDts()) {
+      if (file.endsWith('.d.ts') || file === wsAdapter.server.config.viteburner.dts) {
         continue;
       }
       const resolvedData = wsAdapter.getRamUsageLocalData(file);

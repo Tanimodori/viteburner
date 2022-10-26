@@ -56,7 +56,6 @@ export class WsAdapter {
   buffers: Map<string, HmrData> = new Map();
   manager: WsManager;
   server: ViteBurnerServer;
-  resolvedDts: string | undefined;
   constructor(manager: WsManager, server: ViteBurnerServer) {
     this.manager = manager;
     this.server = server;
@@ -72,21 +71,8 @@ export class WsAdapter {
       this.fullDownload();
     });
   }
-  resolveDts() {
-    if (this.resolvedDts) {
-      return this.resolvedDts;
-    }
-    let filename = this.server.config?.viteburner?.dts;
-    if (filename === false) {
-      return;
-    }
-    if (filename === undefined || filename === true) {
-      filename = defaultDts;
-    }
-    return filename;
-  }
   async getDts() {
-    const filename = this.resolveDts();
+    const filename = this.server.config.viteburner.dts;
     if (!filename) {
       return;
     }
