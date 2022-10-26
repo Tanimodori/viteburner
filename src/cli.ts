@@ -1,8 +1,9 @@
 import { watch } from './watcher';
 import cac from 'cac';
-import { loadConfig, ViteBurnerInlineConfig } from './config';
+import { loadConfig } from './config';
 import { logger } from './console';
 import pkg from '../package.json';
+import { ViteBurnerInlineConfig } from './types';
 
 const cli = cac('viteburner');
 
@@ -10,7 +11,7 @@ cli
   .command('', 'start dev server')
   .alias('serve')
   .alias('dev')
-  .option('--cwd <cwd>', 'Working directory', { default: process.cwd() })
+  .option('--cwd <cwd>', 'Working directory')
   .option('--port <port>', 'Port to listen on')
   .action(startDev);
 
@@ -20,9 +21,10 @@ cli.version(pkg.version);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function startDev(options: any) {
+  const cwd = options.cwd;
   const port = options.port;
   const resolveInlineConfig: ViteBurnerInlineConfig = {
-    cwd: options.cwd,
+    ...(cwd && { cwd }),
     ...(port && { port }),
   };
 

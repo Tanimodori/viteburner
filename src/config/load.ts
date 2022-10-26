@@ -33,7 +33,7 @@ export async function loadConfig(inlineConfig: ViteBurnerInlineConfig) {
         },
       },
     ],
-    cwd: inlineConfig.cwd,
+    cwd: inlineConfig.cwd ?? process.cwd(),
     merge: true,
   });
   return resolveConfig({
