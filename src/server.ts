@@ -1,25 +1,15 @@
 import { resolve } from 'path';
-import { createServer as createViteServerRaw, TransformResult, ViteDevServer } from 'vite';
+import { createServer as createViteServerRaw } from 'vite';
 import { slash, normalizeRequestId } from 'vite-node/utils';
 import { hmrPlugin, entryPlugin, virtualModuleId, hmrPluginName, HmrData } from './plugins';
-import { ResolvedViteBurnerConfig, ViteBurnerConfig } from './config';
+import { ResolvedConfig, ResolvedViteBurnerConfig, ViteBurnerServer } from './types';
 
-export interface ViteBurnerServer extends Omit<ViteDevServer, 'config'> {
-  config: ResolvedViteBurnerConfig;
-  pathToId(file: string): string;
-  fetchModule(file: string): Promise<TransformResult | null>;
-  onHmrMessage(handler: (data: HmrData, server: ViteBurnerServer) => void): void;
-  buildStart(): Promise<void>;
-}
-
-export async function createViteServer(config: ViteBurnerConfig) {
+export async function createViteServer(config: ResolvedViteBurnerConfig) {
   const root = config.cwd;
   return createViteServerRaw({
     ...(root && { root }),
     mode: 'development',
-    optimizeDeps: {
-      disabled: true,
-    },
+    optimizeDeps: { disabled: true },
     clearScreen: false,
     build: {
       lib: {
@@ -30,27 +20,18 @@ export async function createViteServer(config: ViteBurnerConfig) {
         entry: virtualModuleId,
         formats: ['es'],
       },
-      rollupOptions: {
-        output: {
-          exports: 'named',
-          preserveModules: true,
-          preserveModulesRoot: 'src',
-          entryFileNames: () => `[name].js`,
-        },
-      },
     },
-    server: {
-      middlewareMode: true,
-    },
+    server: { middlewareMode: true },
     viteburner: config,
     plugins: [entryPlugin(), hmrPlugin()],
   });
 }
 
-export async function createServer(config: ViteBurnerConfig) {
+export async function createServer(config: ResolvedViteBurnerConfig) {
   const viteServer = await createViteServer(config);
   const server: ViteBurnerServer = {
     ...viteServer,
+    config: { ...viteServer.config, viteburner: config } as ResolvedConfig,
     pathToId(file: string) {
       const id = `/@fs/${slash(resolve(viteServer.config.root, file))}`;
       return normalizeRequestId(id, server.config.base);

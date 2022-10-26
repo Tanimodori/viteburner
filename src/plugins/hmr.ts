@@ -1,7 +1,7 @@
 import { HmrContext, Plugin } from 'vite';
 import { relative } from 'path';
-import { ViteBurnerConfig, WatchItem } from '..';
 import { WatchManager } from './watch';
+import { WatchItem, ViteBurnerConfig } from '@/types';
 
 declare module 'vite' {
   interface ViteDevServer {

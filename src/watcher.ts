@@ -4,11 +4,11 @@ import fg from 'fast-glob';
 import fs from 'fs';
 import { HmrData } from './plugins';
 import { KeyHandlerContext, logger, onKeypress } from './console';
-import { ViteBurnerConfig } from './config';
 import { createServer } from './server';
 import { WsManager, WsAdapter, ResolvedData } from './ws';
 import { isScriptFile } from './utils';
 import { resolve } from 'path';
+import { ResolvedViteBurnerConfig } from './types';
 
 export function displayKeyHelpHint() {
   logger.info(
@@ -26,7 +26,7 @@ export function displayWatchAndHelp() {
   displayKeyHelpHint();
 }
 
-export async function watch(config: ViteBurnerConfig) {
+export async function watch(config: ResolvedViteBurnerConfig) {
   // create ws server
   const port = config.port ?? 12525;
   logger.info('ws', 'creating ws server...');

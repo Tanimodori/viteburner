@@ -155,7 +155,7 @@ export type ResolvedViteBurnerConfig = {
 };
 
 export type ResolvedConfig = Readonly<
-  ViteResolvedConfig & {
+  Omit<ViteResolvedConfig, 'viteburner'> & {
     viteburner: ResolvedViteBurnerConfig;
   }
 >;
