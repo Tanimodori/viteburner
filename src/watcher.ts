@@ -28,9 +28,8 @@ export function displayWatchAndHelp() {
 
 export async function watch(config: ResolvedViteBurnerConfig) {
   // create ws server
-  const port = config.port ?? 12525;
   logger.info('ws', 'creating ws server...');
-  const wsManager = new WsManager({ port, timeout: config.timeout });
+  const wsManager = new WsManager({ port: config.port, timeout: config.timeout });
 
   // create vite server
   logger.info('vite', 'creating dev server...');
@@ -61,7 +60,6 @@ export async function watch(config: ResolvedViteBurnerConfig) {
 }
 
 export async function handleKeyInput(wsAdapter: WsAdapter) {
-  const port = wsAdapter.server.config?.viteburner?.port ?? 12525;
   const padding = 18;
   const printStatus = (tag: string, msg: string) => {
     logger.info('status', pc.reset(tag.padStart(padding)), msg);
@@ -70,7 +68,7 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
     logger.info('status');
     logger.info('status', ' '.repeat(padding - 4) + pc.reset(pc.bold(pc.inverse(pc.green(' STATUS ')))));
     printStatus('connection:', wsAdapter.manager.connected ? pc.green('connected') : pc.yellow('disconnected'));
-    printStatus('port:', pc.magenta(String(port)));
+    printStatus('port:', pc.magenta(wsAdapter.server.config.viteburner.port));
     const pending = wsAdapter.buffers.size;
     const pendingStr = `${pending} file${pending === 1 ? '' : 's'}`;
     const pendingStrStyled = pending ? pc.yellow(pendingStr) : pc.dim(pendingStr);
