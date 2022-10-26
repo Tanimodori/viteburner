@@ -77,7 +77,7 @@ export class WsAdapter {
     }
     try {
       const data = await this.manager.getDefinitionFile();
-      const root = this.server.config.root ?? process.cwd();
+      const root = this.server.config.root;
       const fullpath = path.resolve(root, filename);
       await writeFile(fullpath, data);
       logger.info('dts change', filename);
