@@ -40,7 +40,7 @@ export interface WatchItem {
 /**
  * User config defined in `viteburner.config`.
  */
-export interface ViteBurnerUserConfig {
+export interface ViteBurnerConfig {
   /**
    * watch options
    */
@@ -113,30 +113,19 @@ export interface ViteBurnerUserConfig {
    * @default undefined
    */
   dumpFiles?: string | null | undefined | ((file: string, server: string) => string | null | undefined);
+  /** current working dir */
+  cwd?: string;
 }
+
+export type ViteBurnerInlineConfig = Pick<ViteBurnerConfig, 'port' | 'cwd'>;
 
 /**
  * User config defined in `vite.config`.
  */
-export interface ViteBurnerViteConfig extends UserConfig {
+export interface ViteBurnerUserConfig extends UserConfig {
   /** viteburner related configs */
   viteburner?: ViteBurnerConfig;
 }
-
-/**
- * User config defined in cli.
- */
-export interface ViteBurnerInlineConfig {
-  /** current working dir */
-  cwd?: string;
-  /** the port that WebSocket server listens to */
-  port?: number;
-}
-
-/**
- * User config union.
- */
-export interface ViteBurnerConfig extends ViteBurnerUserConfig, ViteBurnerInlineConfig {}
 
 declare module 'vite' {
   interface UserConfig {
@@ -144,13 +133,13 @@ declare module 'vite' {
   }
 }
 /** TypeScript helper to define your config */
-export function defineConfig(config: ViteBurnerViteConfig): ViteBurnerViteConfig {
+export function defineConfig(config: ViteBurnerUserConfig): ViteBurnerUserConfig {
   return config;
 }
 
 export type Promisable<T> = T | Promise<T>;
 export type Functionable<T> = T | (() => T);
-export type ViteBurnerViteConfigInput = Functionable<Promisable<ViteBurnerViteConfig>>;
+export type ViteBurnerUserConfigInput = Functionable<Promisable<ViteBurnerUserConfig>>;
 
 export async function loadConfig(inlineConfig: ViteBurnerInlineConfig) {
   const { config } = await loadConfigRaw<ViteBurnerUserConfig>({
@@ -163,7 +152,7 @@ export async function loadConfig(inlineConfig: ViteBurnerInlineConfig) {
       // load inline config from `vite.config`
       {
         files: 'vite.config',
-        async rewrite<ViteBurnerViteConfigInput>(config: ViteBurnerViteConfigInput) {
+        async rewrite<ViteBurnerUserConfigInput>(config: ViteBurnerUserConfigInput) {
           const resolvedConfig = await (typeof config === 'function' ? config() : config);
           const sourcemap = resolvedConfig?.build?.sourcemap;
           return {

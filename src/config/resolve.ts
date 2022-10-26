@@ -22,6 +22,7 @@ export type ResolvedViteBurnerUserConfig = Readonly<{
     ignoreSourcemap: boolean;
   };
   dumpFiles?: (file: string, server: string) => string | null | undefined;
+  cwd: string;
 }>;
 
 export function resolveWatchLocation(location: WatchItem['location']) {
@@ -93,6 +94,7 @@ export function resolveConfig(config: ViteBurnerConfig) {
       ignoreSourcemap: config?.download?.ignoreSourcemap ?? true,
     },
     dumpFiles: resolveDumpFile(config.dumpFiles),
+    cwd: config.cwd ?? process.cwd(),
   };
   return resolvedConfig;
 }
