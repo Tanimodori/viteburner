@@ -55,7 +55,7 @@ export function resolveConfig(config: ViteBurnerConfig) {
   const resolvedConfig: ResolvedViteBurnerConfig = {
     watch: watch.map((item) => ({
       pattern: item.pattern,
-      transform: item.transform ?? true,
+      transform: item.transform ?? false,
       location: resolveWatchLocation(item.location),
     })),
     sourcemap: config.sourcemap ?? false,
