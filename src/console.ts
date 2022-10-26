@@ -53,6 +53,11 @@ export type KeypressHandler = (ctx: KeyHandlerContext) => void | Promise<void>;
 // source: https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/node/stdin.ts
 // MIT License
 export function onKeypress(handler: KeypressHandler) {
+  //  Key press handler may not work on non-tty stdin like Git Bash on Windows.
+  if (!process.stdin.isTTY) {
+    logger.warn('current stdin is not a TTY. Keypress events may not work.');
+  }
+
   let running = false;
   async function callback(str: string, key: KeyInfo) {
     // esc, ctrl+d or ctrl+c to force exit
@@ -71,7 +76,7 @@ export function onKeypress(handler: KeypressHandler) {
   function on() {
     off();
     rl = readline.createInterface({ input: process.stdin });
-    readline.emitKeypressEvents(process.stdin);
+    readline.emitKeypressEvents(process.stdin, rl);
     if (process.stdin.isTTY) {
       process.stdin.setRawMode(true);
     }
