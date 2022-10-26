@@ -1,5 +1,6 @@
 import { loadConfig as loadConfigRaw } from 'unconfig';
 import { UserConfig } from 'vite';
+import { resolveConfig } from './resolve';
 
 /**
  * Destinations for the transformed files.
@@ -132,6 +133,7 @@ declare module 'vite' {
     viteburner?: ViteBurnerConfig;
   }
 }
+
 /** TypeScript helper to define your config */
 export function defineConfig(config: ViteBurnerUserConfig): ViteBurnerUserConfig {
   return config;
@@ -165,8 +167,8 @@ export async function loadConfig(inlineConfig: ViteBurnerInlineConfig) {
     cwd: inlineConfig.cwd,
     merge: true,
   });
-  return {
+  return resolveConfig({
     ...config,
     ...inlineConfig,
-  } as ViteBurnerConfig;
+  });
 }
