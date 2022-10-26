@@ -1,7 +1,14 @@
+import { ResolvedConfig } from 'vite';
 import { defaultUploadLocation, fixStartingSlash } from '..';
 import { WatchItem, ViteBurnerConfig } from './load';
 
-export type ResolvedViteBurnerUserConfig = Readonly<{
+export type ResolvedViteBurnerConfig = Readonly<
+  ResolvedConfig & {
+    viteburner: ResolvedViteBurnerUserConfig;
+  }
+>;
+
+export type ResolvedViteBurnerUserConfig = {
   watch: {
     pattern: string;
     transform: boolean;
@@ -23,7 +30,7 @@ export type ResolvedViteBurnerUserConfig = Readonly<{
   };
   dumpFiles?: (file: string, server: string) => string | null | undefined;
   cwd: string;
-}>;
+};
 
 export function resolveWatchLocation(location: WatchItem['location']) {
   return (filename: string) => {

@@ -128,12 +128,6 @@ export interface ViteBurnerUserConfig extends UserConfig {
   viteburner?: ViteBurnerConfig;
 }
 
-declare module 'vite' {
-  interface UserConfig {
-    viteburner?: ViteBurnerConfig;
-  }
-}
-
 /** TypeScript helper to define your config */
 export function defineConfig(config: ViteBurnerUserConfig): ViteBurnerUserConfig {
   return config;
