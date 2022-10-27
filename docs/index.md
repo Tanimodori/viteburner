@@ -1,11 +1,14 @@
 # Viteburner Documentations
 
+- [FAQ](guide/faq.md)
+
 ## Guide
 
 - [Quick Start](guide/quick-start.md)
 - [Overview](guide/overview.md)
 - [Transform](guide/transform.md)
 - [RAM Usage](guide/ram-usage.md)
+- [Comparison](guide/comparison.md)
 
 ## Config
 
