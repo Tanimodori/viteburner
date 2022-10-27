@@ -13,6 +13,7 @@
     "skipLibCheck": true,
     "paths": {
       "@/*": ["./src/*"],
+      "/src/*": ["./src/*"],
       "@ns": ["./NetscriptDefinitions.d.ts"]
     }
   },
