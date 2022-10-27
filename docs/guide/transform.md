@@ -8,6 +8,19 @@ When file changes or manual upload is triggered, vitburner will first get all de
 
 ## Import path
 
+The following import methods are supported:
+
+```ts
+// relative import
+import { foo } from './foo';
+// absolute import
+import { foo } from '@/foo';
+// alternatively
+import { foo } from '/src/foo';
+```
+
+### Import fix
+
 Say you have the following file structure:
 
 ```
