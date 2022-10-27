@@ -13,9 +13,8 @@ The following import methods are supported:
 ```ts
 // relative import
 import { foo } from './foo';
-// absolute import
+// absolute import, need to configure vite.config and tsconfig.json
 import { foo } from '@/foo';
-// alternatively
 import { foo } from '/src/foo';
 ```
 
