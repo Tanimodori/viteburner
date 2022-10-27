@@ -66,10 +66,14 @@ Unfortunately, you can't use bare `/` as an import alias for vite since vite int
 4. Modify `.gitignore` to ignore the new dts file.
 5. Rerun viteburner.
 
-## Watch mode doesn't work
+## Watch mode doesn't work.
 
 If your terminal is a non-tty terminal (like Git Bash on Windows), keypress control may not work in watch mode. But the basic watch and other functionalities are working.
 
 ## Which License is viteburner under?
 
 viteburner and viteburner-template is licensed under the [MIT License](../../LICENSE).
+
+## I have a question that is not listed here.
+
+Please open an issue on [GitHub](https://github.com/Tanimodori/viteburner/issues).
