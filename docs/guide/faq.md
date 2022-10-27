@@ -58,6 +58,14 @@ You can use other import alias by configuring vite.config and tsconfig.json like
 
 Unfortunately, you can't use bare `/` as an import alias for vite since vite internally use `/@fs/` and other alias so it will conflict. The `/src` is actually a alias.
 
+## How can I change the `NetscriptDefinitions.d.ts` path?
+
+1. Change the `dts` option in config, see [Server Options](../config/server-options.md).
+2. Change the `@ns` alias in `tsconfig.json`.
+3. Delete the exisiting dts file in disk.
+4. Modify `.gitignore` to ignore the new dts file.
+5. Rerun viteburner.
+
 ## Watch mode doesn't work
 
 If your terminal is a non-tty terminal (like Git Bash on Windows), keypress control may not work in watch mode. But the basic watch and other functionalities are working.
