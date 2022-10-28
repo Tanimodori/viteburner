@@ -42,6 +42,7 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
 
   return {
     name: 'viteburner',
+    apply: 'serve',
     // Load viteburner.config.xx, merge with config, and resolve
     async config(config) {
       logger.info('config', 'resolving user config...');
