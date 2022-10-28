@@ -192,6 +192,7 @@ export class WsManager {
     });
   }
   close() {
+    this.ws?.close();
     this.wss.close();
   }
 }
