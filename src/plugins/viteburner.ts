@@ -9,10 +9,8 @@ import { WatchManager } from './watch';
 
 export const virtualModuleId = 'virtual:viteburner-entry';
 
-export function getDefaultConfig(inlinedConfig: ViteBurnerInlineConfig): UserConfig {
-  const root = inlinedConfig.cwd;
+export function getDefaultConfig(): UserConfig {
   return {
-    ...(root && { root }),
     mode: 'development',
     optimizeDeps: { disabled: true },
     clearScreen: false,
@@ -40,7 +38,7 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
     async config(config) {
       logger.info('config', 'resolving user config...');
       config.viteburner = await loadConfig(inlineConfig);
-      return getDefaultConfig(inlineConfig);
+      return getDefaultConfig();
     },
     configResolved() {
       logger.info('config', 'config resolved');

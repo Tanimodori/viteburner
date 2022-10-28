@@ -32,6 +32,7 @@ export async function startDev(options: any) {
 
   // create server
   createServer({
+    ...(cwd && { root: cwd }),
     viteburner: resolveInlineConfig,
     plugins: [viteburnerPlugin(resolveInlineConfig)],
   });
