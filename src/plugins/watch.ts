@@ -7,7 +7,7 @@ import fs from 'fs';
 import { resolve } from 'path';
 import { slash } from 'vite-node/utils';
 import fg from 'fast-glob';
-import { hmrPluginName } from './hmr';
+import { hmrPluginName } from './viteburner';
 import { ResolvedWatchItem } from '@/types';
 
 export class WatchManager {
