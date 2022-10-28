@@ -39,6 +39,7 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
     name: 'viteburner',
     // Load viteburner.config.xx, merge with config, and resolve
     async config(config) {
+      logger.info('config', 'resolving user config...');
       const standalone = await loadConfig<ViteBurnerConfig>({
         sources: [
           {
@@ -53,6 +54,9 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
         ...config,
         viteburner: resolveConfig(conbinedConfig),
       };
+    },
+    configResolved() {
+      logger.info('config', 'config resolved');
     },
     // save server instance
     configureServer(_server) {

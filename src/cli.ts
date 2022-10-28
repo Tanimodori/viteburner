@@ -1,9 +1,9 @@
-import { watch } from './watcher';
 import cac from 'cac';
-import { loadConfig } from './config';
 import { logger } from './console';
 import pkg from '../package.json';
 import { ViteBurnerInlineConfig } from './types';
+import { createServer } from 'vite';
+import { viteburnerPlugin } from './plugins/viteburner';
 
 const cli = cac('viteburner');
 
@@ -30,12 +30,11 @@ export async function startDev(options: any) {
 
   logger.info('version', pkg.version);
 
-  // resolve config
-  logger.info('config', 'resolving user config...');
-  const config = await loadConfig(resolveInlineConfig);
-  logger.info('config', 'config resolved');
-
-  watch(config);
+  // create server
+  createServer({
+    viteburner: resolveInlineConfig,
+    plugins: [viteburnerPlugin(resolveInlineConfig)],
+  });
 }
 
 export async function main() {
