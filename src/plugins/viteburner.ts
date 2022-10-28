@@ -87,13 +87,7 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
     },
     // main entry
     buildStart() {
-      // create ws server
-      logger.info('ws', 'creating ws server...');
-      const wsManager = new WsManager(server.config.viteburner);
-      const wsAdapter = new WsAdapter(wsManager, server);
-
       // create watch
-      server.onHmrMessage(wsAdapter.handleHmrMessage);
       const { root, viteburner } = server.config;
       const { watch, ignoreInitial } = viteburner;
       server.watchManager = new WatchManager(watch, {
@@ -101,6 +95,14 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
         persistent: true,
         ignoreInitial,
       });
+
+      // create ws server
+      logger.info('ws', 'creating ws server...');
+      const wsManager = new WsManager(server.config.viteburner);
+      const wsAdapter = new WsAdapter(wsManager, server);
+
+      // handle hmr
+      server.onHmrMessage(wsAdapter.handleHmrMessage);
       server.watchManager.init();
 
       // create key handler
