@@ -2,7 +2,7 @@ import pc from 'picocolors';
 import prompt from 'prompts';
 import fg from 'fast-glob';
 import fs from 'fs';
-import { KeyHandlerContext, logger, onKeypress } from './console';
+import { KeyHandlerContext, KeypressHandler, logger } from './console';
 import { WsAdapter, ResolvedData } from './ws';
 import { isScriptFile } from './utils';
 import { resolve } from 'path';
@@ -23,7 +23,7 @@ export function displayWatchAndHelp() {
   displayKeyHelpHint();
 }
 
-export function handleKeyInput(wsAdapter: WsAdapter) {
+export function handleKeyInput(wsAdapter: WsAdapter): KeypressHandler {
   const padding = 18;
   const printStatus = (tag: string, msg: string) => {
     logger.info('status', pc.reset(tag.padStart(padding)), msg);
@@ -204,7 +204,7 @@ export function handleKeyInput(wsAdapter: WsAdapter) {
     ctx.on();
   };
 
-  return onKeypress(async (ctx) => {
+  return async (ctx) => {
     const { key } = ctx;
     let isKeyHandled = true;
     if (key.name === 'q') {
@@ -234,5 +234,5 @@ export function handleKeyInput(wsAdapter: WsAdapter) {
     if (isKeyHandled) {
       displayWatchAndHelp();
     }
-  });
+  };
 }
