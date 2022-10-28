@@ -1,13 +1,10 @@
 import { Plugin, UserConfig } from 'vite';
-import defu from 'defu';
-import { loadConfig } from 'unconfig';
-import { HmrData, ViteBurnerConfig, ViteBurnerInlineConfig, ViteBurnerServer } from '@/types';
-import { resolveConfig } from '@/config/resolve';
+import { HmrData, ViteBurnerInlineConfig, ViteBurnerServer } from '@/types';
 import { logger } from '@/console';
 import { WsManager, WsAdapter } from '@/ws';
 import { resolve } from 'pathe';
 import { slash, normalizeRequestId } from 'vite-node/utils';
-import { handleKeyInput, hmrPluginName } from '..';
+import { handleKeyInput, hmrPluginName, loadConfig } from '..';
 import { WatchManager } from './watch';
 
 export const virtualModuleId = 'virtual:viteburner-entry';
@@ -40,20 +37,8 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
     // Load viteburner.config.xx, merge with config, and resolve
     async config(config) {
       logger.info('config', 'resolving user config...');
-      const standalone = await loadConfig<ViteBurnerConfig>({
-        sources: [
-          {
-            files: 'viteburner.config',
-            extensions: ['ts', 'mts', 'cts', 'js', 'mjs', 'cjs', 'json', ''],
-          },
-        ],
-      });
-      const conbinedConfig = defu(inlineConfig, standalone.config, config.viteburner);
-      return {
-        ...getDefaultConfig(),
-        ...config,
-        viteburner: resolveConfig(conbinedConfig),
-      };
+      config.viteburner = await loadConfig(inlineConfig);
+      return getDefaultConfig();
     },
     configResolved() {
       logger.info('config', 'config resolved');
@@ -88,6 +73,7 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
     // main entry
     buildStart() {
       // create watch
+      console.log(server.config);
       const { root, viteburner } = server.config;
       const { watch, ignoreInitial } = viteburner;
       server.watchManager = new WatchManager(watch, {
