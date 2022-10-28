@@ -50,6 +50,12 @@ export interface KeyHandlerContext {
 
 export type KeypressHandler = (ctx: KeyHandlerContext) => void | Promise<void>;
 
+export interface KeypressHandlerControl {
+  on(): void;
+  off(): void;
+  running: () => boolean;
+}
+
 // source: https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/node/stdin.ts
 // MIT License
 export function onKeypress(handler: KeypressHandler) {
@@ -91,4 +97,10 @@ export function onKeypress(handler: KeypressHandler) {
     }
   }
   on();
+
+  return {
+    on,
+    off,
+    running: () => running,
+  } as KeypressHandlerControl;
 }

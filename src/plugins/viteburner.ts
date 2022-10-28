@@ -1,6 +1,6 @@
 import { Plugin, UserConfig } from 'vite';
 import { HmrData, ViteBurnerInlineConfig, ViteBurnerServer } from '@/types';
-import { logger } from '@/console';
+import { KeypressHandlerControl, logger } from '@/console';
 import { WsManager, WsAdapter } from '@/ws';
 import { resolve } from 'pathe';
 import { slash, normalizeRequestId } from 'vite-node/utils';
@@ -39,6 +39,7 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
   const resolvedVirtualModuleId = '\0' + virtualModuleId;
   let server: ViteBurnerServer;
   let wsAdapter: WsAdapter;
+  let keyHandler: KeypressHandlerControl;
 
   return {
     name: 'viteburner',
@@ -100,7 +101,7 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
       server.watchManager.init();
 
       // create key handler
-      handleKeyInput(wsAdapter);
+      keyHandler = handleKeyInput(wsAdapter);
     },
     // virtual entry
     resolveId(id: string) {
@@ -117,6 +118,7 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
     buildEnd() {
       server.watchManager.close();
       wsAdapter.manager.close();
+      keyHandler.off();
     },
   };
 }

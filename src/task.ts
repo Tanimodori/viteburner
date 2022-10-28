@@ -23,7 +23,7 @@ export function displayWatchAndHelp() {
   displayKeyHelpHint();
 }
 
-export async function handleKeyInput(wsAdapter: WsAdapter) {
+export function handleKeyInput(wsAdapter: WsAdapter) {
   const padding = 18;
   const printStatus = (tag: string, msg: string) => {
     logger.info('status', pc.reset(tag.padStart(padding)), msg);
@@ -204,7 +204,7 @@ export async function handleKeyInput(wsAdapter: WsAdapter) {
     ctx.on();
   };
 
-  onKeypress(async (ctx) => {
+  return onKeypress(async (ctx) => {
     const { key } = ctx;
     let isKeyHandled = true;
     if (key.name === 'q') {
