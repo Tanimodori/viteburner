@@ -73,6 +73,7 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
     // main entry
     buildStart() {
       // create watch
+      logger.info('watch', 'creating a watcher...');
       const { root, viteburner } = server.config;
       const { watch, ignoreInitial, port, timeout } = viteburner;
       server.watchManager = new WatchManager(watch, {

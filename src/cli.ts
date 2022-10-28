@@ -31,6 +31,7 @@ export async function startDev(options: any) {
   logger.info('version', pkg.version);
 
   // create server
+  logger.info('vite', 'creating dev server...');
   createServer({
     ...(cwd && { root: cwd }),
     viteburner: resolveInlineConfig,
