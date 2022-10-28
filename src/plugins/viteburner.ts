@@ -9,8 +9,10 @@ import { WatchManager } from './watch';
 
 export const virtualModuleId = 'virtual:viteburner-entry';
 
-export function getDefaultConfig() {
+export function getDefaultConfig(inlinedConfig: ViteBurnerInlineConfig): UserConfig {
+  const root = inlinedConfig.cwd;
   return {
+    ...(root && { root }),
     mode: 'development',
     optimizeDeps: { disabled: true },
     clearScreen: false,
@@ -25,7 +27,7 @@ export function getDefaultConfig() {
       },
     },
     server: { middlewareMode: true },
-  } as UserConfig;
+  };
 }
 
 export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
@@ -38,7 +40,7 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
     async config(config) {
       logger.info('config', 'resolving user config...');
       config.viteburner = await loadConfig(inlineConfig);
-      return getDefaultConfig();
+      return getDefaultConfig(inlineConfig);
     },
     configResolved() {
       logger.info('config', 'config resolved');
@@ -73,9 +75,8 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
     // main entry
     buildStart() {
       // create watch
-      console.log(server.config);
       const { root, viteburner } = server.config;
-      const { watch, ignoreInitial } = viteburner;
+      const { watch, ignoreInitial, port, timeout } = viteburner;
       server.watchManager = new WatchManager(watch, {
         cwd: root,
         persistent: true,
@@ -84,11 +85,11 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
 
       // create ws server
       logger.info('ws', 'creating ws server...');
-      const wsManager = new WsManager(server.config.viteburner);
+      const wsManager = new WsManager({ port, timeout });
       const wsAdapter = new WsAdapter(wsManager, server);
 
       // handle hmr
-      server.onHmrMessage(wsAdapter.handleHmrMessage);
+      server.onHmrMessage((data) => wsAdapter.handleHmrMessage(data));
       server.watchManager.init();
 
       // create key handler
