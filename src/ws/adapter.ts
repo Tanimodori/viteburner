@@ -60,12 +60,17 @@ export class WsAdapter {
     this.server = server;
     this.manager.onConnected(async (ws) => {
       logger.info('conn', '', 'connected');
-      ws.on('close', () => {
+      const handler = () => {
         logger.info('conn', '', pc.yellow('disconnected'));
-      });
+      };
+      ws.on('close', handler);
       await this.getDts();
       await this.handleHmrMessage();
+      return () => {
+        ws.off('close', handler);
+      };
     });
+    this.manager.checkIfWssReused();
   }
   async getDts() {
     const filename = this.server.config.viteburner.dts;

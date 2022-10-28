@@ -1,4 +1,5 @@
 import { RawData, WebSocket, WebSocketServer } from 'ws';
+import { z } from 'zod';
 import {
   wsResponseSchema,
   PushFileParams,
@@ -15,9 +16,8 @@ import {
   calculateRamResponseSchema,
   getDefinitionFileResponseSchema,
 } from './messages';
-import { z } from 'zod';
-import { logger } from '..';
-import { getWss } from './allocator';
+import { logger } from '@/console';
+import { getWss, isWssReused } from './allocator';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface PromiseHolder<T = any> {
@@ -39,6 +39,7 @@ export interface WsManagerOptions {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Fn = (...args: any[]) => any;
+type Promisable<T> = T | Promise<T>;
 
 export class WsManager {
   options: Required<WsManagerOptions>;
@@ -46,7 +47,7 @@ export class WsManager {
   wss: WebSocketServer;
   trackers: PromiseHolder[];
   nextId: number;
-  handlers: [string, Fn][];
+  unregisters: Fn[];
   constructor(options: WsManagerOptions) {
     this.options = {
       timeout: 10000,
@@ -56,7 +57,7 @@ export class WsManager {
     this.nextId = 0;
     this.ws = undefined;
     this.wss = getWss(this.options.port);
-    this.handlers = [];
+    this.unregisters = [];
     this._registerHandler();
   }
   get connected() {
@@ -78,21 +79,30 @@ export class WsManager {
     };
     this.wss.on('connection', _onConnected);
     this.wss.on('error', _onError);
-    this.handlers.push(['connection', _onConnected]);
-    this.handlers.push(['error', _onError]);
+    this.unregisters.push(() => {
+      this.wss.off('connection', _onConnected);
+      this.wss.off('error', _onError);
+    });
   }
-  onConnected(cb: (ws: WebSocket) => void) {
-    const handler = (ws: WebSocket) => {
+  onConnected(cb: (ws: WebSocket) => Promisable<Fn | void>) {
+    const handler = async (ws: WebSocket) => {
       // ensure ws is saved before any sendMessage calls
       this.ws = ws;
-      cb(ws);
+      const unregister = await cb(ws);
+      unregister && this.unregisters.push(unregister);
     };
     this.wss.on('connection', handler);
-    this.handlers.push(['connection', handler]);
+    this.unregisters.push(() => {
+      this.wss.off('connection', handler);
+    });
   }
-  onDisconneted(cb: () => void) {
-    this.wss.on('close', cb);
-    this.handlers.push(['close', cb]);
+  checkIfWssReused() {
+    if (isWssReused() && this.wss.clients.size > 0) {
+      for (const client of this.wss.clients) {
+        this.ws = client;
+      }
+      this.wss.emit('connection', this.ws);
+    }
   }
   handleMessage(response: RawData) {
     const parsed = wsResponseSchema.parse(JSON.parse(response.toString()));
@@ -209,8 +219,6 @@ export class WsManager {
   }
   close() {
     // remove all handlers
-    this.handlers.forEach(([event, handler]) => {
-      this.wss.off(event, handler);
-    });
+    this.unregisters.forEach((unregister) => unregister());
   }
 }
