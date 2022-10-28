@@ -191,4 +191,7 @@ export class WsManager {
       validator: getDefinitionFileResponseSchema,
     });
   }
+  close() {
+    this.wss.close();
+  }
 }

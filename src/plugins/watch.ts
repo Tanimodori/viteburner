@@ -103,4 +103,7 @@ export class WatchManager {
     const filenames = this.getUploadFilenames(filename);
     return filenames.find((item) => item.server === server)?.filename;
   }
+  close() {
+    this.watcher?.close();
+  }
 }

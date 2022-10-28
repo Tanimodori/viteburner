@@ -38,6 +38,7 @@ export function getDefaultConfig(): UserConfig {
 export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
   const resolvedVirtualModuleId = '\0' + virtualModuleId;
   let server: ViteBurnerServer;
+  let wsAdapter: WsAdapter;
 
   return {
     name: 'viteburner',
@@ -92,7 +93,7 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
       // create ws server
       logger.info('ws', 'creating ws server...');
       const wsManager = new WsManager({ port, timeout });
-      const wsAdapter = new WsAdapter(wsManager, server);
+      wsAdapter = new WsAdapter(wsManager, server);
 
       // handle hmr
       server.onHmrMessage((data) => wsAdapter.handleHmrMessage(data));
@@ -111,6 +112,11 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
       if (id === resolvedVirtualModuleId) {
         return `export {}`;
       }
+    },
+    // exit
+    buildEnd() {
+      server.watchManager.close();
+      wsAdapter.manager.close();
     },
   };
 }
