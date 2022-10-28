@@ -21,6 +21,7 @@ export default defineConfig({
         'acorn',
         'cac',
         'chokidar',
+        'defu',
         'fast-glob',
         'magic-string',
         'micromatch',
