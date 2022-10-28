@@ -1,6 +1,6 @@
 import { Plugin, UserConfig } from 'vite';
 import { HmrData, ViteBurnerInlineConfig, ViteBurnerServer } from '@/types';
-import { KeypressHandlerControl, logger, setHandler } from '@/console';
+import { logger, setHandler } from '@/console';
 import { WsManager, WsAdapter } from '@/ws';
 import { resolve } from 'pathe';
 import { slash, normalizeRequestId } from 'vite-node/utils';
