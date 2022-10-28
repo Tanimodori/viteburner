@@ -2,13 +2,10 @@ import pc from 'picocolors';
 import prompt from 'prompts';
 import fg from 'fast-glob';
 import fs from 'fs';
-import { HmrData } from './types';
 import { KeyHandlerContext, logger, onKeypress } from './console';
-import { createServer } from './server';
-import { WsManager, WsAdapter, ResolvedData } from './ws';
+import { WsAdapter, ResolvedData } from './ws';
 import { isScriptFile } from './utils';
 import { resolve } from 'path';
-import { ResolvedViteBurnerConfig } from './types';
 
 export function displayKeyHelpHint() {
   logger.info(
@@ -24,39 +21,6 @@ export function displayKeyHelpHint() {
 export function displayWatchAndHelp() {
   logger.info('vite', pc.reset('watching for file changes...'));
   displayKeyHelpHint();
-}
-
-export async function watch(config: ResolvedViteBurnerConfig) {
-  // create ws server
-  logger.info('ws', 'creating ws server...');
-  const wsManager = new WsManager({ port: config.port, timeout: config.timeout });
-
-  // create vite server
-  logger.info('vite', 'creating dev server...');
-  const server = await createServer(config);
-
-  const wsAdapter = new WsAdapter(wsManager, server);
-
-  // store initial HMR datas
-  let buildStarted = false;
-  const initialDatas: HmrData[] = [];
-  server.onHmrMessage(async (data) => {
-    if (!buildStarted) {
-      initialDatas.push(data);
-    } else {
-      await wsAdapter.handleHmrMessage(data);
-    }
-  });
-  server.watchManager.init();
-
-  // init plugins
-  await server.buildStart();
-  buildStarted = true;
-
-  // process initial HMR datas
-  await wsAdapter.handleHmrMessage(initialDatas);
-
-  handleKeyInput(wsAdapter);
 }
 
 export async function handleKeyInput(wsAdapter: WsAdapter) {

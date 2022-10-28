@@ -4,9 +4,16 @@ import { logger } from '@/console';
 import { WsManager, WsAdapter } from '@/ws';
 import { resolve } from 'pathe';
 import { slash, normalizeRequestId } from 'vite-node/utils';
-import { handleKeyInput, hmrPluginName, loadConfig } from '..';
+import { handleKeyInput, loadConfig } from '..';
 import { WatchManager } from './watch';
 
+declare module 'vite' {
+  interface ViteDevServer {
+    watchManager: WatchManager;
+  }
+}
+
+export const hmrPluginName = 'viteburner:hmr';
 export const virtualModuleId = 'virtual:viteburner-entry';
 
 export function getDefaultConfig(): UserConfig {
