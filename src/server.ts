@@ -1,7 +1,7 @@
 import { resolve } from 'path';
 import { createServer as createViteServerRaw } from 'vite';
 import { slash, normalizeRequestId } from 'vite-node/utils';
-import { hmrPlugin, entryPlugin, virtualModuleId, hmrPluginName } from './plugins';
+import { hmrPlugin, entryPlugin, virtualModuleId, hmrPluginName, configPlugin } from './plugins';
 import { HmrData, ResolvedConfig, ResolvedViteBurnerConfig, ViteBurnerServer } from './types';
 
 export async function createViteServer(config: ResolvedViteBurnerConfig) {
@@ -22,8 +22,7 @@ export async function createViteServer(config: ResolvedViteBurnerConfig) {
       },
     },
     server: { middlewareMode: true },
-    viteburner: config,
-    plugins: [entryPlugin(), hmrPlugin()],
+    plugins: [configPlugin(config), entryPlugin(), hmrPlugin()],
   });
 }
 
