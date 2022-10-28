@@ -1,17 +1,21 @@
 |  | [`vscode-template`](https://github.com/bitburner-official/vscode-template) | [`typescript-template`](https://github.com/bitburner-official/typescript-template) | [`viteburner-template`](https://github.com/Tanimodori/viteburner-template) |
 | --- | --- | --- | --- |
 | Official | ✅ (deprecated) | ✅ |  |
+| API | File API | RFA | RFA |
 | Game compatibility | Steam Only | ✅ Both | ✅ Both |
-| TS transpiled by | tsc | tsc | esbuild |
 | Sync | ✅ | ✅ | ✅ |
 | Push all files manually | ✅ | ✅ | ✅ |
+| Upload to multiple in-game servers |  |  | ✅ |
+| Upload to multiple bitburner instances |  | ✅ |  |
 | Download files manually |  | ✅ | ✅ |
-| Upload to multiple servers |  |  | ✅ |
+| Download dts from | github | game | game |
+| Change dts location |  | ✅ | ✅ |
 | RAM monitor |  |  | ✅ |
-| Watch mode with key handler |  |  | ✅ |
+| Key commands for watch mode |  |  | ✅ |
 | Dynamic config |  |  | ✅ |
+| TS transpiled by | tsc | tsc | esbuild |
 | Resolve Import path |  |  | ✅ |
 | OS independent | ✅ | ✅ | ✅ |
-| IDE independent |  | ✅ | ✅ |
+| IDE independent | VSCode Only | ✅ | ✅ |
 | Plugins |  |  | ✅ |
 | License | _unknown_ | _unknown_ | [MIT](../../LICENSE) |
