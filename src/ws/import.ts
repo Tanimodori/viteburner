@@ -1,5 +1,6 @@
 import { parse as acornParse } from 'acorn';
 import MagicString from 'magic-string';
+import { normalizeRequestId } from 'vite-node/utils';
 import { forceStartingSlash, logger, WatchManager } from '..';
 
 export interface FixImportPathOptions {
@@ -18,7 +19,8 @@ function parse(code: string) {
 }
 
 function getFilename(options: FixImportPathOptions, imports?: string) {
-  const realImports = imports ?? options.filename;
+  // Issue #8
+  const realImports = normalizeRequestId(imports ?? options.filename);
   const importPath = options.manager.getUploadFilenamesByServer(realImports, options.server);
   if (!importPath) {
     // warn user if upload filename is not found on server
