@@ -3,6 +3,7 @@
     "module": "esnext",
     "target": "esnext",
     "lib": ["esnext", "dom"],
+    "types": ["vite/client"],
     "strict": true,
     "allowJs": true,
     "isolatedModules": true,
