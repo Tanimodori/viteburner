@@ -8,6 +8,13 @@ export interface HmrData extends WatchItem {
   timestamp: number;
 }
 
+declare module 'vite' {
+  interface ViteDevServer {
+    /** vite internal _importGlobMap for detemine glob hmr */
+    _importGlobMap: Map<string, string[]>;
+  }
+}
+
 export interface ViteBurnerServer extends Omit<ViteDevServer, 'config'> {
   config: ResolvedConfig;
   pathToId(file: string): string;

@@ -10,11 +10,12 @@ import {
 import { WsManager } from './manager';
 import fs from 'fs';
 import pc from 'picocolors';
-import path, { resolve } from 'path';
+import path, { relative, resolve } from 'path';
 import { slash } from 'vite-node/utils';
 import fg from 'fast-glob';
 import { fixImportPath } from './import';
 import { ViteBurnerServer, HmrData } from '@/types';
+import { match } from 'micromatch';
 
 export const formatUpload = (from: string, to: string, serverName: string) => {
   to = forceStartingSlash(to);
@@ -87,12 +88,44 @@ export class WsAdapter {
       logger.error(`error getting dts file: ${e}`);
     }
   }
+  async checkDependencies(data: HmrData[]) {
+    for (const item of data) {
+      // change won't affect import glob generated files, skippping
+      if (item.event === 'change') {
+        continue;
+      }
+      const resolvedFile = slash(resolve(this.server.config.root, item.file));
+      this.server._importGlobMap?.forEach((value, key) => {
+        if (value.some((pattern) => match([resolvedFile], pattern).length > 0)) {
+          // push key to data
+          const importer = slash(relative(this.server.config.root, key));
+          // recursive import, skipping
+          if (data.some((item) => item.file === importer)) {
+            return;
+          }
+          const importerData = this.server.watchManager.findItem(importer);
+          if (importerData?.transform) {
+            data.push({
+              file: importer,
+              timestamp: item.timestamp,
+              initial: item.initial,
+              event: 'change',
+              ...importerData,
+            });
+          }
+        }
+      });
+    }
+    return data;
+  }
   async handleHmrMessage(data?: HmrData | HmrData[]) {
     if (!data) {
       data = [];
     } else if (!Array.isArray(data)) {
       data = [data];
     }
+    // check deps
+    data = await this.checkDependencies(data);
     const connected = this.manager.connected;
     for (const item of data) {
       this.buffers.set(item.file, item);
