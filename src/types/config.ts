@@ -37,6 +37,22 @@ export interface WatchItem {
 }
 
 /**
+ * polling options, see chokidar
+ */
+export interface PollingOptions {
+  /**
+   * Interval of file system polling in milliseconds.
+   * @default 100
+   */
+  interval?: number;
+  /**
+   * Interval of file system polling for binary files.
+   * @default 300
+   */
+  binaryInterval?: number;
+}
+
+/**
  * User config defined in `viteburner.config`.
  */
 export interface ViteBurnerConfig {
@@ -44,6 +60,10 @@ export interface ViteBurnerConfig {
    * watch options
    */
   watch?: WatchItem[];
+  /**
+   * polling options, see chokidar
+   */
+  usePolling?: boolean | PollingOptions;
   /**
    * If set to `inline`, sourcemap will be embedded into transformed js files.
    * If not set, use `build.sourcemap` from `vite` config.
@@ -141,6 +161,8 @@ export interface ResolvedWatchItem {
 
 export interface ResolvedViteBurnerConfig {
   watch: ResolvedWatchItem[];
+  usePolling: boolean;
+  pollingOptions: PollingOptions;
   sourcemap: boolean | 'inline' | 'hidden';
   port: number;
   timeout: number;

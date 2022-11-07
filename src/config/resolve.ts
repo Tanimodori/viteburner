@@ -48,6 +48,16 @@ export function resolveDumpFile(dumpFiles: ViteBurnerConfig['dumpFiles']) {
   }
 }
 
+export function resolvePolling(usePolling: ViteBurnerConfig['usePolling']) {
+  if (typeof usePolling === 'boolean') {
+    return { usePolling, pollingOptions: {} };
+  } else if (usePolling) {
+    return { usePolling: true, pollingOptions: usePolling };
+  } else {
+    return { usePolling: false, pollingOptions: {} };
+  }
+}
+
 export function resolveConfig(config: ViteBurnerConfig) {
   const watch = config.watch ?? [];
   const server = config.download?.server ?? 'home';
@@ -58,6 +68,7 @@ export function resolveConfig(config: ViteBurnerConfig) {
       transform: item.transform ?? false,
       location: resolveWatchLocation(item.location),
     })),
+    ...resolvePolling(config.usePolling),
     sourcemap: config.sourcemap ?? false,
     port: config.port ?? 12525,
     timeout: config.timeout ?? 10000,
