@@ -30,7 +30,7 @@ npm run dev
 
 In bitburner, select "Options > Remote API", enter the port of viteburner displays (default: `12525`) and click "Connect".
 
-checkout [Quick Start](guide/quick-start.md) for more details if you want to use viteburner in your existing project.
+checkout [Quick Start](docs/guide/quick-start.md) for more details if you want to use viteburner in your existing project.
 
 ## API
 
