@@ -8,6 +8,17 @@ Please checkout the [Quick Start](quick-start.md) guide.
 
 Please checkout the [Quick Start](quick-start.md) guide for a sync-only setup.
 
+## File sync is not working
+
+1. Press `s` to print the status (or the in-game "Options > Remote API" menu) to check if it is connected to the game and if any pending files exist.
+2. Press `u` to perform a full sync to see if manual sync works.
+3. If you are using WSL2 or a network file system, set [`usePolling`](../config/upload-options.md#usepolling) to `true` in your config file.
+4. Inspect the console output of viteburner to see if there are any errors preventing from compliling or uploading files (e.g. Syntax errors, invalid filenames etc.).
+5. Inspect the console output of viteburner to see if there are any `hmr` events. If there are none, check if the `watch` option is set correctly in your config file.
+6. Add `dumpFiles` settings to your config file to dump the compiled files to a local directory (e.g. `dumpFiles: 'dist'`). If file in the `dist` is updated but not in the game, it means watch works but there is a problem with the upload process.
+7. Try upgrading to the latest version of viteburner (and viteburner-template if you are using it).
+8. Open an issue on Github. Please attach output of `npx envinfo --system --binaries --npmPackages` and viteburner output for triage and decribe you issue.
+
 ## What's the advantage and disadvantage of using vite's transform?
 
 Advantage:

@@ -164,3 +164,26 @@ const watchItem = {
 If the `ignoreInitial` is set to `true`, viteburner will not upload files when the watcher starts. This is useful when you want to upload files only when they are changed.
 
 Note that even if `ignoreInitial` is set to `false`, viteburner will _not_ all upload files when the server reconnects.
+
+## `usePolling`
+
+- **Type:** `boolean | { interval?: number; binaryInterval?: number }`
+- **Default:** `false`
+
+If `usePolling` is set to `true` or any `usePolling` options, viteburner will tell chokidar to use polling to watch files. This is useful when you're watching files on WSL2 or network filesystems.
+
+**Caution:** Polling will use a lot of CPU resources. See [chokidar#performance](https://github.com/paulmillr/chokidar#performance) for more details.
+
+### `usePolling.interval`
+
+- **Type:** `number`
+- **Default:** `100`
+
+The `interval` option tells how often to poll files in milliseconds.
+
+### `usePolling.binaryInterval`
+
+- **Type:** `number`
+- **Default:** `300`
+
+The `binaryInterval` option tells how often to poll [binary](https://github.com/sindresorhus/binary-extensions/blob/main/binary-extensions.json) files in milliseconds.

@@ -39,6 +39,7 @@ For detailed documentation, checkout [docs](docs/index.md).
 ```ts
 export interface ViteBurnerUserConfig {
   watch?: WatchItem[];
+  usePolling?: boolean | { interval?: number; binaryInterval?: number };
   sourcemap?: boolean | 'inline' | 'hidden';
   port?: number;
   timeout?: number;
