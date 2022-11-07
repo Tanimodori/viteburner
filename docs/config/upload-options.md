@@ -170,7 +170,7 @@ Note that even if `ignoreInitial` is set to `false`, viteburner will _not_ all u
 - **Type:** `boolean | { interval?: number; binaryInterval?: number }`
 - **Default:** `false`
 
-If `usePolling` is set to `true` or any `usePolling` options, viteburner will tell chokidar to use polling to watch files. This is useful when you're watching files on WSL2 or network filesystems.
+If `usePolling` is set to `true` or any `usePolling` options, viteburner will tell chokidar to use polling to watch files. This is useful when you're watching files on [Windows fs on WSL2](https://github.com/microsoft/WSL/issues/4739) or network fs.
 
 **Caution:** Polling will use a lot of CPU resources. See [chokidar#performance](https://github.com/paulmillr/chokidar#performance) for more details.
 
