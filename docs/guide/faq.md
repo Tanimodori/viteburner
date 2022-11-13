@@ -69,6 +69,12 @@ You can use other import alias by configuring vite.config and tsconfig.json like
 
 Unfortunately, you can't use bare `/` as an import alias for vite since vite internally use `/@fs/` and other alias so it will conflict. The `/src` is actually a alias.
 
+## Error: Failed to import "_importee_" from "_importer_", does the file exist?
+
+This is an import error when vite cannot find the file. Please check if the file exists and the import path is correct.
+
+Checkout the ["How can I import scripts?"](faq.md#how-can-i-import-scripts) section for how to import script.
+
 ## How can I change the `NetscriptDefinitions.d.ts` path?
 
 1. Change the `dts` option in config, see [Server Options](../config/server-options.md).
