@@ -46,7 +46,8 @@ export default defineConfig({
       include: 'src/**/*.ts',
       entryRoot: resolve(__dirname, 'src'),
       outputDir: resolve(__dirname, 'dist/typings'),
-      rollupTypes: true,
+      // Disabled due to https://github.com/qmhc/vite-plugin-dts/issues/144
+      // rollupTypes: true,
     }),
   ],
 });
