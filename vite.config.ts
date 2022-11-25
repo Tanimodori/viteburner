@@ -11,7 +11,10 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: '',
+      entry: {
+        entry: resolve(__dirname, 'src/entry.ts'),
+        index: resolve(__dirname, 'src/index.ts'),
+      },
       fileName: '[name]',
       formats: ['cjs', 'es'],
     },
@@ -33,10 +36,6 @@ export default defineConfig({
         'zod',
         ...builtins,
       ],
-      input: {
-        entry: resolve(__dirname, 'src/entry.ts'),
-        index: resolve(__dirname, 'src/index.ts'),
-      },
     },
     outDir: 'dist',
     emptyOutDir: true,
@@ -47,6 +46,8 @@ export default defineConfig({
       include: 'src/**/*.ts',
       entryRoot: resolve(__dirname, 'src'),
       outputDir: resolve(__dirname, 'dist/typings'),
+      // Disabled due to https://github.com/qmhc/vite-plugin-dts/issues/144
+      // rollupTypes: true,
     }),
   ],
 });
