@@ -31,7 +31,7 @@ function getFilename(options: FixImportPathOptions, imports?: string) {
     logger.warn(`import`, `This may be a problem when the script is running on the server.`);
     return realImports;
   } else {
-    return importPath;
+    return forceStartingSlash(importPath);
   }
 }
 
@@ -53,7 +53,7 @@ export function fixImportPath(options: FixImportPathOptions) {
       const raw = source.raw as string;
       const value = source.value as string;
       // get the import path on the server
-      const importPath = forceStartingSlash(getFilename(options, value));
+      const importPath = getFilename(options, value);
       // get the relative path
       const quote = raw[0];
       magicString.overwrite(source.start, source.end, quote + importPath + quote);
