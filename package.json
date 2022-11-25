@@ -1,6 +1,6 @@
 {
   "name": "viteburner",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Daemon tools of bitburner using vite for script transform, file syncing, RAM monitoring and more!",
   "bin": {
     "viteburner": "bin/viteburner.js"
