@@ -51,3 +51,7 @@ export const removeStartingSlash = (s: string) => {
 export const defaultUploadLocation = (file: string) => {
   return file.replace(/^src\//, '').replace(/\.ts$/, '.js');
 };
+
+// from vite packages\vite\src\node\utils.ts
+export const externalRE = /^(https?:)?\/\//;
+export const isExternalUrl = (url: string): boolean => externalRE.test(url);
