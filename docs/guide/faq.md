@@ -93,7 +93,7 @@ Currently viteburner does not support local NPM dependencies at the moment but m
 
 Vite and its plugins work at two different modes. In `dev` mode, vite will keep the source file structure and transpile them one by one, which is known as the "bundleless" mode. In `build` mode, vite will bundle all the files into one file.
 
-Viteburner works in `dev` mode beacuse:
+Viteburner works in `dev` mode because:
 
 - We need to keep the source file structure to sync the files to the game. So the RAM calculation and `scp` files will be correct. There is a way to tell rollup to keep the file structure when bundling but it is more tricky and hacky.
 - Allow us to do HMR and don't need to bundle the files again when we change the files. When we run vite in `build` mode with `--watch`, it will bundle the files again when we change the files. This is not efficient.
