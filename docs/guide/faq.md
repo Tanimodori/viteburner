@@ -4,7 +4,7 @@
 
 Please checkout the [Quick Start](quick-start.md) guide.
 
-## I don't know what vite is and just want to sync my files.
+## I don't know what vite is and just want to sync my files
 
 Please checkout the [Quick Start](quick-start.md) guide for a sync-only setup.
 
@@ -83,14 +83,29 @@ Checkout the ["How can I import scripts?"](faq.md#how-can-i-import-scripts) sect
 4. Modify `.gitignore` to ignore the new dts file.
 5. Rerun viteburner.
 
-## Watch mode doesn't work.
+## Watch mode doesn't work
 
 If your terminal is a non-tty terminal (like Git Bash on Windows), keypress control may not work in watch mode. But the basic watch and other functionalities are working.
+
+## Can I use local NPM dependencies with viteburner?
+
+Currently viteburner does not support local NPM dependencies at the moment but maybe implemented in the future.
+
+Vite and its plugins work at two different modes. In `dev` mode, vite will keep the source file structure and transpile them one by one, which is known as the "bundleless" mode. In `build` mode, vite will bundle all the files into one file.
+
+Viteburner works in `dev` mode beacuse:
+
+- We need to keep the source file structure to sync the files to the game. So the RAM calculation and `scp` files will be correct. There is a way to tell rollup to keep the file structure when bundling but it is more tricky and hacky.
+- Allow us to do HMR and don't need to bundle the files again when we change the files. When we run vite in `build` mode with `--watch`, it will bundle the files again when we change the files. This is not efficient.
+
+Using local NPM dependencies in `build` mode is trivial since `esbuild` will bundle them together. But in `dev` mode, the client needs to track into NPM dependencies and request them from the vite dev server. If the client is a normal browser, it will be able to request them because vite have injected HMR code when starting the dev server. But in `viteburner` or similarly `vite-node` we need to manually track dependencies and send them to the client so it will found them.
+
+So theoretically it is possible to implement local NPM dependencies in viteburner. Since it is not a frequently request feature, it is not implemented yet but maybe implemented in the future.
 
 ## Which License is viteburner under?
 
 viteburner and viteburner-template is licensed under the [MIT License](../../LICENSE).
 
-## I have a question that is not listed here.
+## I have a question that is not listed here
 
 Please open an issue on [GitHub](https://github.com/Tanimodori/viteburner/issues).
