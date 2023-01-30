@@ -43,9 +43,9 @@
   "devDependencies": {
     "@types/estree": "^1.0.0",
     "@types/micromatch": "^4.0.2",
-    "@types/node": "^18.11.9",
-    "@types/prompts": "^2.4.1",
-    "@types/ws": "^8.5.3",
+    "@types/node": "^18.11.18",
+    "@types/prompts": "^2.4.2",
+    "@types/ws": "^8.5.4",
     "@typescript-eslint/eslint-plugin": "^5.49.0",
     "@typescript-eslint/parser": "^5.49.0",
     "builtin-modules": "^3.3.0",
@@ -53,24 +53,24 @@
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
     "prettier": "^2.8.3",
-    "typescript": "^4.9.3",
+    "typescript": "^4.9.4",
     "vite": "^4.0.4",
-    "vite-node": "^0.25.3",
+    "vite-node": "^0.25.8",
     "vite-plugin-dts": "^1.7.1",
-    "vitest": "^0.25.1"
+    "vitest": "^0.25.8"
   },
   "dependencies": {
-    "acorn": "^8.8.1",
+    "acorn": "^8.8.2",
     "cac": "^6.7.14",
     "chokidar": "^3.5.3",
     "fast-glob": "^3.2.12",
     "magic-string": "^0.26.7",
     "micromatch": "^4.0.5",
-    "pathe": "^1.0.0",
+    "pathe": "^1.1.0",
     "picocolors": "^1.0.0",
     "prompts": "^2.4.2",
     "unconfig": "^0.3.7",
-    "ws": "^8.11.0",
+    "ws": "^8.12.0",
     "zod": "^3.19.1"
   },
   "peerDependencies": {
