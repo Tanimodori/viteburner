@@ -3,6 +3,27 @@ import { resolve } from 'path';
 import builtins from 'builtin-modules/static';
 import dts from 'vite-plugin-dts';
 
+const externalModules = [
+  // exclude all dependencies
+  'acorn',
+  'cac',
+  'chokidar',
+  'fast-glob',
+  'magic-string',
+  'micromatch',
+  'pathe',
+  'picocolors',
+  'prompts',
+  'unconfig',
+  'vite',
+  'ws',
+  'zod',
+  // node builtins
+  ...builtins,
+  // node builtins with prefix
+  ...builtins.map((name) => `node:${name}`),
+];
+
 export default defineConfig({
   resolve: {
     alias: {
@@ -19,23 +40,7 @@ export default defineConfig({
       formats: ['cjs', 'es'],
     },
     rollupOptions: {
-      external: [
-        // exclede all node builtins and dependencies
-        'acorn',
-        'cac',
-        'chokidar',
-        'fast-glob',
-        'magic-string',
-        'micromatch',
-        'pathe',
-        'picocolors',
-        'prompts',
-        'unconfig',
-        'vite',
-        'ws',
-        'zod',
-        ...builtins,
-      ],
+      external: externalModules,
     },
     outDir: 'dist',
     emptyOutDir: true,
