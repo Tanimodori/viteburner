@@ -31,6 +31,7 @@ export default defineConfig({
     },
   },
   build: {
+    ssr: true,
     lib: {
       entry: {
         entry: resolve(__dirname, 'src/entry.ts'),
@@ -40,11 +41,17 @@ export default defineConfig({
       formats: ['cjs', 'es'],
     },
     rollupOptions: {
-      external: externalModules,
+      external: (src) => {
+        const name = src.split('/')[0];
+        return externalModules.includes(name);
+      },
     },
     outDir: 'dist',
     emptyOutDir: true,
     sourcemap: false,
+  },
+  ssr: {
+    noExternal: true,
   },
   plugins: [
     dts({
