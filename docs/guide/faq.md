@@ -102,6 +102,10 @@ Using local NPM dependencies in `build` mode is trivial since `esbuild` will bun
 
 So theoretically it is possible to implement local NPM dependencies in viteburner. Since it is not a frequently request feature, it is not implemented yet but maybe implemented in the future.
 
+## How can I import enums from `NetscriptDefinitions.d.ts`?
+
+Checkout [this comment](https://github.com/Tanimodori/viteburner/issues/17#issuecomment-1445016725).
+
 ## Which License is viteburner under?
 
 viteburner and viteburner-template is licensed under the [MIT License](../../LICENSE).
