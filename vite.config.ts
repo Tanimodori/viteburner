@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
-import builtins from 'builtin-modules/static';
+import { builtinModules } from 'node:module';
 import dts from 'vite-plugin-dts';
 
 const externalModules = [
@@ -19,9 +19,9 @@ const externalModules = [
   'ws',
   'zod',
   // node builtins
-  ...builtins,
+  ...builtinModules,
   // node builtins with prefix
-  ...builtins.map((name) => `node:${name}`),
+  ...builtinModules.map((name) => `node:${name}`),
 ];
 
 export default defineConfig({
