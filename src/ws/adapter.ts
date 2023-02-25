@@ -159,6 +159,7 @@ export class WsAdapter {
   async fetchModule(data: HmrData) {
     let content = '';
     if (data.transform) {
+      this.server.invalidateFile(data.file);
       const module = await this.server.fetchModule(data.file);
       if (!module) {
         throw new Error('module not found: ' + data.file);
