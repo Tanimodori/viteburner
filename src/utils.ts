@@ -5,7 +5,11 @@ import path from 'path';
 export function getSourceMapString(map?: SourceMap | null): string {
   if (!map) return '';
   const mapDataString = JSON.stringify(map);
-  return `//# sourceMappingURL=data:application/json;base64,${Buffer.from(mapDataString).toString('base64')}`;
+  // splitted due to vite-node issue
+  // https://github.com/vitest-dev/vitest/issues/2918
+  const resultA = `//# sourceMappingURL=data:`;
+  const resultB = `application/json;base64,${Buffer.from(mapDataString).toString('base64')}`;
+  return resultA + resultB;
 }
 
 export async function writeFile(file: string, content: string) {
