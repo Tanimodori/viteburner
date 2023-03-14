@@ -1,5 +1,5 @@
 import { Plugin, UserConfig } from 'vite';
-import { HmrData, ViteBurnerInlineConfig, ViteBurnerServer } from '@/types';
+import { HmrData, ViteBurnerInlineConfig, ViteBurnerServer, ViteBurnerUserConfig } from '@/types';
 import { logger, setHandler } from '@/console';
 import { WsManager, WsAdapter } from '@/ws';
 import { resolve } from 'pathe';
@@ -44,7 +44,7 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
     name: 'viteburner',
     apply: 'serve',
     // Load viteburner.config.xx, merge with config, and resolve
-    async config(config) {
+    async config(config: ViteBurnerUserConfig) {
       logger.info('config', 'resolving user config...');
       config.viteburner = await loadConfig(inlineConfig);
       return getDefaultConfig();

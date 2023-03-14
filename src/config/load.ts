@@ -1,10 +1,10 @@
-import { ViteBurnerInlineConfig } from '@/types';
 import { loadConfig as loadConfigRaw } from 'unconfig';
-import { UserConfig } from 'vite';
+import type { UserConfig } from 'vite';
+import type { ViteBurnerInlineConfig, ViteBurnerUserConfig } from '@/types';
 import { resolveConfig } from './resolve';
 
 /** TypeScript helper to define your config */
-export function defineConfig(config: UserConfig): UserConfig {
+export function defineConfig(config: ViteBurnerUserConfig): UserConfig {
   return config;
 }
 

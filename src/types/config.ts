@@ -1,4 +1,4 @@
-import type { ResolvedConfig as ViteResolvedConfig } from 'vite';
+import type { ResolvedConfig as ViteResolvedConfig, UserConfig } from 'vite';
 
 /**
  * Destinations for the transformed files.
@@ -138,14 +138,9 @@ export interface ViteBurnerConfig {
 
 export type ViteBurnerInlineConfig = Pick<ViteBurnerConfig, 'port' | 'cwd'>;
 
-/**
- * User config defined in `vite.config`.
- */
-declare module 'vite' {
-  interface UserConfig {
-    /** viteburner related configs */
-    viteburner?: ViteBurnerConfig;
-  }
+export interface ViteBurnerUserConfig extends UserConfig {
+  /** viteburner related configs */
+  viteburner?: ViteBurnerConfig;
 }
 
 // Resolved

@@ -1,8 +1,7 @@
 import { resolve } from 'path';
-import type { UserConfig } from 'vite';
-import type { ViteBurnerConfig } from '../src/types';
+import type { ViteBurnerUserConfig } from '../src/types';
 
-const config: UserConfig & { viteburner: ViteBurnerConfig } = {
+const config: ViteBurnerUserConfig = {
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
