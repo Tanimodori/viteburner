@@ -66,7 +66,7 @@ export class WsAdapter {
       };
       ws.on('close', handler);
       await this.getDts();
-      await this.handleHmrMessage();
+      await this.server.watchManager.fullReload();
       return () => {
         ws.off('close', handler);
       };
