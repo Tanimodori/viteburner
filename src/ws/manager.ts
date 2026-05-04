@@ -35,14 +35,14 @@ export interface MessageSchema<P = undefined, R extends z.ZodTypeAny = z.ZodType
 export interface WsManagerOptions {
   port: number;
   timeout?: number;
+  tls?: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Fn = (...args: any[]) => any;
 type Promisable<T> = T | Promise<T>;
 
 export class WsManager {
-  options: Required<WsManagerOptions>;
+  options: WsManagerOptions & { timeout: number; tls: boolean };
   ws: WebSocket | undefined;
   wss: WebSocketServer;
   trackers: PromiseHolder[];
@@ -51,12 +51,13 @@ export class WsManager {
   constructor(options: WsManagerOptions) {
     this.options = {
       timeout: 10000,
+      tls: false,
       ...options,
     };
     this.trackers = [];
     this.nextId = 0;
     this.ws = undefined;
-    this.wss = getWss(this.options.port);
+    this.wss = getWss(this.options.port, this.options.tls);
     this.unregisters = [];
     this._registerHandler();
   }

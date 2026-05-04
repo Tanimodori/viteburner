@@ -81,6 +81,7 @@ export function resolveConfig(config: ViteBurnerConfig) {
       ignoreSourcemap: config?.download?.ignoreSourcemap ?? true,
     },
     dumpFiles: resolveDumpFile(config.dumpFiles),
+    tls: config.tls ?? false,
     cwd: config.cwd ?? process.cwd(),
   };
   return resolvedConfig;

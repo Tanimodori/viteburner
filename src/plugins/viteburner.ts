@@ -84,7 +84,7 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
       // create watch
       logger.info('watch', 'creating a watcher...');
       const { root, viteburner } = server.config;
-      const { watch, ignoreInitial, port, timeout, usePolling, pollingOptions } = viteburner;
+      const { watch, ignoreInitial, port, timeout, tls, usePolling, pollingOptions } = viteburner;
       server.watchManager = new WatchManager(watch, {
         cwd: root,
         persistent: true,
@@ -95,7 +95,7 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
 
       // create ws server
       logger.info('ws', 'creating ws server...');
-      const wsManager = new WsManager({ port, timeout });
+      const wsManager = new WsManager({ port, timeout, tls });
       wsAdapter = new WsAdapter(wsManager, server);
 
       // handle hmr

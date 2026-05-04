@@ -75,6 +75,11 @@ export interface ViteBurnerConfig {
    */
   port?: number;
   /**
+   * Enable TLS (wss://) for secure connections.
+   * @default false
+   */
+  tls?: boolean;
+  /**
    * The timeout for WebSocket server in ms.
    * @default 10000
    */
@@ -170,6 +175,7 @@ export interface ResolvedViteBurnerConfig {
     ignoreSourcemap: boolean;
   };
   dumpFiles?: (file: string, server: string) => string | null | undefined;
+  tls: boolean;
   cwd: string;
 }
 
