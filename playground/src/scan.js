@@ -20,7 +20,7 @@ export async function main(ns) {
 
         const info = ns.getServer(neighbor);
         const hasRoot = info.hasAdminRights;
-        const ports = info.openPorts;
+        const ports = info.openPortCount;
         const requiredPorts = info.numOpenPortsRequired;
         const hackLevel = info.requiredHackingSkill;
         const money = info.moneyAvailable;
@@ -33,9 +33,9 @@ export async function main(ns) {
 
         const root = hasRoot ? "[ROOT]" : "[   ]";
         const ports2 = `${ports}/${requiredPorts} ports`;
-        const moneyStr = ns.formatNumber(money, 2);
-        const maxStr = ns.formatNumber(maxMoney, 2);
-        const diffStr = `${difficulty.toFixed(1)}/${minDiff.toFixed(1)}`;
+        const moneyStr = ns.format.number(money, 2);
+        const maxStr = ns.format.number(maxMoney, 2);
+        const diffStr = `${difficulty?.toFixed(1)}/${minDiff?.toFixed(1)}`;
         const hp = ns.getHackingLevel();
         const canHack = hp >= hackLevel ? "✓" : "✗";
 
@@ -48,7 +48,7 @@ export async function main(ns) {
   const playerLevel = ns.getHackingLevel();
   for (const t of targets) {
     if (t.hasRoot && playerLevel >= t.hackLevel && t.money > 0) {
-      ns.tprint(`  ${t.hostname.padEnd(22)} $${ns.formatNumber(t.money, 2).padStart(12)} diff=${t.difficulty.toFixed(1)} growth=${t.growth}`);
+      ns.tprint(`  ${t.hostname.padEnd(22)} $${ns.format.number(t.money, 2).padStart(12)} diff=${t.difficulty?.toFixed(1)} growth=${t.growth}`);
     }
   }
 }

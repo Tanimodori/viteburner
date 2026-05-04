@@ -27,13 +27,13 @@ export async function main(ns) {
     // If money is below max, grow
     else if (money < maxMoney * 0.9) {
       const growThreads = Math.ceil(await ns.grow(target));
-      ns.tprint(`[${target}] grew x${ns.getServerMoneyAvailable(target) / money.toFixed(2)}`);
+      ns.tprint(`[${target}] grew x${ns.format.number(ns.getServerMoneyAvailable(target) / money, 2)}`);
     }
     // Otherwise hack
     else {
       const hackThreads = Math.max(1, Math.floor(ns.getServerMaxMoney(target) * 0.001 / ns.hackAnalyze(target)));
       const stolen = await ns.hack(target, { threads: hackThreads });
-      ns.tprint(`[${target}] hacked $${ns.formatNumber(stolen, 2)}`);
+      ns.tprint(`[${target}] hacked $${ns.format.number(stolen, 2)}`);
     }
   }
 }
