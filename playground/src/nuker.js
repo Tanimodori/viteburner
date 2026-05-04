@@ -11,13 +11,11 @@ export async function main(ns) {
   const portPrograms = {
     "BruteSSH.exe":   ns.brutessh,
     "FTPCrack.exe":   ns.ftpcrack,
-    "SMTPcrack.exe":  ns.smtpcrack,
-    "SQLInject.exe":  ns.sqlcrack,
-    "HTTPWorm.exe":   ns.httpcrack,
+    "SMTPcrack.exe":  ns.relaysmtp,
+    "SQLInject.exe":  ns.sqlinject,
+    "HTTPWorm.exe":   ns.httpworm,
     "RelaySMTP.exe":  ns.relaysmtp,
   };
-
-  const hasPortProgram = (name) => portPrograms[name] !== undefined;
 
   function openPorts(server) {
     let count = 0;
