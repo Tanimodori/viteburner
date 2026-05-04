@@ -17,13 +17,13 @@ export interface WsResponse<R = any> {
   id: number;
   result: R;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  error: any;
+  error?: any;
 }
 export const wsResponseSchema = z.object({
   jsonrpc: z.literal('2.0'),
   id: z.number(),
   result: z.any(),
-  error: z.any(),
+  error: z.any().optional(),
 });
 
 // pushFile

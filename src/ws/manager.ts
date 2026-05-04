@@ -48,6 +48,7 @@ export class WsManager {
   trackers: PromiseHolder[];
   nextId: number;
   unregisters: Fn[];
+  private _wssReady: Promise<WebSocketServer>;
   constructor(options: WsManagerOptions) {
     this.options = {
       timeout: 10000,
@@ -57,14 +58,17 @@ export class WsManager {
     this.trackers = [];
     this.nextId = 0;
     this.ws = undefined;
-    this.wss = getWss(this.options.port, this.options.tls);
+    this._wssReady = getWss(this.options.port, this.options.tls);
+    this._wssReady.then((wss) => {
+      this.wss = wss;
+      this._registerHandler();
+    });
     this.unregisters = [];
-    this._registerHandler();
   }
   get connected() {
     return this.ws?.readyState === WebSocket.OPEN;
   }
-  _registerHandler() {
+  private _registerHandler() {
     const _onConnected = (ws: WebSocket) => {
       this.ws = ws;
       ws.on('message', (response) => this.handleMessage(response));
@@ -85,7 +89,8 @@ export class WsManager {
       this.wss.off('error', _onError);
     });
   }
-  onConnected(cb: (ws: WebSocket) => Promisable<Fn | void>) {
+  async onConnected(cb: (ws: WebSocket) => Promisable<Fn | void>) {
+    await this._wssReady;
     const handler = async (ws: WebSocket) => {
       // ensure ws is saved before any sendMessage calls
       this.ws = ws;
@@ -97,7 +102,8 @@ export class WsManager {
       this.wss.off('connection', handler);
     });
   }
-  checkIfWssReused() {
+  async checkIfWssReused() {
+    await this._wssReady;
     if (isWssReused() && this.wss.clients.size > 0) {
       for (const client of this.wss.clients) {
         this.ws = client;
@@ -120,6 +126,7 @@ export class WsManager {
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async sendMessage<P = undefined, R extends z.ZodTypeAny = z.ZodTypeAny>(options: MessageSchema<P, R>) {
+    await this._wssReady;
     const params = options.params;
 
     // preflight check
