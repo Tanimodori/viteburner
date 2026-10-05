@@ -1,9 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { ViteburnerCli } from './cli';
+import { getGameDir } from './ensure-game';
 import { E2eProject, createProject } from './project';
 import { StaticServer, getFreePort, startStaticServer } from './static-server';
-import { getGameDir } from './ensure-game';
 
 export const REPO_ROOT = path.resolve(__dirname, '..', '..');
 

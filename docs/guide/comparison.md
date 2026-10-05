@@ -2,7 +2,7 @@
 
 | Sync Package | [`bitburner-vscode`](https://github.com/bitburner-official/bitburner-vscode) | [`bitburner-sync`](https://github.com/Nezrahm/bitburner-sync) | [`bitburner-filesync`](https://github.com/bitburner-official/bitburner-filesync) | [`viteburner`](https://github.com/Tanimodori/viteburner) |
 | --- | --- | --- | --- | --- |
-| Template | [`vscode-template`](https://github.com/bitburner-official/vscode-template) | | [`typescript-template`](https://github.com/bitburner-official/typescript-template) | [`viteburner-template`](https://github.com/Tanimodori/viteburner-template) |
+| Template | [`vscode-template`](https://github.com/bitburner-official/vscode-template) |  | [`typescript-template`](https://github.com/bitburner-official/typescript-template) | [`viteburner-template`](https://github.com/Tanimodori/viteburner-template) |
 | Official | ✅ (deprecated) | By Nezrahm | ✅ | By Tanimodori |
 | API | File API | File API | RFA | RFA |
 | Game compatibility | Steam Only | Steam Only | ✅ Both | ✅ Both |

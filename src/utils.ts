@@ -1,6 +1,6 @@
-import { SourceMap } from 'rollup';
 import fs from 'fs';
 import path from 'path';
+import { SourceMap } from 'rollup';
 
 export function getSourceMapString(map?: SourceMap | null): string {
   if (!map) return '';

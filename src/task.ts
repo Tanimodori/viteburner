@@ -1,11 +1,11 @@
+import fs from 'fs';
+import { resolve } from 'path';
+import fg from 'fast-glob';
 import pc from 'picocolors';
 import prompt from 'prompts';
-import fg from 'fast-glob';
-import fs from 'fs';
 import { KeyHandlerContext, KeypressHandler, logger } from './console';
-import { WsAdapter, ResolvedData } from './ws';
 import { isScriptFile } from './utils';
-import { resolve } from 'path';
+import { WsAdapter, ResolvedData } from './ws';
 
 export function displayKeyHelpHint() {
   logger.info(
@@ -219,13 +219,13 @@ export function handleKeyInput(wsAdapter: WsAdapter): KeypressHandler {
       displayHelp();
     } else if (key.name === 'u') {
       // u to update all
-      checkConnection() && fullUpload();
+      if (checkConnection()) fullUpload();
     } else if (key.name === 'd') {
       // d to download all
-      checkConnection() && fullDownload();
+      if (checkConnection()) fullDownload();
     } else if (key.name === 'r') {
       // f to show ram usage
-      checkConnection() && (await showRamUsage(ctx));
+      if (checkConnection()) await showRamUsage(ctx);
     } else {
       isKeyHandled = false;
     }

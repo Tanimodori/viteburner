@@ -1,5 +1,5 @@
-import pc from 'picocolors';
 import readline from 'readline';
+import pc from 'picocolors';
 
 export const prefix = '[viteburner]';
 
@@ -7,9 +7,9 @@ import { createLogger as createLoggerRaw } from 'vite';
 
 export function formatNormal(first = '', second = '', third = '') {
   const parts = [];
-  first && parts.push(pc.green(first));
-  second && parts.push(pc.dim(second));
-  third && parts.push(third);
+  if (first) parts.push(pc.green(first));
+  if (second) parts.push(pc.dim(second));
+  if (third) parts.push(third);
   return parts.join(' ');
 }
 

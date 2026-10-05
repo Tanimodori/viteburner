@@ -1,0 +1,23 @@
+{
+  "plugins": ["eslint", "typescript", "unicorn", "oxc"],
+  "categories": {
+    "correctness": "error"
+  },
+  "env": {
+    "es2021": true,
+    "node": true,
+    "browser": false
+  },
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/NetscriptDefinitions.d.ts",
+    "bin/**",
+    "e2e/.cache/**",
+    "e2e/.tmp/**"
+  ],
+  "rules": {
+    "no-constant-condition": "off",
+    "typescript/no-explicit-any": "warn"
+  }
+}

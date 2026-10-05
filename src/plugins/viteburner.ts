@@ -1,9 +1,9 @@
-import { Plugin, UserConfig } from 'vite';
-import { HmrData, ViteBurnerInlineConfig, ViteBurnerServer, ViteBurnerUserConfig } from '@/types';
-import { logger, setHandler } from '@/console';
-import { WsManager, WsAdapter } from '@/ws';
 import { resolve } from 'pathe';
+import { Plugin, UserConfig } from 'vite';
 import { slash, normalizeRequestId } from 'vite-node/utils';
+import { logger, setHandler } from '@/console';
+import { HmrData, ViteBurnerInlineConfig, ViteBurnerServer, ViteBurnerUserConfig } from '@/types';
+import { WsManager, WsAdapter } from '@/ws';
 import { handleKeyInput, loadConfig } from '..';
 import { WatchManager } from './watch';
 

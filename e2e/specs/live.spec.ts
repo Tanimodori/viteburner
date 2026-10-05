@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { VERIFY_MARKER, VERIFY_SCRIPT, startViteBurner, stopViteBurner, ViteBurnerFixture } from '../helpers/flow';
 import {
   connectRemoteApi,
   dismissTutorial,
@@ -7,7 +8,6 @@ import {
   grantLocalNetworkAccess,
   runTerminalCommand,
 } from '../helpers/game';
-import { VERIFY_MARKER, VERIFY_SCRIPT, startViteBurner, stopViteBurner, ViteBurnerFixture } from '../helpers/flow';
 
 /**
  * Opt-in smoke test against the live game site (https://bitburner-official.github.io/).

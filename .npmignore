@@ -1,7 +1,7 @@
-.eslintrc
 .gitattributes
-.prettierignore
-.prettierrc
+.oxlintrc.json
+.oxfmtrc.json
+.zcode/**
 playground/**/*
 src/**
 vite.config.ts

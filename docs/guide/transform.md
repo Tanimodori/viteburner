@@ -11,11 +11,11 @@ When file changes or manual upload is triggered, vitburner will first get all de
 The following import methods are supported:
 
 ```ts
-// relative import
-import { foo } from './foo';
+import { foo } from '/src/foo';
 // absolute import, need to configure vite.config and tsconfig.json
 import { foo } from '@/foo';
-import { foo } from '/src/foo';
+// relative import
+import { foo } from './foo';
 ```
 
 ### Import fix
@@ -34,8 +34,8 @@ src/
 
 ```ts
 import { NS } from '@ns';
-import { relative } from './relative';
 import { absolute } from '@/import/absolute';
+import { relative } from './relative';
 
 export async function main(ns: NS) {
   relative(ns);
@@ -68,8 +68,8 @@ This works file for normal vite and ts project. During dev mode, vite will resol
 Transformed `main.ts`
 
 ```ts
-import { relative } from '/src/import/relative.js';
 import { absolute } from '/src/import/absolute.js';
+import { relative } from '/src/import/relative.js';
 export async function main(ns) {
   relative(ns);
   absolute(ns);
@@ -83,8 +83,8 @@ Also, bitburner only supports abosolute path for import, so you can use vite to 
 If you are disabling the `transform` option for a file, you need to make sure the import path is correct manually.
 
 ```js
-import { relative } from '/import/relative.js';
 import { absolute } from '/import/absolute.js';
+import { relative } from '/import/relative.js';
 export async function main(ns) {
   relative(ns);
   absolute(ns);

@@ -26,9 +26,8 @@ npm i -D viteburner vite
 In `vite.config.js`
 
 ```ts
-/* eslint-env node */
-import { defineConfig } from 'viteburner';
 import { resolve } from 'path';
+import { defineConfig } from 'viteburner';
 export default defineConfig({
   /** basic vite configs */
   resolve: {
@@ -53,9 +52,8 @@ export default defineConfig({
 In `vite.config.ts`
 
 ```ts
-/* eslint-env node */
-import { defineConfig } from 'viteburner';
 import { resolve } from 'path';
+import { defineConfig } from 'viteburner';
 export default defineConfig({
   /** basic vite configs */
   resolve: {

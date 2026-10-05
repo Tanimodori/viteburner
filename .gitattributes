@@ -1,1 +1,8 @@
-* text=auto
+# Text files are stored with LF in the repository and checked out with CRLF everywhere.
+# eol overrides each machine's core.autocrlf, which is per-clone configuration and cannot
+# keep every checkout identical on its own. It also matches endOfLine in .oxfmtrc.json.
+* text=auto eol=crlf
+
+# The CLI entry keeps LF on every platform: its shebang must work when installers
+# link it as an executable on POSIX.
+bin/viteburner.js text eol=lf

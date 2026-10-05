@@ -1,9 +1,9 @@
 import cac from 'cac';
-import { logger } from './console';
-import pkg from '../package.json';
-import { ViteBurnerInlineConfig } from './types';
 import { createServer } from 'vite';
+import pkg from '../package.json';
+import { logger } from './console';
 import { viteburnerPlugin } from './plugins/viteburner';
+import { ViteBurnerInlineConfig } from './types';
 
 const cli = cac('viteburner');
 

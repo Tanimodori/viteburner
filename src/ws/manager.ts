@@ -1,5 +1,7 @@
 import { RawData, WebSocket, WebSocketServer } from 'ws';
 import { z } from 'zod';
+import { logger } from '@/console';
+import { getWss, isWssReused } from './allocator';
 import {
   wsResponseSchema,
   PushFileParams,
@@ -16,8 +18,6 @@ import {
   calculateRamResponseSchema,
   getDefinitionFileResponseSchema,
 } from './messages';
-import { logger } from '@/console';
-import { getWss, isWssReused } from './allocator';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface PromiseHolder<T = any> {
@@ -89,7 +89,7 @@ export class WsManager {
       // ensure ws is saved before any sendMessage calls
       this.ws = ws;
       const unregister = await cb(ws);
-      unregister && this.unregisters.push(unregister);
+      if (unregister) this.unregisters.push(unregister);
     };
     this.wss.on('connection', handler);
     this.unregisters.push(() => {

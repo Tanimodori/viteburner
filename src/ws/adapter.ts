@@ -1,3 +1,10 @@
+import fs from 'fs';
+import path, { relative, resolve } from 'path';
+import fg from 'fast-glob';
+import { match } from 'micromatch';
+import pc from 'picocolors';
+import { slash } from 'vite-node/utils';
+import { ViteBurnerServer, HmrData } from '@/types';
 import {
   getSourceMapString,
   logger,
@@ -7,15 +14,8 @@ import {
   forceStartingSlash,
   removeStartingSlash,
 } from '..';
-import { WsManager } from './manager';
-import fs from 'fs';
-import pc from 'picocolors';
-import path, { relative, resolve } from 'path';
-import { slash } from 'vite-node/utils';
-import fg from 'fast-glob';
 import { fixImportPath } from './import';
-import { ViteBurnerServer, HmrData } from '@/types';
-import { match } from 'micromatch';
+import { WsManager } from './manager';
 
 export const formatUpload = (from: string, to: string, serverName: string) => {
   to = forceStartingSlash(to);

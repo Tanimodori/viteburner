@@ -38,11 +38,11 @@ Note that you need to use vite's transform to write TypeScript scripts that run 
 The following import methods are supported by default in viteburner-template:
 
 ```ts
-// relative import
-import { foo } from './foo';
+import { foo } from '/src/foo';
 // absolute import, need to configure vite.config and tsconfig.json
 import { foo } from '@/foo';
-import { foo } from '/src/foo';
+// relative import
+import { foo } from './foo';
 ```
 
 You need to turn on vite's transform to use relative import and import alias (`@/` in this case).

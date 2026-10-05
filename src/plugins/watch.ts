@@ -1,14 +1,14 @@
-import { FSWatcher, WatchOptions } from 'chokidar';
-import { isMatch } from 'micromatch';
-import { removeStartingSlash } from '..';
-import chokidar from 'chokidar';
 import EventEmitter from 'events';
 import fs from 'fs';
 import { resolve } from 'path';
-import { slash } from 'vite-node/utils';
+import { FSWatcher, WatchOptions } from 'chokidar';
+import chokidar from 'chokidar';
 import fg from 'fast-glob';
-import { hmrPluginName } from './viteburner';
+import { isMatch } from 'micromatch';
+import { slash } from 'vite-node/utils';
 import { ResolvedWatchItem } from '@/types';
+import { removeStartingSlash } from '..';
+import { hmrPluginName } from './viteburner';
 
 export class WatchManager {
   items: ResolvedWatchItem[];
