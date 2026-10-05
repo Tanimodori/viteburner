@@ -2,3 +2,5 @@ NetscriptDefinitions.d.ts
 package-lock.json
 bin/
 **/dist/
+e2e/.cache/
+e2e/.tmp/

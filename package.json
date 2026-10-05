@@ -19,6 +19,10 @@
     "test": "npm run lint && npm run test:spec",
     "test:spec": "vitest run",
     "test:playground": "vite-node ./src/entry.ts -- --cwd ./playground",
+    "e2e:setup": "playwright install chromium && vite-node e2e/scripts/ensure-game.ts",
+    "test:e2e": "npm run build && playwright test --project=local",
+    "test:e2e:live": "npm run build && playwright test --project=live",
+    "test:e2e:ui": "playwright test --ui",
     "postversion": "npm run build",
     "lint": "npm run lint:ts && npm run lint:eslint && npm run lint:prettier",
     "lint:ts": "tsc --noEmit",
@@ -41,6 +45,7 @@
   },
   "homepage": "https://github.com/Tanimodori/viteburner#readme",
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/estree": "^1.0.0",
     "@types/micromatch": "^4.0.2",
     "@types/node": "^18.14.1",
