@@ -145,3 +145,8 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# zcode
+.zcode/*
+!.zcode/workflows/
+.zcodeignore
