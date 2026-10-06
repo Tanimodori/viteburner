@@ -5,9 +5,8 @@ import { FSWatcher, WatchOptions } from 'chokidar';
 import chokidar from 'chokidar';
 import fg from 'fast-glob';
 import { isMatch } from 'micromatch';
-import { slash } from 'vite-node/utils';
 import { ResolvedWatchItem } from '@/types';
-import { removeStartingSlash } from '..';
+import { removeStartingSlash, slash } from '..';
 import { hmrPluginName } from './viteburner';
 
 export class WatchManager {

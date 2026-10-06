@@ -1,9 +1,8 @@
 import { parse as acornParse } from 'acorn';
 import MagicString from 'magic-string';
-import { normalizeRequestId } from 'vite-node/utils';
 import { logger } from '@/console';
 import { WatchManager } from '@/plugins';
-import { isExternalUrl, forceStartingSlash } from '@/utils';
+import { isExternalUrl, forceStartingSlash, normalizeRequestId } from '@/utils';
 
 export interface FixImportPathOptions {
   filename: string;

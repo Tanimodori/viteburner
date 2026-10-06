@@ -3,7 +3,6 @@ import path, { relative, resolve } from 'path';
 import fg from 'fast-glob';
 import { match } from 'micromatch';
 import pc from 'picocolors';
-import { slash } from 'vite-node/utils';
 import { ViteBurnerServer, HmrData } from '@/types';
 import {
   getSourceMapString,
@@ -13,6 +12,7 @@ import {
   fixStartingSlash,
   forceStartingSlash,
   removeStartingSlash,
+  slash,
 } from '..';
 import { fixImportPath } from './import';
 import { WsManager } from './manager';
