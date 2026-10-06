@@ -23,7 +23,7 @@
     "lint:oxlint": "oxlint",
     "setup": "npm run setup:browser && npm run setup:game",
     "setup:browser": "playwright install chromium",
-    "setup:game": "tsx test/scripts/ensure-game.ts",
+    "setup:game": "tsx test/local/setup-game.ts",
     "test": "npm run test:e2e",
     "test:e2e": "vitest run",
     "test:e2e:live": "vitest run --mode live",

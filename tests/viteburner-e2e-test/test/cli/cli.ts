@@ -11,7 +11,7 @@ export function stripAnsi(text: string): string {
 export interface ViteburnerCliOptions {
   /** Package root of the published CLI; it is started from `bin/viteburner.js` (requires a fresh build). */
   packageRoot: string;
-  /** Project directory the CLI serves (a copy of this package's `src/` fixture in E2E runs). */
+  /** Project directory the CLI serves (a copy of this package's fixture project in E2E runs). */
   cwd: string;
   /** WebSocket port the game should connect to. */
   port: number;

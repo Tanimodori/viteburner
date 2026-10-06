@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { FIXTURE_DIR, FIXTURE_FILES, GAME_DIRECTORIES, escapeRegExp, gamePath } from './helpers/fixture';
+import { FIXTURE_DIR, FIXTURE_FILES, GAME_DIRECTORIES, escapeRegExp, gamePath } from './manifest';
 
 /**
- * The fixture manifest (`test/helpers/fixture.ts`) is the only source of truth for what the E2E suite
+ * The fixture manifest (`test/fixture/manifest.ts`) is the only source of truth for what the E2E suite
  * expects the sync pipeline to produce. These checks keep that truth aligned with the files on disk,
  * with no browser and no CLI involved, so a mismatch fails fast and in isolation.
  */

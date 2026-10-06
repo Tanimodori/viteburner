@@ -1,5 +1,20 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { PACKAGE_ROOT } from '../paths';
+
+/**
+ * The fixture project handed to the CLI: a `vite.config.ts`, its own `tsconfig.json` and `src/**` —
+ * the former `packages/viteburner/playground`, moved here so its only consumer owns it.
+ *
+ * It sits at the package root, not under `test/`: `src/**` imports `@ns`, which only resolves through
+ * the fixture's own tsconfig once the CLI has downloaded the game's definitions, so it must stay
+ * outside this package's tsc (see `tsconfig.json`). Tests never run against it in place — every run
+ * copies it to `PROJECT_TMP_DIR` first, so nothing under here is ever written.
+ */
+export const FIXTURE_PROJECT_DIR = path.join(PACKAGE_ROOT, 'src');
+
+/** The isolated copy a run drives the CLI against (gitignored; removed after the run unless E2E_KEEP). */
+export const PROJECT_TMP_DIR = path.join(PACKAGE_ROOT, 'test', '.tmp', 'project');
 
 export interface E2eProject {
   /** Absolute path of the temp project root (contains vite.config.ts and src/). */
@@ -17,20 +32,20 @@ export interface E2eProject {
 }
 
 /**
- * Copy the in-package fixture (`src/`) into the given destination so E2E runs never touch the actual
- * fixture directory (watch events + the CLI's `dumpFiles` output write into `dist/`).
+ * Copy the read-only fixture project into an isolated destination so E2E runs never touch it (watch
+ * events and the CLI's `dumpFiles` output write into `dist/`).
  *
  * A `dist/` in the fixture is skipped: it is generated output, and copying a stale one would let the
  * dump assertions pass on last run's bytes.
  */
-export function createProject(fixtureDir: string, destDir: string): E2eProject {
+export function createProject(destDir = PROJECT_TMP_DIR): E2eProject {
   fs.rmSync(destDir, { recursive: true, force: true });
   fs.mkdirSync(destDir, { recursive: true });
-  for (const entry of fs.readdirSync(fixtureDir)) {
+  for (const entry of fs.readdirSync(FIXTURE_PROJECT_DIR)) {
     if (entry === 'dist') {
       continue;
     }
-    fs.cpSync(path.join(fixtureDir, entry), path.join(destDir, entry), { recursive: true });
+    fs.cpSync(path.join(FIXTURE_PROJECT_DIR, entry), path.join(destDir, entry), { recursive: true });
   }
   const srcDir = path.join(destDir, 'src');
   return {
@@ -51,4 +66,11 @@ export function createProject(fixtureDir: string, destDir: string): E2eProject {
       return fs.existsSync(path.join(destDir, relative));
     },
   };
+}
+
+/** Drop the run's project copy, keeping it around when `E2E_KEEP` is set for manual inspection. */
+export function removeProject(project: E2eProject) {
+  if (!process.env.E2E_KEEP) {
+    fs.rmSync(project.root, { recursive: true, force: true });
+  }
 }

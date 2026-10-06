@@ -28,17 +28,6 @@ const MIME_TYPES: Record<string, string> = {
   '.xml': 'application/xml',
 };
 
-export function getFreePort(): Promise<number> {
-  return new Promise((resolve, reject) => {
-    const probe = net.createServer();
-    probe.on('error', reject);
-    probe.listen(0, '127.0.0.1', () => {
-      const address = probe.address() as net.AddressInfo;
-      probe.close(() => resolve(address.port));
-    });
-  });
-}
-
 export interface StaticServer {
   url: string;
   close(): Promise<void>;

@@ -13,9 +13,10 @@
     "baseUrl": ".",
     "types": ["node"]
   },
-  // The fixture's config is the one file of the fixture that touches the published package's types
-  // (`ViteBurnerUserConfig`), so it is checked here. The fixture sources are not: they resolve `@ns`
-  // through their own tsconfig, and their correctness is judged by the E2E run, not by tsc.
+  // The fixture project's `src/**` is deliberately out of reach: it imports `@ns`, which only
+  // resolves through the fixture's own tsconfig once the CLI has downloaded the game's definitions,
+  // and its correctness is judged by the E2E run, not by tsc. The fixture's `vite.config.ts` is the
+  // one fixture file checked here, because it uses the published `ViteBurnerUserConfig` type.
   "include": ["test/**/*.ts", "vitest.config.ts", "src/vite.config.ts"],
   "exclude": ["test/.cache", "test/.tmp"]
 }

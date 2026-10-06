@@ -1,9 +1,9 @@
 import { resolve } from 'path';
 import type { ViteBurnerUserConfig } from 'viteburner';
 
-// The fixture project the E2E suite hands to the CLI. It is a copy of the old
-// `packages/viteburner/playground`, kept verbatim so the suite exercises the same watch patterns,
-// aliases and dump mapping that the playground used to.
+// The fixture project the E2E suite hands to the CLI. Its aliases, watch patterns and dump mapping
+// are the ones the assertions in `test/fixture/manifest.ts` are written against: change either and
+// the other must change with it.
 const config: ViteBurnerUserConfig = {
   resolve: {
     alias: {

@@ -1,14 +1,11 @@
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { FIXTURE_PROJECT_DIR } from './project';
 
 /**
- * The fixture project the E2E suite hands to the CLI.
- *
- * This is the former `packages/viteburner/playground`, moved here so the only consumer of the
- * fixture — the E2E suite — owns it. It is copied to `test/.tmp/` before every run, so nothing here
- * is ever written by a test.
+ * The fixture manifest: what the sync pipeline is expected to produce for each source file in the
+ * fixture project (`./project.ts`). It is the suite's single source of truth for the upload set.
  */
-export const FIXTURE_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'src');
+export const FIXTURE_DIR = FIXTURE_PROJECT_DIR;
 
 /**
  * What the game does when asked to run an uploaded file.
