@@ -1,10 +1,11 @@
-import type { BrowserContext, Page } from '@playwright/test';
+import type { BrowserContext, Locator, Page } from 'playwright';
+import { expect, vi } from 'vitest';
 
 /**
  * Chromium (142+) gates requests to local/loopback addresses behind the Local Network Access
  * permission. The E2E flow connects to `ws://localhost:<port>` from the game page, so grant the
  * permission where supported; the LNA features are additionally disabled via launch flags in
- * `playwright.config.ts`.
+ * `browser.ts`.
  */
 export async function grantLocalNetworkAccess(context: BrowserContext, origin: string) {
   try {
@@ -62,7 +63,28 @@ export async function gotoTerminal(page: Page, timeout = 30_000) {
 /** Type a command into the in-game terminal and press Enter. */
 export async function runTerminalCommand(page: Page, command: string) {
   const input = page.locator('#terminal-input');
-  await input.click();
+  // Focus instead of click: the game queues a success snackbar (bottom-right) for every uploaded file,
+  // and its overlay intercepts pointer events. `fill` needs focus, not a pointer, so this is equivalent
+  // and immune to the toast queue.
+  await input.focus();
   await input.fill(command);
   await input.press('Enter');
+}
+
+/**
+ * The in-game terminal and its dialogs render asynchronously; poll a locator's text until `matcher`
+ * holds. This is the vitest stand-in for Playwright's auto-retrying `expect(locator).toContainText`.
+ */
+export async function expectLocatorText(locator: Locator, text: string, { timeout = 30_000, negate = false } = {}) {
+  await vi.waitFor(
+    async () => {
+      const content = await locator.innerText();
+      if (negate) {
+        expect(content).not.toContain(text);
+      } else {
+        expect(content).toContain(text);
+      }
+    },
+    { timeout, interval: 250 },
+  );
 }

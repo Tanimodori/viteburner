@@ -14,8 +14,8 @@
     "**/.rush/**",
     "**/NetscriptDefinitions.d.ts",
     "**/bin/**",
-    "**/e2e/.cache/**",
-    "**/e2e/.tmp/**"
+    "**/test/.cache/**",
+    "**/test/.tmp/**"
   ],
   "rules": {
     "no-constant-condition": "off",

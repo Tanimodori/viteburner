@@ -445,6 +445,11 @@
       "packageName": "viteburner",
       "projectFolder": "packages/viteburner",
       "tags": [ "tool" ]
+    },
+    {
+      "packageName": "viteburner-e2e-test",
+      "projectFolder": "tests/viteburner-e2e-test",
+      "tags": [ "test" ]
     }
   ]
 }

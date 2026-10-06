@@ -4,7 +4,8 @@ Daemon tools of bitburner using vite for script transform, file syncing, RAM mon
 
 **Packages**
 
-- **[viteburner](packages/viteburner/README.md)**: The CLI/daemon package published to npm, including its E2E test suite
+- **[viteburner](packages/viteburner/README.md)**: The CLI/daemon package published to npm
+- **[viteburner-e2e-test](tests/viteburner-e2e-test/README.md)**: End-to-end suite that drives the built CLI from the outside (vitest + Playwright)
 
 ## Development
 

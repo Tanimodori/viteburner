@@ -126,8 +126,8 @@ dist-storybook/
 .heft/
 
 # E2E artifacts (pinned game build download, temp projects and test output)
-**/e2e/.cache/
-**/e2e/.tmp/
+**/test/.cache/
+**/test/.tmp/
 
 # Bitburner type definitions
 **/NetscriptDefinitions.d.ts

@@ -15,6 +15,8 @@ export interface E2eProject {
 /**
  * Copy `playground/` into the given destination so E2E runs never touch the actual fixture
  * directory (watch events + server-side uploads write into `dist/`).
+ *
+ * The playground stays in the `viteburner` package; this suite only ever reads from it.
  */
 export function createProject(playgroundDir: string, destDir: string): E2eProject {
   fs.rmSync(destDir, { recursive: true, force: true });

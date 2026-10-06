@@ -22,7 +22,7 @@
     "**/NetscriptDefinitions.d.ts",
     "package-lock.json",
     "**/bin/**",
-    "**/e2e/.cache/**",
-    "**/e2e/.tmp/**"
+    "**/test/.cache/**",
+    "**/test/.tmp/**"
   ]
 }

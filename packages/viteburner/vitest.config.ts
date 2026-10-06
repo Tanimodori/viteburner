@@ -2,10 +2,11 @@ import { resolve } from 'path';
 import { defineConfig } from 'vitest/config';
 
 /**
- * Keep Vitest focused on unit tests under `test/`.
+ * Unit tests for this package, under `test/`.
  *
- * Vitest's default include pattern would also pick up the Playwright specs under `e2e/`,
- * which cannot run inside Vitest.
+ * The end-to-end suite lives in `tests/viteburner-e2e-test`, which drives the built CLI from the
+ * outside; keeping this include narrow means a change to either one cannot pull the other's specs
+ * into the wrong runner.
  */
 export default defineConfig({
   resolve: {

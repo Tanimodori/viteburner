@@ -17,14 +17,5 @@
       "@ns": ["./NetscriptDefinitions.d.ts"]
     }
   },
-  "include": [
-    "src/**/*.ts",
-    "test/**/*.ts",
-    "e2e/**/*.ts",
-    "NetscriptDefinitions.d.ts",
-    "vite.config.ts",
-    "vitest.config.ts",
-    "playwright.config.ts"
-  ],
-  "exclude": ["e2e/.cache", "e2e/.tmp"]
+  "include": ["src/**/*.ts", "test/**/*.ts", "NetscriptDefinitions.d.ts", "vite.config.ts", "vitest.config.ts"]
 }

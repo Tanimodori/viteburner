@@ -9,9 +9,9 @@ export function stripAnsi(text: string): string {
 }
 
 export interface ViteburnerCliOptions {
-  /** Package root; the CLI is started from `bin/viteburner.js` (requires a fresh `rushx build`). */
+  /** Package root of the published CLI; it is started from `bin/viteburner.js` (requires a fresh build). */
   packageRoot: string;
-  /** Project directory the CLI serves (a copy of `playground/` in E2E runs). */
+  /** Project directory the CLI serves (a copy of the `viteburner` playground in E2E runs). */
   cwd: string;
   /** WebSocket port the game should connect to. */
   port: number;
@@ -23,7 +23,7 @@ const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
  * Controls a real viteburner CLI process (dist mode: `node bin/viteburner.js`).
  *
  * The whole point is to exercise the same artifact that is published to npm, so the caller must
- * build first (`rushx test:e2e` does that).
+ * build the `viteburner` package first (the repo's `rush build`/`rushx build` does that).
  */
 export class ViteburnerCli {
   readonly port: number;
@@ -51,7 +51,9 @@ export class ViteburnerCli {
   async start() {
     const bin = path.join(this.packageRoot, 'bin', 'viteburner.js');
     if (!fs.existsSync(path.join(this.packageRoot, 'dist', 'entry.js'))) {
-      throw new Error('dist/entry.js is missing. Run `rushx build` first, or use `rushx test:e2e`.');
+      throw new Error(
+        'viteburner dist/entry.js is missing. Run `rush build` (or `rushx build` in that package) first.',
+      );
     }
     this.child = spawn(process.execPath, [bin, '--cwd', this.cwd, '--port', String(this.port)], {
       cwd: this.packageRoot,

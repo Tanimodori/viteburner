@@ -9,7 +9,7 @@ import path from 'node:path';
  *
  * The tarball is the content of https://github.com/bitburner-official/bitburner-official.github.io at the commit
  * below (the deployed v3.0.1 release build). It is downloaded once, verified against the SHA-256 hash and cached
- * under `e2e/.cache/` (gitignored).
+ * under `test/.cache/` (gitignored).
  *
  * To upgrade the pinned build: fetch the commit SHA of bitburner-official.github.io, download
  * `https://codeload.github.com/bitburner-official/bitburner-official.github.io/tar.gz/<commit>`, update
@@ -23,7 +23,7 @@ export const PINNED_GAME = {
 } as const;
 
 export function getCacheRoot(packageRoot: string) {
-  return path.join(packageRoot, 'e2e', '.cache');
+  return path.join(packageRoot, 'test', '.cache');
 }
 
 export function getGameDir(packageRoot: string) {
