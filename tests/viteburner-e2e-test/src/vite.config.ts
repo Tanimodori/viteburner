@@ -1,6 +1,9 @@
 import { resolve } from 'path';
-import type { ViteBurnerUserConfig } from '../src/types';
+import type { ViteBurnerUserConfig } from 'viteburner';
 
+// The fixture project the E2E suite hands to the CLI. It is a copy of the old
+// `packages/viteburner/playground`, kept verbatim so the suite exercises the same watch patterns,
+// aliases and dump mapping that the playground used to.
 const config: ViteBurnerUserConfig = {
   resolve: {
     alias: {

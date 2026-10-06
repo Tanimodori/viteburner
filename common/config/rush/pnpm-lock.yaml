@@ -73,9 +73,6 @@ importers:
       rollup:
         specifier: ^3.30.0
         version: 3.30.0
-      tsx:
-        specifier: ^4.23.15
-        version: 4.23.15
       typescript:
         specifier: ^4.9.5
         version: 4.9.5
@@ -109,6 +106,9 @@ importers:
       typescript:
         specifier: ^4.9.5
         version: 4.9.5
+      vite:
+        specifier: ^4.1.4
+        version: 4.5.14(@types/node@18.19.130)
       viteburner:
         specifier: workspace:*
         version: link:../../packages/viteburner

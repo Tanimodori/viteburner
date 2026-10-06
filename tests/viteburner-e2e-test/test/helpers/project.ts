@@ -10,22 +10,27 @@ export interface E2eProject {
   writeSource(relative: string, content: string): void;
   /** Remove a source file if present. */
   removeSource(relative: string): void;
+  /** Read a project-relative file (source, or the CLI's dump) as text. */
+  readFile(relative: string): string;
+  /** Whether a project-relative path exists (source, or the CLI's dump). */
+  exists(relative: string): boolean;
 }
 
 /**
- * Copy `playground/` into the given destination so E2E runs never touch the actual fixture
- * directory (watch events + server-side uploads write into `dist/`).
+ * Copy the in-package fixture (`src/`) into the given destination so E2E runs never touch the actual
+ * fixture directory (watch events + the CLI's `dumpFiles` output write into `dist/`).
  *
- * The playground stays in the `viteburner` package; this suite only ever reads from it.
+ * A `dist/` in the fixture is skipped: it is generated output, and copying a stale one would let the
+ * dump assertions pass on last run's bytes.
  */
-export function createProject(playgroundDir: string, destDir: string): E2eProject {
+export function createProject(fixtureDir: string, destDir: string): E2eProject {
   fs.rmSync(destDir, { recursive: true, force: true });
   fs.mkdirSync(destDir, { recursive: true });
-  for (const entry of fs.readdirSync(playgroundDir)) {
+  for (const entry of fs.readdirSync(fixtureDir)) {
     if (entry === 'dist') {
       continue;
     }
-    fs.cpSync(path.join(playgroundDir, entry), path.join(destDir, entry), { recursive: true });
+    fs.cpSync(path.join(fixtureDir, entry), path.join(destDir, entry), { recursive: true });
   }
   const srcDir = path.join(destDir, 'src');
   return {
@@ -38,6 +43,12 @@ export function createProject(playgroundDir: string, destDir: string): E2eProjec
     },
     removeSource(relative: string) {
       fs.rmSync(path.join(srcDir, relative), { force: true });
+    },
+    readFile(relative: string) {
+      return fs.readFileSync(path.join(destDir, relative), 'utf8');
+    },
+    exists(relative: string) {
+      return fs.existsSync(path.join(destDir, relative));
     },
   };
 }

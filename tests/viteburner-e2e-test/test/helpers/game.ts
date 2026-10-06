@@ -72,6 +72,55 @@ export async function runTerminalCommand(page: Page, command: string) {
 }
 
 /**
+ * Clear the terminal scrollback so the next command's output is unambiguous.
+ *
+ * The listing checks poll the whole `#terminal` for a filename, and a previous listing would satisfy a
+ * later check for the same name. Clearing first means a match can only come from the command just sent.
+ */
+export async function clearTerminal(page: Page) {
+  await runTerminalCommand(page, 'clear');
+  await page.waitForTimeout(300);
+}
+
+/** Clear the terminal, list a directory on home (`ls` at the root, `ls <dir>` otherwise) and return its text. */
+export async function listDirectory(page: Page, dir: string) {
+  await clearTerminal(page);
+  const command = dir === '.' ? 'ls' : `ls ${dir}`;
+  await runTerminalCommand(page, command);
+  const terminal = page.locator('#terminal');
+  // The echo of the command itself is the marker that this listing (not a stale one) has rendered.
+  await expectLocatorText(terminal, command, { timeout: 20_000 });
+  await page.waitForTimeout(300);
+  return terminal.innerText();
+}
+
+/** Open a file with `cat`, read the modal's content, then close the modal. */
+export async function catFile(page: Page, file: string, timeout = 20_000) {
+  await clearTerminal(page);
+  await runTerminalCommand(page, `cat ${file}`);
+  const modal = page.locator('.MuiModal-root');
+  await modal.waitFor({ state: 'visible', timeout });
+  const content = await modal.innerText();
+  await page.keyboard.press('Escape');
+  await modal.waitFor({ state: 'hidden', timeout });
+  return content;
+}
+
+/**
+ * Run a script and return the terminal text once output has settled.
+ *
+ * `settleMs` waits for the game to finish printing; the game gives no completion event, and a failing
+ * script reports asynchronously. Callers assert on the returned text, so a too-short wait surfaces as
+ * a failed expectation rather than a false pass.
+ */
+export async function runScript(page: Page, script: string, settleMs = 2_500) {
+  await clearTerminal(page);
+  await runTerminalCommand(page, `run ${script}`);
+  await page.waitForTimeout(settleMs);
+  return page.locator('#terminal').innerText();
+}
+
+/**
  * The in-game terminal and its dialogs render asynchronously; poll a locator's text until `matcher`
  * holds. This is the vitest stand-in for Playwright's auto-retrying `expect(locator).toContainText`.
  */

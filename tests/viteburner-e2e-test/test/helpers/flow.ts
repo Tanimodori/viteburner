@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ViteburnerCli } from './cli';
 import { getGameDir } from './ensure-game';
+import { FIXTURE_DIR } from './fixture';
 import { E2eProject, createProject } from './project';
 import { StaticServer, getFreePort, startStaticServer } from './static-server';
 
@@ -21,9 +22,6 @@ const require = createRequire(import.meta.url);
  * which is where `bin/` and the built `dist/` live.
  */
 export const VITEBURNER_PACKAGE_ROOT = path.resolve(path.dirname(require.resolve('viteburner')), '..');
-
-/** The fixture project handed to the CLI: a copy of the `viteburner` package's playground. */
-export const PLAYGROUND_DIR = path.join(VITEBURNER_PACKAGE_ROOT, 'playground');
 
 export const VERIFY_MARKER = 'E2E_VERIFY_OK';
 
@@ -60,8 +58,9 @@ export interface StartViteBurnerOptions {
 }
 
 /**
- * Start the static game server (when `servePinnedGame`), prepare an isolated copy of playground/ and
- * start the real viteburner CLI against it. Call from `beforeAll`; use `stopViteBurner` in `afterAll`.
+ * Start the static game server (when `servePinnedGame`), prepare an isolated copy of the in-package
+ * fixture and start the real viteburner CLI against it. Call from `beforeAll`; use `stopViteBurner`
+ * in `afterAll`.
  *
  * Overloaded so a caller that serves the pinned build gets a fixture with `server` guaranteed:
  * the local leg should not have to re-assert what its own call already decided.
@@ -82,7 +81,7 @@ export async function startViteBurner(options: StartViteBurnerOptions = {}): Pro
 
   const wsPort = await getFreePort();
   const projectDir = path.join(PACKAGE_ROOT, 'test', '.tmp', 'project');
-  const project = createProject(PLAYGROUND_DIR, projectDir);
+  const project = createProject(FIXTURE_DIR, projectDir);
   const cli = new ViteburnerCli({ packageRoot: VITEBURNER_PACKAGE_ROOT, cwd: project.root, port: wsPort });
   await cli.start();
   await cli.waitForLog(/watching for file changes/, 90_000);

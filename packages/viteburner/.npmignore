@@ -4,7 +4,6 @@
 .zcode/**
 .rush/**
 rush-logs/**
-playground/**/*
 src/**
 vite.config.ts
 vitest.config.ts

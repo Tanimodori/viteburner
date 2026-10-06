@@ -13,6 +13,9 @@
     "baseUrl": ".",
     "types": ["node"]
   },
-  "include": ["test/**/*.ts", "vitest.config.ts"],
+  // The fixture's config is the one file of the fixture that touches the published package's types
+  // (`ViteBurnerUserConfig`), so it is checked here. The fixture sources are not: they resolve `@ns`
+  // through their own tsconfig, and their correctness is judged by the E2E run, not by tsc.
+  "include": ["test/**/*.ts", "vitest.config.ts", "src/vite.config.ts"],
   "exclude": ["test/.cache", "test/.tmp"]
 }
