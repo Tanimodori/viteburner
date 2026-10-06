@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
 
-const repoRoot = __dirname;
+const packageRoot = __dirname;
 
 /**
  * E2E configuration.
@@ -9,15 +9,15 @@ const repoRoot = __dirname;
  * - `local` (default): serves the pinned Bitburner web build from `e2e/.cache/` over
  *   http://127.0.0.1. Deterministic and offline-friendly.
  * - `live`: smoke test against https://bitburner-official.github.io/ (opt-in via
- *   `npm run test:e2e:live`); result may drift with upstream releases.
+ *   `rushx test:e2e:live`); result may drift with upstream releases.
  *
- * Requires `npm run build` first (the CLI under test is `bin/viteburner.js` -> dist), which
- * `npm run test:e2e` performs automatically.
+ * Requires `rushx build` first (the CLI under test is `bin/viteburner.js` -> dist), which
+ * `rushx test:e2e` performs automatically.
  */
 export default defineConfig({
-  testDir: path.join(repoRoot, 'e2e', 'specs'),
-  globalSetup: path.join(repoRoot, 'e2e', 'global-setup.ts'),
-  outputDir: path.join(repoRoot, 'e2e', '.tmp', 'test-results'),
+  testDir: path.join(packageRoot, 'e2e', 'specs'),
+  globalSetup: path.join(packageRoot, 'e2e', 'global-setup.ts'),
+  outputDir: path.join(packageRoot, 'e2e', '.tmp', 'test-results'),
   fullyParallel: false,
   workers: 1,
   retries: 0,

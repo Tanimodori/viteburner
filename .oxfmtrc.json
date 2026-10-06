@@ -18,10 +18,11 @@
   "ignorePatterns": [
     "**/dist/**",
     "**/node_modules/**",
+    "**/.rush/**",
     "**/NetscriptDefinitions.d.ts",
     "package-lock.json",
-    "bin/**",
-    "e2e/.cache/**",
-    "e2e/.tmp/**"
+    "**/bin/**",
+    "**/e2e/.cache/**",
+    "**/e2e/.tmp/**"
   ]
 }

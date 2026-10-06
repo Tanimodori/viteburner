@@ -17,11 +17,11 @@ End-to-end tests that exercise the real sync pipeline: a real Bitburner build in
 
 ## Prerequisites
 
-- Node.js and npm
+- Node.js (`rush`/`rushx` drive the toolchain; run commands from the package folder)
 - First-time setup downloads Chromium and the pinned Bitburner web build (about 150 MB + 33 MB):
 
 ```bash
-npm run e2e:setup
+rushx e2e:setup
 ```
 
 The game build is fetched from the `bitburner-official.github.io` repository at a pinned commit, verified against a SHA-256 hash and cached in `e2e/.cache/` (gitignored).
@@ -30,13 +30,13 @@ The game build is fetched from the `bitburner-official.github.io` repository at 
 
 ```bash
 # Build + run the deterministic local E2E (recommended)
-npm run test:e2e
+rushx test:e2e
 
 # Opt-in smoke test against the live game site
-npm run test:e2e:live
+rushx test:e2e:live
 
 # Interactive UI mode
-npm run test:e2e:ui
+rushx test:e2e:ui
 ```
 
 `test:e2e` builds the package first, because the CLI under test is `bin/viteburner.js` which loads `dist/` — i.e. the same artifact that gets published to npm.
@@ -50,7 +50,7 @@ npm run test:e2e:ui
 
 ## Troubleshooting
 
-- `viteburner CLI exited ...` — the CLI log tail is printed and attached to the test result. A common cause is a stale `dist/`; re-run `npm run test:e2e` (it runs `npm run build` first).
-- Game fails to load — check that `e2e/.cache/` contains the pinned build (`npm run e2e:setup`), and that no other process occupies the ports (both game server and WebSocket ports are picked randomly per run).
+- `viteburner CLI exited ...` — the CLI log tail is printed and attached to the test result. A common cause is a stale `dist/`; re-run `rushx test:e2e` (it runs `rushx build` first).
+- Game fails to load — check that `e2e/.cache/` contains the pinned build (`rushx e2e:setup`), and that no other process occupies the ports (both game server and WebSocket ports are picked randomly per run).
 - Set `E2E_GAME_DIR=/path/to/build` to serve an existing Bitburner build instead of the pinned download.
 - Set `E2E_KEEP=1` to keep `e2e/.tmp/project/` after a run for manual inspection (the directory is overwritten on the next run either way).

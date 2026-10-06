@@ -2,6 +2,8 @@
 .oxlintrc.json
 .oxfmtrc.json
 .zcode/**
+.rush/**
+rush-logs/**
 playground/**/*
 src/**
 vite.config.ts

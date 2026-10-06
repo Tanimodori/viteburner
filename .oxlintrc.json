@@ -11,10 +11,11 @@
   "ignorePatterns": [
     "**/dist/**",
     "**/node_modules/**",
+    "**/.rush/**",
     "**/NetscriptDefinitions.d.ts",
-    "bin/**",
-    "e2e/.cache/**",
-    "e2e/.tmp/**"
+    "**/bin/**",
+    "**/e2e/.cache/**",
+    "**/e2e/.tmp/**"
   ],
   "rules": {
     "no-constant-condition": "off",

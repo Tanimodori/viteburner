@@ -11,8 +11,8 @@ import {
 
 /**
  * Opt-in smoke test against the live game site (https://bitburner-official.github.io/).
- * Run with `npm run test:e2e:live`. The result can drift when the game is updated, so this
- * project is not part of the default `npm run test:e2e`.
+ * Run with `rushx test:e2e:live`. The result can drift when the game is updated, so this
+ * project is not part of the default `rushx test:e2e`.
  */
 test.describe('viteburner live smoke test', () => {
   let fixture: ViteBurnerFixture;

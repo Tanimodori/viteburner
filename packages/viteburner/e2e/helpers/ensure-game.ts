@@ -22,12 +22,12 @@ export const PINNED_GAME = {
   tarballSha256: '2e301387aed87e54b97cea614f2207b98a22285357b5a4b10f7c7b129c4da0fd',
 } as const;
 
-export function getCacheRoot(repoRoot: string) {
-  return path.join(repoRoot, 'e2e', '.cache');
+export function getCacheRoot(packageRoot: string) {
+  return path.join(packageRoot, 'e2e', '.cache');
 }
 
-export function getGameDir(repoRoot: string) {
-  return path.join(getCacheRoot(repoRoot), 'bitburner', PINNED_GAME.commit.slice(0, 8));
+export function getGameDir(packageRoot: string) {
+  return path.join(getCacheRoot(packageRoot), 'bitburner', PINNED_GAME.commit.slice(0, 8));
 }
 
 function sha256File(file: string) {
@@ -90,7 +90,7 @@ function extract(tarball: string, dest: string): Promise<void> {
  * Set `E2E_GAME_DIR` to serve an existing build instead of downloading (it must contain `index.html`).
  * Returns the directory that contains `index.html`.
  */
-export async function ensureGame(repoRoot: string): Promise<string> {
+export async function ensureGame(packageRoot: string): Promise<string> {
   const override = process.env.E2E_GAME_DIR;
   if (override) {
     const dir = path.resolve(override);
@@ -100,7 +100,7 @@ export async function ensureGame(repoRoot: string): Promise<string> {
     return dir;
   }
 
-  const gameDir = getGameDir(repoRoot);
+  const gameDir = getGameDir(packageRoot);
   const marker = path.join(gameDir, '.sha256');
   if (fs.existsSync(marker) && fs.readFileSync(marker, 'utf8').trim() === PINNED_GAME.tarballSha256) {
     if (fs.existsSync(path.join(gameDir, 'index.html'))) {
@@ -108,7 +108,7 @@ export async function ensureGame(repoRoot: string): Promise<string> {
     }
   }
 
-  const tarball = path.join(getCacheRoot(repoRoot), `game-${PINNED_GAME.commit.slice(0, 8)}.tar.gz`);
+  const tarball = path.join(getCacheRoot(packageRoot), `game-${PINNED_GAME.commit.slice(0, 8)}.tar.gz`);
   if (!fs.existsSync(tarball) || sha256File(tarball) !== PINNED_GAME.tarballSha256) {
     const url = `https://codeload.github.com/${PINNED_GAME.repo}/tar.gz/${PINNED_GAME.commit}`;
     await download(url, tarball);

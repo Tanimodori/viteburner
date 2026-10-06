@@ -9,8 +9,8 @@ export function stripAnsi(text: string): string {
 }
 
 export interface ViteburnerCliOptions {
-  /** Repository root; the CLI is started from `bin/viteburner.js` (requires a fresh `npm run build`). */
-  repoRoot: string;
+  /** Package root; the CLI is started from `bin/viteburner.js` (requires a fresh `rushx build`). */
+  packageRoot: string;
   /** Project directory the CLI serves (a copy of `playground/` in E2E runs). */
   cwd: string;
   /** WebSocket port the game should connect to. */
@@ -23,11 +23,11 @@ const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
  * Controls a real viteburner CLI process (dist mode: `node bin/viteburner.js`).
  *
  * The whole point is to exercise the same artifact that is published to npm, so the caller must
- * build first (`npm run test:e2e` does that).
+ * build first (`rushx test:e2e` does that).
  */
 export class ViteburnerCli {
   readonly port: number;
-  private readonly repoRoot: string;
+  private readonly packageRoot: string;
   private readonly cwd: string;
   private child?: ChildProcess;
   private buffer = '';
@@ -35,7 +35,7 @@ export class ViteburnerCli {
   private exitInfo = '';
 
   constructor(options: ViteburnerCliOptions) {
-    this.repoRoot = options.repoRoot;
+    this.packageRoot = options.packageRoot;
     this.cwd = options.cwd;
     this.port = options.port;
   }
@@ -49,12 +49,12 @@ export class ViteburnerCli {
   }
 
   async start() {
-    const bin = path.join(this.repoRoot, 'bin', 'viteburner.js');
-    if (!fs.existsSync(path.join(this.repoRoot, 'dist', 'entry.js'))) {
-      throw new Error('dist/entry.js is missing. Run `npm run build` first, or use `npm run test:e2e`.');
+    const bin = path.join(this.packageRoot, 'bin', 'viteburner.js');
+    if (!fs.existsSync(path.join(this.packageRoot, 'dist', 'entry.js'))) {
+      throw new Error('dist/entry.js is missing. Run `rushx build` first, or use `rushx test:e2e`.');
     }
     this.child = spawn(process.execPath, [bin, '--cwd', this.cwd, '--port', String(this.port)], {
-      cwd: this.repoRoot,
+      cwd: this.packageRoot,
       stdio: ['ignore', 'pipe', 'pipe'],
       windowsHide: true,
     });

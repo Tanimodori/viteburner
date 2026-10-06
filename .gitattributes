@@ -1,8 +1,29 @@
 # Text files are stored with LF in the repository and checked out with CRLF everywhere.
 # eol overrides each machine's core.autocrlf, which is per-clone configuration and cannot
 # keep every checkout identical on its own. It also matches endOfLine in .oxfmtrc.json.
-* text=auto eol=crlf
+*                            text=auto eol=crlf
 
 # The CLI entry keeps LF on every platform: its shebang must work when installers
 # link it as an executable on POSIX.
-bin/viteburner.js text eol=lf
+packages/viteburner/bin/viteburner.js text eol=lf
+
+# ZCode parses a saved workflow's `/* zcode-workflow` metadata block by splitting the file
+# on "\n" and rejoining it with "\n". Under CRLF the block's last line keeps a stray "\r",
+# which YAML folds into the scalar (`required: true` parses as "true\r"), so the workflow is
+# rejected as invalid_metadata. These files must therefore be stored and checked out as LF.
+*.dwf.ts                     text eol=lf
+
+# Don't allow people to merge changes to these generated files, because the result
+# may be invalid.  You need to run "rush update" again.
+pnpm-lock.yaml               merge=text
+shrinkwrap.yaml              merge=binary
+npm-shrinkwrap.json          merge=binary
+yarn.lock                    merge=binary
+
+# Rush's JSON config files use JavaScript-style code comments.  The rule below prevents pedantic
+# syntax highlighters such as GitHub's from highlighting these comments as errors.  Your text editor
+# may also require a special configuration to allow comments in JSON.
+#
+# For more information, see this issue: https://github.com/microsoft/rushstack/issues/1088
+#
+*.json                       linguist-language=JSON-with-Comments
