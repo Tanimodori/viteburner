@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path, { relative, resolve } from 'path';
+import { WsManager } from 'bb-ws-server';
 import fg from 'fast-glob';
 import { match } from 'micromatch';
 import pc from 'picocolors';
@@ -15,7 +16,6 @@ import {
   slash,
 } from '..';
 import { fixImportPath } from './import';
-import { WsManager } from './manager';
 
 export const formatUpload = (from: string, to: string, serverName: string) => {
   to = forceStartingSlash(to);
@@ -71,7 +71,6 @@ export class WsAdapter {
         ws.off('close', handler);
       };
     });
-    this.manager.checkIfWssReused();
   }
   async getDts() {
     const filename = this.server.config.viteburner.dts;

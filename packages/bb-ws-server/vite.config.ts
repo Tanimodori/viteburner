@@ -5,18 +5,8 @@ import dts from 'vite-plugin-dts';
 
 const externalModules = [
   // exclude all dependencies
-  'acorn',
-  'bb-ws-server',
-  'cac',
-  'chokidar',
-  'fast-glob',
-  'magic-string',
-  'micromatch',
-  'pathe',
-  'picocolors',
-  'prompts',
-  'unconfig',
-  'vite',
+  'ws',
+  'zod',
   // node builtins
   ...builtinModules,
   // node builtins with prefix
@@ -24,16 +14,10 @@ const externalModules = [
 ];
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      '@': resolve(__dirname, 'src'),
-    },
-  },
   build: {
     ssr: true,
     lib: {
       entry: {
-        entry: resolve(__dirname, 'src/entry.ts'),
         index: resolve(__dirname, 'src/index.ts'),
       },
       fileName: '[name]',

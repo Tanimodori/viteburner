@@ -1,12 +1,9 @@
 {
-  "name": "viteburner",
-  "version": "0.5.3",
-  "description": "Daemon tools of bitburner using vite for script transform, file syncing, RAM monitoring and more!",
-  "bin": {
-    "viteburner": "bin/viteburner.js"
-  },
-  "main": "./dist/entry.js",
-  "module": "./dist/entry.mjs",
+  "name": "bb-ws-server",
+  "version": "0.1.0",
+  "description": "WebSocket server speaking the Bitburner Remote API protocol, with a WsManager that drives it.",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "exports": {
     ".": {
       "require": "./dist/index.js",
@@ -31,7 +28,7 @@
   },
   "keywords": [
     "bitburner",
-    "vite"
+    "websocket"
   ],
   "author": "Tanimodori",
   "license": "MIT",
@@ -40,32 +37,17 @@
   },
   "homepage": "https://github.com/Tanimodori/viteburner#readme",
   "devDependencies": {
-    "@types/estree": "^1.0.0",
-    "@types/micromatch": "^4.0.2",
     "@types/node": "^18.14.1",
-    "@types/prompts": "^2.4.2",
+    "@types/ws": "^8.5.4",
     "oxfmt": "^0.72.0",
     "oxlint": "^1.87.0",
-    "rollup": "^3.30.0",
     "typescript": "^4.9.5",
     "vite": "^4.1.4",
     "vite-plugin-dts": "2.0.2",
     "vitest": "^0.34.6"
   },
   "dependencies": {
-    "acorn": "^8.8.2",
-    "bb-ws-server": "workspace:*",
-    "cac": "^6.7.14",
-    "chokidar": "^3.5.3",
-    "fast-glob": "^3.2.12",
-    "magic-string": "^0.30.0",
-    "micromatch": "^4.0.5",
-    "pathe": "^1.1.0",
-    "picocolors": "^1.0.0",
-    "prompts": "^2.4.2",
-    "unconfig": "^0.3.7"
-  },
-  "peerDependencies": {
-    "vite": "^3.0.0 || ^4.0.0"
+    "ws": "^8.12.1",
+    "zod": "^3.20.6"
   }
 }

@@ -94,7 +94,7 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
 
       // create ws server
       logger.info('ws', 'creating ws server...');
-      const wsManager = new WsManager({ port, timeout });
+      const wsManager = new WsManager({ port, timeout, logger });
       wsAdapter = new WsAdapter(wsManager, server);
 
       // handle hmr
