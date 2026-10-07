@@ -28,7 +28,7 @@
 
 1. 每个 fixture 文件都上传到游戏：CLI 日志里有该文件的 `hmr add … (done)`，游戏侧 `ls` 也列得出。
 2. 游戏能 `cat` 回每个文件且内容正确：转换过的带 inline sourcemap，原样复制的没有。
-3. `dumpFiles` 把转换结果克隆到 fixture 的 `dist/`，内容与上传一致。
+3. `dumpFiles` 把转换结果克隆到 fixture 的 `dist/`：内容与提交在 `test/fixture/dist/` 的基线逐字比对（inline sourcemap 与行尾除外）。
 4. 每个可执行脚本逐个 `run`，核对其输出行，且没有运行时错误。
 5. 本游戏拒绝执行的文件（`ns1.script`、`importExternal/main.js`）报告拒绝信息，而不是假装成功。
 6. 新增源文件实时同步到游戏、能被 `cat`/`run`，删除后在游戏里消失。
@@ -51,6 +51,8 @@ test/
   fixture/           fixture 的清单与脚手架（工程本体在包根 src/）
     project.ts         fixture 工程的路径、复制成隔离副本、读写源文件
     manifest.ts       fixture 清单：上传/落点/转换/期望内容/运行结论 —— 同步结果的唯一事实来源
+    dump.ts           dump 基线路径与 inline sourcemap 归一化（第 3 步的逐字比对）
+    dist/             dump 基线（golden file）：第 3 步逐字比对的转换结果，提交进仓库
     verify-script.ts  六步测试第 6 步新增的那个脚本，及其来源/上传路径
     manifest.spec.ts  不开浏览器、不跑 CLI，只校验清单与磁盘内容一致
   cli/               cli 操作，vite 框架搭建
@@ -98,6 +100,6 @@ rushx typecheck     # tsc --noEmit
 
 ## 目录与忽略
 
-固定构建与临时项目缓存于 `test/.cache/`、`test/.tmp/`（均 gitignore）。包根的 `src/` 是只读的 fixture 工程，测试运行时被整份复制到 `test/.tmp/project/`，CLI 的 watch 与 `dumpFiles` 都只写副本。`packages/viteburner` 里原来的 `e2e/` 与 `playwright.config.ts` 已删除。
+固定构建与临时项目缓存于 `test/.cache/`、`test/.tmp/`（均 gitignore），基线在 `test/fixture/dist/`（提交进仓库）。包根的 `src/` 是只读的 fixture 工程，测试运行时被整份复制到 `test/.tmp/project/`，CLI 的 watch 与 `dumpFiles` 都只写副本——`src/` 里没有任何一处会被运行改写。`packages/viteburner` 里原来的 `e2e/` 与 `playwright.config.ts` 已删除。
 
 fixture 的 `src/**` 因此不在本包 tsc 的扫描范围内（`tsconfig.json` 只 include `test/**` 与 fixture 的 `vite.config.ts`）：这些源码 import `@ns`，只有 CLI 把游戏类型定义下载到工程里之后才解析得了，其正确性由 E2E 运行判定。

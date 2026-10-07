@@ -33,10 +33,11 @@ export interface E2eProject {
 
 /**
  * Copy the read-only fixture project into an isolated destination so E2E runs never touch it (watch
- * events and the CLI's `dumpFiles` output write into `dist/`).
+ * events and the CLI's `dumpFiles` output write into the copy's `dist/`).
  *
- * A `dist/` in the fixture is skipped: it is generated output, and copying a stale one would let the
- * dump assertions pass on last run's bytes.
+ * A `dist/` in the fixture itself is skipped: the fixture's `build.outDir` is `dist`, so one could
+ * only be a stray `vite build` output that has no business in a run. The dump baselines are not in
+ * the fixture (`test/fixture/dist/`, see `dump.ts`), so this does not touch them.
  */
 export function createProject(destDir = PROJECT_TMP_DIR): E2eProject {
   fs.rmSync(destDir, { recursive: true, force: true });

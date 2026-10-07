@@ -2,6 +2,7 @@ import path from 'node:path';
 import type { Browser, BrowserContext, Page } from 'playwright';
 import { afterAll, beforeAll, describe, expect, it, onTestFailed } from 'vitest';
 import { ViteBurner, startViteBurner, stopViteBurner } from './cli/vite';
+import { dumpBaselinePath, endsWithInlineSourcemap, normalizeDump } from './fixture/dump';
 import { FIXTURE_FILES, GAME_DIRECTORIES, uploadLogPattern } from './fixture/manifest';
 import { E2eProject, createProject, removeProject } from './fixture/project';
 import { VERIFY_MARKER, VERIFY_SCRIPT, VERIFY_SOURCE, VERIFY_UPLOAD } from './fixture/verify-script';
@@ -143,15 +144,11 @@ describe(`viteburner E2E (${live ? 'online' : 'offline'})`, () => {
       for (const expected of file.contains) {
         expect(content, `cat ${file.upload} should contain ${JSON.stringify(expected)}`).toContain(expected);
       }
-      // `sourcemap: 'inline'` in the fixture config: transformed files carry an inline map, and the
-      // files copied verbatim must not have gained one.
-      if (file.transformed) {
-        expect(content, `cat ${file.upload} should carry an inline sourcemap`).toContain(
-          '//# sourceMappingURL=data:application/json;base64,',
-        );
-      } else {
-        expect(content, `cat ${file.upload} should be copied verbatim`).not.toContain('sourceMappingURL');
-      }
+      // `sourcemap: 'inline'` in the fixture config, so the trailing map is what separates a
+      // transformed upload from a verbatim one. The modal renders the file as stored behind its own
+      // `<name>\n\n` header, so the file's last line is still the last line here — and asking where
+      // the comment lands cannot be answered by a stray `sourceMappingURL` in the file's own text.
+      expect(endsWithInlineSourcemap(content), `inline sourcemap at the end of ${file.upload}`).toBe(file.transformed);
     }
   });
 
@@ -162,6 +159,14 @@ describe(`viteburner E2E (${live ? 'online' : 'offline'})`, () => {
       for (const expected of file.contains) {
         expect(dumped, `${file.dump} should contain ${JSON.stringify(expected)}`).toContain(expected);
       }
+
+      // The dump is the transformed source, so the baseline is the whole compiled file, not a set of
+      // substrings: any change in what the pipeline emits fails here as a diff naming the line.
+      // `normalizeDump` drops the inline sourcemap and line endings — see `fixture/dump.ts` — so the
+      // map is paid for by asserting where it lands, which a substring search could not tell apart
+      // from a verbatim file that merely mentions `sourceMappingURL`.
+      expect(endsWithInlineSourcemap(dumped), `inline sourcemap at the end of ${file.dump}`).toBe(file.transformed);
+      await expect(normalizeDump(dumped)).toMatchFileSnapshot(dumpBaselinePath(file.dump));
     }
   });
 

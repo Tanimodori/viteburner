@@ -13,6 +13,11 @@ packages/viteburner/bin/viteburner.js text eol=lf
 # rejected as invalid_metadata. These files must therefore be stored and checked out as LF.
 *.dwf.ts                     text eol=lf
 
+# The E2E dump baselines are compared byte for byte against vite's transform output, which always
+# terminates lines with "\n". The `eol=crlf` above would hand a fresh checkout CRLF baselines and
+# fail the comparison on every platform, so these are pinned to LF.
+tests/viteburner-e2e-test/test/fixture/dist/** text eol=lf
+
 # Don't allow people to merge changes to these generated files, because the result
 # may be invalid.  You need to run "rush update" again.
 pnpm-lock.yaml               merge=text
