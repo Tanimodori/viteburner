@@ -104,8 +104,3 @@ export function onKeypress(handler: KeypressHandler) {
     running: () => running,
   } as KeypressHandlerControl;
 }
-
-let handler: KeypressHandler | undefined;
-export function setHandler(value?: KeypressHandler) {
-  handler = value;
-}
