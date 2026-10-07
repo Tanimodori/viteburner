@@ -8,26 +8,17 @@ import type { ViteService } from '@/services/vite';
 import type { WatchService } from '@/services/watch';
 import type { WsService } from '@/services/ws';
 import type { HmrData } from '@/types';
-import { forceStartingSlash, getSourceMapString, isScriptFile, removeStartingSlash, slash, writeFile } from '@/utils';
+import {
+  forceStartingSlash,
+  formatDownload,
+  formatUpload,
+  getSourceMapString,
+  isScriptFile,
+  removeStartingSlash,
+  slash,
+  writeFile,
+} from '@/utils';
 import { fixImportPath } from './import';
-
-export const formatUpload = (from: string, to: string, serverName: string) => {
-  to = forceStartingSlash(to);
-  const dest = `@${serverName}:${to}`;
-  return {
-    styled: `${pc.dim(from)} ${pc.reset('->')} ${pc.dim(dest)}`,
-    raw: `${from} -> ${dest}`,
-  };
-};
-
-export const formatDownload = (from: string, to: string, serverName: string) => {
-  to = removeStartingSlash(to);
-  const src = `@${serverName}:/${from}`;
-  return {
-    styled: `${pc.dim(src)} ${pc.reset('->')} ${pc.dim(to)}`,
-    raw: `${src} -> ${to}`,
-  };
-};
 
 export interface FileContent {
   filename: string;
@@ -40,12 +31,6 @@ export interface ResolvedDataItem {
 }
 
 export type ResolvedData = ResolvedDataItem[];
-
-export const defaultDownloadLocation = (file: string) => {
-  return 'src/' + file;
-};
-
-export const defaultDts = 'NetscriptDefinitions.d.ts';
 
 export interface SyncServiceDeps {
   ws: WsService;
@@ -61,6 +46,9 @@ export interface SyncServiceDeps {
  * other services directly, since they are peers in the same session. The two things that arrive from
  * outside it (a file changed, the game connected) are delivered by the session that owns it: see
  * `handleHmrMessage` and `onConnected`.
+ *
+ * The operations the player asks for live here too — the full upload/download and the RAM reports —
+ * because each one is a read of, or a push through, this same pipeline.
  */
 export class SyncService {
   buffers: Map<string, HmrData> = new Map();
@@ -263,7 +251,29 @@ export class SyncService {
     }
   }
 
+  private checkConnection() {
+    if (!this.ws.connected) {
+      logger.error('conn', pc.red('no connection'));
+      return false;
+    }
+    return true;
+  }
+
+  /** Re-send every watched file, as if each one had just changed. */
+  fullUpload() {
+    if (!this.checkConnection()) {
+      return;
+    }
+    logger.info('upload', pc.reset('force full-upload triggered'));
+    void this.watch.fullReload();
+  }
+
   async fullDownload() {
+    if (!this.checkConnection()) {
+      return;
+    }
+    logger.info('download', pc.reset('force full-download triggered'));
+
     // stop watching
     logger.info('vite', pc.reset('stop watching for file changes while downloading'));
     this.watch.setEnabled(false);
@@ -324,6 +334,8 @@ export class SyncService {
   }
 
   async getRamUsage(pattern?: string) {
+    logger.info('ram', pc.reset('fetching ram usage of scripts...'));
+
     // get patterns
     const patterns = pattern ?? this.watch.patterns;
     if (!patterns) {
@@ -343,6 +355,21 @@ export class SyncService {
     for (const file of files) {
       await this.getRamUsageLocal(file);
     }
+  }
+
+  /** The local scripts that have a RAM cost — the choices to offer for a per-file report. */
+  async getRamUsageLocalFiles() {
+    const pattern = '**/*.{js,ts,script}';
+    const files = await fg(pattern, { cwd: this.vite.root });
+    files.sort();
+    // The files worth offering as a choice: not a declaration, not the synced definitions, and
+    // mapped to at least one upload destination.
+    return files.filter((file) => {
+      if (file.endsWith('.d.ts') || file === this.vite.config.dts) {
+        return false;
+      }
+      return this.getRamUsageLocalData(file).length > 0;
+    });
   }
 
   getRamUsageLocalData(file: string) {
@@ -388,6 +415,10 @@ export class SyncService {
   }
 
   async getRamUsageLocal(file: string) {
+    if (!fs.existsSync(resolve(this.vite.root, file))) {
+      logger.error('ram', `file ${file} does not exist`);
+      return false;
+    }
     const resolvedData = this.getRamUsageLocalData(file);
     return this.getRamUsageLocalRaw(file, resolvedData);
   }

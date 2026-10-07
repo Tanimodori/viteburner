@@ -1,5 +1,8 @@
 import { ResolvedViteBurnerConfig, ViteBurnerConfig, WatchItem } from '@/types';
-import { defaultUploadLocation, fixStartingSlash } from '@/utils';
+import { defaultDownloadLocation, defaultUploadLocation, fixStartingSlash } from '@/utils';
+
+/** The definition file the game serves, unless the config names another. */
+export const defaultDts = 'NetscriptDefinitions.d.ts';
 
 export function resolveWatchLocation(location: WatchItem['location']) {
   return (filename: string) => {
@@ -34,7 +37,7 @@ export function resolveDts(dts: ViteBurnerConfig['dts']) {
   } else if (dts === false) {
     return undefined;
   } else {
-    return 'NetscriptDefinitions.d.ts';
+    return defaultDts;
   }
 }
 
@@ -76,7 +79,7 @@ export function resolveConfig(config: ViteBurnerConfig) {
     ignoreInitial: config.ignoreInitial ?? false,
     download: {
       server: Array.isArray(server) ? server : [server],
-      location: config?.download?.location ?? ((file) => 'src/' + file),
+      location: config?.download?.location ?? defaultDownloadLocation,
       ignoreTs: config?.download?.ignoreTs ?? true,
       ignoreSourcemap: config?.download?.ignoreSourcemap ?? true,
     },

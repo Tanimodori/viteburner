@@ -15,7 +15,11 @@ export interface ViteBurnerStatus {
 }
 
 /**
- * What the daemon can be asked to do, one method per operation.
+ * What the plugin can be asked to do, one method per capability.
+ *
+ * This is the plugin's whole public surface: a caller holding only the resolved config — the CLI, a
+ * test, another plugin — asks for an operation through the plugin object instead of through the dev
+ * server's websocket.
  *
  * Nothing here names an input, a prompt, or a terminal: which key asks for which operation, what to
  * ask the player first, and how to render the answer are the caller's business. An operation needs a
@@ -23,7 +27,7 @@ export interface ViteBurnerStatus {
  * `configureServer` that starts it until that dev server is closed; outside that window each one is a
  * no-op.
  */
-export interface ViteBurnerPluginCommands {
+export interface ViteBurnerPluginApi {
   /** Tear the running session's services down, without ending the process. */
   dispose(): void;
   /** The daemon's state, or `undefined` while no session is running. */
@@ -44,16 +48,6 @@ export interface ViteBurnerPluginCommands {
   getRamUsageLocalFiles(): Promise<string[]>;
   /** The filenames on a server, or `null` if the game could not be asked — the choices for {@link showRamUsageRemote}. */
   getFileNames(server: string): Promise<string[] | null>;
-}
-
-/**
- * What the plugin can be asked to do, one method per capability.
- *
- * This is the plugin's whole public surface: a caller holding only the resolved config — the CLI, a
- * test, another plugin — asks for an operation through the plugin object instead of through the dev
- * server's websocket.
- */
-export interface ViteBurnerPluginApi extends ViteBurnerPluginCommands {
   /**
    * The viteburner config this dev server resolved, the same object on `resolvedConfig.viteburner`.
    *

@@ -63,14 +63,14 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): ViteBurn
         port: session.vite.config.port,
         pending: session.sync.pending,
       },
-    fullUpload: () => session?.core.fullUpload(),
-    fullDownload: () => session?.core.fullDownload(),
-    showRamUsageAll: () => session?.core.showRamUsageAll(),
-    showRamUsageGlob: (pattern) => session?.core.showRamUsageGlob(pattern),
-    showRamUsageLocal: (file) => session?.core.showRamUsageLocal(file),
-    showRamUsageRemote: (server, filename) => session?.core.showRamUsageRemote(server, filename),
-    getRamUsageLocalFiles: async () => (session ? session.core.getRamUsageLocalFiles() : []),
-    getFileNames: async (server) => (session ? session.core.getFileNames(server) : null),
+    fullUpload: () => session?.sync.fullUpload(),
+    fullDownload: () => session?.sync.fullDownload(),
+    showRamUsageAll: () => session?.sync.getRamUsage(),
+    showRamUsageGlob: (pattern) => session?.sync.getRamUsage(pattern),
+    showRamUsageLocal: (file) => session?.sync.getRamUsageLocal(file),
+    showRamUsageRemote: (server, filename) => session?.sync.getRamUsageRemote(server, filename),
+    getRamUsageLocalFiles: async () => (session ? session.sync.getRamUsageLocalFiles() : []),
+    getFileNames: async (server) => (session ? session.sync.getFileNames(server) : null),
   };
 
   return {

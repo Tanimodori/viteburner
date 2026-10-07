@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import pc from 'picocolors';
 import { SourceMap } from 'rollup';
 
 export function getSourceMapString(map?: SourceMap | null): string {
@@ -50,6 +51,30 @@ export const removeStartingSlash = (s: string) => {
 
 export const defaultUploadLocation = (file: string) => {
   return file.replace(/^src\//, '').replace(/\.ts$/, '.js');
+};
+
+export const defaultDownloadLocation = (file: string) => {
+  return 'src/' + file;
+};
+
+/** Render an upload as a pair of lines: `styled` for the terminal, `raw` for a log or a test. */
+export const formatUpload = (from: string, to: string, serverName: string) => {
+  to = forceStartingSlash(to);
+  const dest = `@${serverName}:${to}`;
+  return {
+    styled: `${pc.dim(from)} ${pc.reset('->')} ${pc.dim(dest)}`,
+    raw: `${from} -> ${dest}`,
+  };
+};
+
+/** Render a download as a pair of lines: `styled` for the terminal, `raw` for a log or a test. */
+export const formatDownload = (from: string, to: string, serverName: string) => {
+  to = removeStartingSlash(to);
+  const src = `@${serverName}:/${from}`;
+  return {
+    styled: `${pc.dim(src)} ${pc.reset('->')} ${pc.dim(to)}`,
+    raw: `${src} -> ${to}`,
+  };
 };
 
 // from vite packages\vite\src\node\utils.ts

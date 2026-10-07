@@ -1,7 +1,6 @@
 import type { ViteDevServer } from 'vite';
 import { logger } from '@/console';
 import { EventBus } from '@/services/bus';
-import { CoreService } from '@/services/core';
 import { SyncService } from '@/services/sync';
 import { ViteService } from '@/services/vite';
 import { WatchService } from '@/services/watch';
@@ -24,7 +23,6 @@ export class Session {
   readonly watch: WatchService;
   readonly ws: WsService;
   readonly sync: SyncService;
-  readonly core: CoreService;
 
   private readonly disposers: (() => void)[] = [];
   private disposed = false;
@@ -48,13 +46,6 @@ export class Session {
     );
     this.ws = new WsService({ port: config.port, timeout: config.timeout, logger }, bus);
     this.sync = new SyncService({ ws: this.ws, watch: this.watch, vite: this.vite });
-    this.core = new CoreService({
-      ws: this.ws,
-      sync: this.sync,
-      watch: this.watch,
-      vite: this.vite,
-      dispose: () => this.dispose(),
-    });
   }
 
   start() {
