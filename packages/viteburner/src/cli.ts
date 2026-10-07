@@ -2,11 +2,8 @@ import cac from 'cac';
 import { createServer } from 'vite';
 import pkg from '../package.json';
 import { logger } from './console';
-import { dispatchKey, displayWatchAndHelp } from './keys';
-import { findViteBurnerPlugin } from './plugins/api';
-import { viteburnerPlugin } from './plugins/viteburner';
-import { EventBus } from './services/bus';
-import { InputService } from './services/input';
+import { findViteBurnerPlugin, viteburnerPlugin } from './plugins';
+import { cliPlugin, displayStatus, displayWatchAndHelp } from './plugins/cli';
 import { ViteBurnerInlineConfig } from './types';
 
 const cli = cac('viteburner');
@@ -34,32 +31,21 @@ export async function startDev(options: any) {
 
   logger.info('version', pkg.version);
 
-  // The bus and the key reader are the CLI's, not a dev server's: vite builds a fresh server on a
-  // config change, and neither the events nor stdin are replaced with it.
-  const bus = new EventBus();
-  const input = new InputService(bus);
-
-  // create server
   logger.info('vite', 'creating dev server...');
+  // Two plugins, two control planes: the daemon's, and the CLI's own keys and help. Only the CLI adds
+  // the second, which is why the daemon plugin never learns what a key is.
   const server = await createServer({
     ...(cwd && { root: cwd }),
     viteburner: resolveInlineConfig,
-    plugins: [viteburnerPlugin(resolveInlineConfig, bus)],
+    plugins: [viteburnerPlugin(resolveInlineConfig), cliPlugin()],
   });
 
-  // Keypresses are the CLI's input and the plugin's api is the only way in, so the CLI keeps the key
-  // map and the help that documents it, and calls the matching api command for each key it answers.
-  // Starting the reader is this call, explicitly: nothing else attaches one, and a reader that is
-  // never started leaves every key unanswered.
+  // Startup banner: the daemon's state, then the hint for the keys above.
   const plugin = findViteBurnerPlugin(server.config);
   if (!plugin) {
     throw new Error('the viteburner plugin is not part of this config');
   }
-  bus.on('input:key', ({ key }) => dispatchKey(key, plugin.api, input));
-  input.start();
-
-  // Startup banner: the daemon's state, then the hint for the keys above.
-  plugin.api.displayStatus();
+  displayStatus(plugin.api);
   displayWatchAndHelp();
 }
 

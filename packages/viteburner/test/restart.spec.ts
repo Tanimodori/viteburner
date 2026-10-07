@@ -4,8 +4,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { createServer, type ViteDevServer } from 'vite';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { findViteBurnerPlugin } from '../src/plugins/api';
 import { viteburnerPlugin } from '../src/plugins/viteburner';
+import { findViteBurnerPlugin } from '../src/plugins/viteburner/api';
 import type { ViteBurnerUserConfig } from '../src/types';
 
 /**

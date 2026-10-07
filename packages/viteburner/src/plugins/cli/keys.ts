@@ -1,6 +1,9 @@
 import pc from 'picocolors';
-import { logger } from './console';
-import { ViteBurnerPluginApi } from './plugins/api';
+import { logger } from '@/console';
+import type { ViteBurnerPluginApi } from '@/plugins/viteburner/api';
+import { displayRamUsage, displayStatus, quit } from './commands';
+import { resumeKeypress, suspendKeypress } from './keypress';
+import type { Keypress } from './keypress';
 
 export function displayKeyHelpHint() {
   logger.info(
@@ -18,7 +21,7 @@ export function displayWatchAndHelp() {
   displayKeyHelpHint();
 }
 
-/** The keys this CLI answers, and what each one does. The plugin knows none of them. */
+/** The keys this CLI answers, and what each one does. The daemon plugin knows none of them. */
 function displayHelp() {
   logger.info('help');
   const commands = [
@@ -44,36 +47,30 @@ export interface KeyAction {
   interactive?: boolean;
 }
 
-/** The keys the CLI answers, and the plugin api command each one calls. */
+/** The keys the CLI answers, and the plugin api operation each one runs. */
 export const keyActions: Record<string, KeyAction> = {
-  q: { run: (api) => api.quit() },
-  s: { run: (api) => api.displayStatus() },
+  q: { run: quit },
+  s: { run: displayStatus },
   h: { run: displayHelp },
   u: { run: (api) => api.fullUpload() },
   d: { run: (api) => api.fullDownload() },
-  r: { run: (api) => api.showRamUsage(), interactive: true },
+  r: { run: displayRamUsage, interactive: true },
 };
 
-/** What a key handler needs from the reader it is answering: the ability to hand the terminal over. */
-export interface KeyDispatchControl {
-  suspend(): void;
-  resume(): void;
-}
-
-/** Answer one keypress: run the key's command, then print the hint that ends the turn. */
-export async function dispatchKey(key: string, api: ViteBurnerPluginApi, control: KeyDispatchControl) {
+/** Answer one keypress: run the key's operation, then print the hint that ends the turn. */
+export async function dispatchKey(key: string, api: ViteBurnerPluginApi, keypress: Keypress) {
   const action = keyActions[key];
   if (!action) {
     return;
   }
   if (action.interactive) {
-    control.suspend();
+    suspendKeypress(keypress);
   }
   try {
     await action.run(api);
   } finally {
     if (action.interactive) {
-      control.resume();
+      resumeKeypress(keypress);
     }
   }
   displayWatchAndHelp();

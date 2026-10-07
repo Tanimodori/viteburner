@@ -36,13 +36,12 @@ export function getDefaultConfig(): UserConfig {
  * per-server state of its own beyond the session `configureServer` creates, and ties that session's
  * teardown to the dev server that owns it rather than to "the current session".
  *
- * `bus` is the process-wide event bus the CLI keeps; a caller that runs the plugin without a CLI gets
- * a private one, so the plugin still works on its own.
+ * The event bus the services publish their external events on is this plugin's own: it is the
+ * daemon's ingress, not an interface the CLI or any other caller reaches into. Which key asks for
+ * which operation is decided by the CLI that adds this plugin — see `plugins/cli`.
  */
-export function viteburnerPlugin(
-  inlineConfig: ViteBurnerInlineConfig,
-  bus: EventBus = new EventBus(),
-): ViteBurnerPlugin {
+export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): ViteBurnerPlugin {
+  const bus = new EventBus();
   const resolvedVirtualModuleId = '\0' + virtualModuleId;
   // The config the plugin resolved, captured at `configResolved` so `getPluginConfig` can answer
   // without a running server — the commands below all need one, this read does not.
@@ -54,15 +53,24 @@ export function viteburnerPlugin(
 
   const api: ViteBurnerPluginApi = {
     getPluginConfig: () => pluginConfig,
-    quit: () => session?.core.quit(),
-    displayStatus: () => session?.core.displayStatus(),
+    dispose: () => {
+      session?.dispose();
+      session = undefined;
+    },
+    getStatus: () =>
+      session && {
+        connected: session.ws.connected,
+        port: session.vite.config.port,
+        pending: session.sync.pending,
+      },
     fullUpload: () => session?.core.fullUpload(),
     fullDownload: () => session?.core.fullDownload(),
-    showRamUsage: () => session?.core.showRamUsage(),
     showRamUsageAll: () => session?.core.showRamUsageAll(),
-    showRamUsageGlob: () => session?.core.showRamUsageGlob(),
-    showRamUsageLocal: () => session?.core.showRamUsageLocal(),
-    showRamUsageRemote: () => session?.core.showRamUsageRemote(),
+    showRamUsageGlob: (pattern) => session?.core.showRamUsageGlob(pattern),
+    showRamUsageLocal: (file) => session?.core.showRamUsageLocal(file),
+    showRamUsageRemote: (server, filename) => session?.core.showRamUsageRemote(server, filename),
+    getRamUsageLocalFiles: async () => (session ? session.core.getRamUsageLocalFiles() : []),
+    getFileNames: async (server) => (session ? session.core.getFileNames(server) : null),
   };
 
   return {

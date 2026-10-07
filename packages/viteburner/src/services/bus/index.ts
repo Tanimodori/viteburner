@@ -4,9 +4,13 @@ import type { HmrData, ResolvedViteBurnerConfig } from '@/types';
 /**
  * Everything that reaches the daemon from outside it.
  *
- * Only the four external sources publish here: the file watcher, the game's socket, vite's server
- * lifecycle, and the player's keyboard. Everything else is a direct call between the services that
- * make up a session, so this map stays the whole of what can arrive from outside.
+ * Only the three external sources publish here: the file watcher, the game's socket, and vite's
+ * server lifecycle. Everything else is a direct call between the services that make up a session, so
+ * this map stays the whole of what can arrive from outside.
+ *
+ * The player's keyboard is not among them: the keys are the CLI's control plane, read and answered by
+ * the CLI's own plugin (`plugins/cli`) against the api this plugin publishes. The bus is the daemon's
+ * ingress only, which is what keeps it free of anything the CLI owns.
  */
 export interface AppEvents {
   /** A dev server was created and its services are running. */
@@ -19,8 +23,6 @@ export interface AppEvents {
   'ws:disconnected': undefined;
   /** A watched file was added, changed, or removed. */
   'fs:changed': HmrData;
-  /** One key reached the CLI's stdin reader. */
-  'input:key': { key: string };
 }
 
 export type EventHandler<T> = (payload: T) => void | Promise<void>;

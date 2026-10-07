@@ -53,7 +53,7 @@ export class Session {
       sync: this.sync,
       watch: this.watch,
       vite: this.vite,
-      shutdown: () => this.quit(),
+      dispose: () => this.dispose(),
     });
   }
 
@@ -78,11 +78,5 @@ export class Session {
     this.ws.stop();
     this.watch.stop();
     void this.bus.emit('vite:closed', undefined);
-  }
-
-  /** The player asked to leave: drop this session's services, then exit. */
-  private quit() {
-    this.dispose();
-    process.exit(0);
   }
 }
