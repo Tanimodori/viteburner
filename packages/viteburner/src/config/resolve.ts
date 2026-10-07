@@ -1,5 +1,5 @@
 import { ResolvedViteBurnerConfig, ViteBurnerConfig, WatchItem } from '@/types';
-import { defaultUploadLocation, fixStartingSlash } from '..';
+import { defaultUploadLocation, fixStartingSlash } from '@/utils';
 
 export function resolveWatchLocation(location: WatchItem['location']) {
   return (filename: string) => {

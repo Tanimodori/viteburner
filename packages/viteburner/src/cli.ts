@@ -1,10 +1,12 @@
 import cac from 'cac';
 import { createServer } from 'vite';
 import pkg from '../package.json';
-import { logger, onKeypress } from './console';
-import { createKeyHandler, displayWatchAndHelp } from './keys';
+import { logger } from './console';
+import { dispatchKey, displayWatchAndHelp } from './keys';
 import { findViteBurnerPlugin } from './plugins/api';
 import { viteburnerPlugin } from './plugins/viteburner';
+import { EventBus } from './services/bus';
+import { InputService } from './services/input';
 import { ViteBurnerInlineConfig } from './types';
 
 const cli = cac('viteburner');
@@ -32,12 +34,17 @@ export async function startDev(options: any) {
 
   logger.info('version', pkg.version);
 
+  // The bus and the key reader are the CLI's, not a dev server's: vite builds a fresh server on a
+  // config change, and neither the events nor stdin are replaced with it.
+  const bus = new EventBus();
+  const input = new InputService(bus);
+
   // create server
   logger.info('vite', 'creating dev server...');
   const server = await createServer({
     ...(cwd && { root: cwd }),
     viteburner: resolveInlineConfig,
-    plugins: [viteburnerPlugin(resolveInlineConfig)],
+    plugins: [viteburnerPlugin(resolveInlineConfig, bus)],
   });
 
   // Keypresses are the CLI's input and the plugin's api is the only way in, so the CLI keeps the key
@@ -48,7 +55,8 @@ export async function startDev(options: any) {
   if (!plugin) {
     throw new Error('the viteburner plugin is not part of this config');
   }
-  onKeypress(createKeyHandler(plugin.api));
+  bus.on('input:key', ({ key }) => dispatchKey(key, plugin.api, input));
+  input.start();
 
   // Startup banner: the daemon's state, then the hint for the keys above.
   plugin.api.displayStatus();

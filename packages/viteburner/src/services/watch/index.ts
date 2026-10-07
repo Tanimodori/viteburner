@@ -1,37 +1,47 @@
-import EventEmitter from 'events';
 import fs from 'fs';
 import { resolve } from 'path';
-import { FSWatcher, WatchOptions } from 'chokidar';
-import chokidar from 'chokidar';
+import chokidar, { FSWatcher, WatchOptions } from 'chokidar';
 import fg from 'fast-glob';
 import { isMatch } from 'micromatch';
+import { EventBus } from '@/services/bus';
 import { ResolvedWatchItem } from '@/types';
-import { removeStartingSlash, slash } from '..';
-import { hmrPluginName } from './viteburner';
+import { removeStartingSlash, slash } from '@/utils';
 
-export class WatchManager {
+/**
+ * The file watcher, and the source of the `fs:changed` event.
+ *
+ * It knows which pattern matched (and so where a file uploads), but nothing about the game: it turns
+ * a chokidar event into one `fs:changed` payload on the bus.
+ */
+export class WatchService {
   items: ResolvedWatchItem[];
   options: WatchOptions;
   watcher?: FSWatcher;
   initial: boolean;
   enabled: boolean;
   enabledTimeStamp: number;
-  emitter: EventEmitter;
-  constructor(items: ResolvedWatchItem[], options: WatchOptions = {}) {
+
+  constructor(
+    items: ResolvedWatchItem[],
+    options: WatchOptions,
+    private readonly bus: EventBus,
+  ) {
     this.items = items;
     this.options = options;
     this.initial = true;
     this.enabled = true;
     this.enabledTimeStamp = 0;
-    this.emitter = new EventEmitter();
   }
+
   get patterns() {
     return this.items.map((item) => item.pattern);
   }
+
   findItem(file: string) {
     return this.items.find((item) => isMatch(file, item.pattern));
   }
-  init() {
+
+  start() {
     this.watcher = chokidar.watch(this.patterns, this.options);
     // add watcher to ready watchers when ready
     this.watcher.on('ready', () => {
@@ -46,6 +56,7 @@ export class WatchManager {
       });
     }
   }
+
   triggerHmr(file: string, event: string) {
     // not enabled
     if (!this.enabled) {
@@ -59,7 +70,7 @@ export class WatchManager {
     // emit the event
     const item = this.findItem(file);
     if (item) {
-      this.emitter.emit(hmrPluginName, {
+      void this.bus.emit('fs:changed', {
         ...item,
         file: slash(file),
         event,
@@ -70,12 +81,14 @@ export class WatchManager {
       throw new Error(`File ${file} does not match any patterns`);
     }
   }
+
   setEnabled(value: boolean) {
     this.enabled = value;
     if (value) {
       this.enabledTimeStamp = Date.now();
     }
   }
+
   async fullReload() {
     // skip timestamp check
     this.enabledTimeStamp = 0;
@@ -84,6 +97,7 @@ export class WatchManager {
       this.triggerHmr(file as string, 'change');
     }
   }
+
   /** Get all possible filenames to upload */
   getUploadFilenames(filename: string) {
     // fix starting slash
@@ -97,12 +111,14 @@ export class WatchManager {
 
     return item.location(filename);
   }
+
   /** Shoutcut of `getUploadFilenames(filename).find(server) */
   getUploadFilenamesByServer(filename: string, server: string) {
     const filenames = this.getUploadFilenames(filename);
     return filenames.find((item) => item.server === server)?.filename;
   }
-  close() {
+
+  stop() {
     this.watcher?.close();
   }
 }

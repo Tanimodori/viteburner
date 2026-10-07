@@ -1,5 +1,5 @@
 import pc from 'picocolors';
-import { KeypressHandler, logger } from './console';
+import { logger } from './console';
 import { ViteBurnerPluginApi } from './plugins/api';
 
 export function displayKeyHelpHint() {
@@ -54,23 +54,27 @@ export const keyActions: Record<string, KeyAction> = {
   r: { run: (api) => api.showRamUsage(), interactive: true },
 };
 
-/** Forward keypresses to the plugin: run the key's command, then print the hint that ends the turn. */
-export function createKeyHandler(api: ViteBurnerPluginApi): KeypressHandler {
-  return async (ctx) => {
-    const action = keyActions[ctx.key.name];
-    if (!action) {
-      return;
-    }
+/** What a key handler needs from the reader it is answering: the ability to hand the terminal over. */
+export interface KeyDispatchControl {
+  suspend(): void;
+  resume(): void;
+}
+
+/** Answer one keypress: run the key's command, then print the hint that ends the turn. */
+export async function dispatchKey(key: string, api: ViteBurnerPluginApi, control: KeyDispatchControl) {
+  const action = keyActions[key];
+  if (!action) {
+    return;
+  }
+  if (action.interactive) {
+    control.suspend();
+  }
+  try {
+    await action.run(api);
+  } finally {
     if (action.interactive) {
-      ctx.off();
+      control.resume();
     }
-    try {
-      await action.run(api);
-    } finally {
-      if (action.interactive) {
-        ctx.on();
-      }
-    }
-    displayWatchAndHelp();
-  };
+  }
+  displayWatchAndHelp();
 }

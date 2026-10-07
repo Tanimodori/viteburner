@@ -1,14 +1,14 @@
 import { parse as acornParse } from 'acorn';
 import MagicString from 'magic-string';
 import { logger } from '@/console';
-import { WatchManager } from '@/plugins';
-import { isExternalUrl, forceStartingSlash, normalizeRequestId } from '@/utils';
+import type { WatchService } from '@/services/watch';
+import { forceStartingSlash, isExternalUrl, normalizeRequestId } from '@/utils';
 
 export interface FixImportPathOptions {
   filename: string;
   content: string;
   server: string;
-  manager: WatchManager;
+  manager: WatchService;
 }
 
 function parse(code: string) {

@@ -4,58 +4,85 @@ import fg from 'fast-glob';
 import pc from 'picocolors';
 import prompt from 'prompts';
 import { logger } from '@/console';
+import type { ViteBurnerPluginCommands } from '@/plugins/api';
+import type { ResolvedData, SyncService } from '@/services/sync';
+import type { ViteService } from '@/services/vite';
+import type { WatchService } from '@/services/watch';
+import type { WsService } from '@/services/ws';
 import { isScriptFile } from '@/utils';
-import { ResolvedData, WsAdapter } from '@/ws';
-import { ViteBurnerPluginCommands } from './api';
+
+export interface CoreServiceDeps {
+  ws: WsService;
+  sync: SyncService;
+  watch: WatchService;
+  vite: ViteService;
+  /** Leave the daemon: dispose the session's services, then exit. */
+  shutdown(): void;
+}
 
 /**
- * The commands the plugin runs, over the dev server it was started for.
+ * The game logic the player asks for — the commands behind the plugin's api.
  *
- * Nothing here knows about keys or about this package's CLI: `ViteBurnerPluginCommands` is the whole
- * surface, and which input asks for which command is the caller's business.
+ * Nothing here knows about keys or this CLI's terminal: which key asks for which command is decided
+ * where the keypress arrives. Each command reaches the service that owns the work directly.
  */
-export function createApi(wsAdapter: WsAdapter): ViteBurnerPluginCommands {
-  const padding = 18;
-  const printStatus = (tag: string, msg: string) => {
-    logger.info('status', pc.reset(tag.padStart(padding)), msg);
-  };
-  const displayStatus = () => {
+export class CoreService implements ViteBurnerPluginCommands {
+  private readonly padding = 18;
+
+  constructor(private readonly deps: CoreServiceDeps) {}
+
+  quit() {
+    logger.info('bye');
+    this.deps.shutdown();
+  }
+
+  private printStatus(tag: string, msg: string) {
+    logger.info('status', pc.reset(tag.padStart(this.padding)), msg);
+  }
+
+  displayStatus() {
     logger.info('status');
-    logger.info('status', ' '.repeat(padding - 4) + pc.reset(pc.bold(pc.inverse(pc.green(' STATUS ')))));
-    printStatus('connection:', wsAdapter.manager.connected ? pc.green('connected') : pc.yellow('disconnected'));
-    printStatus('port:', pc.magenta(wsAdapter.server.config.viteburner.port));
-    const pending = wsAdapter.buffers.size;
+    logger.info('status', ' '.repeat(this.padding - 4) + pc.reset(pc.bold(pc.inverse(pc.green(' STATUS ')))));
+    this.printStatus('connection:', this.deps.ws.connected ? pc.green('connected') : pc.yellow('disconnected'));
+    this.printStatus('port:', pc.magenta(this.deps.vite.config.port));
+    const pending = this.deps.sync.pending;
     const pendingStr = `${pending} file${pending === 1 ? '' : 's'}`;
     const pendingStrStyled = pending ? pc.yellow(pendingStr) : pc.dim(pendingStr);
-    printStatus('pending:', pendingStrStyled);
+    this.printStatus('pending:', pendingStrStyled);
     logger.info('status', pc.dim('')); // avoid (x2)
-  };
+  }
 
-  const checkConnection = () => {
-    if (!wsAdapter.manager.connected) {
+  private checkConnection() {
+    if (!this.deps.ws.connected) {
       logger.error('conn', pc.red('no connection'));
       return false;
     }
     return true;
-  };
+  }
 
-  const fullUpload = () => {
+  fullUpload() {
+    if (!this.checkConnection()) {
+      return;
+    }
     logger.info('upload', pc.reset('force full-upload triggered'));
-    wsAdapter.server.watchManager.fullReload();
-  };
+    void this.deps.watch.fullReload();
+  }
 
-  const fullDownload = () => {
+  fullDownload() {
+    if (!this.checkConnection()) {
+      return;
+    }
     logger.info('download', pc.reset('force full-download triggered'));
-    wsAdapter.fullDownload();
-  };
+    void this.deps.sync.fullDownload();
+  }
 
-  const showRamUsageAll = async () => {
+  async showRamUsageAll() {
     logger.info('ram', pc.reset('fetching ram usage of scripts...'));
-    await wsAdapter.getRamUsage();
+    await this.deps.sync.getRamUsage();
     return true;
-  };
+  }
 
-  const showRamUsageGlob = async () => {
+  async showRamUsageGlob() {
     const { pattern } = await prompt({
       type: 'text',
       name: 'pattern',
@@ -66,21 +93,21 @@ export function createApi(wsAdapter: WsAdapter): ViteBurnerPluginCommands {
       return false;
     }
     logger.info('ram', pc.reset('fetching ram usage of scripts...'));
-    await wsAdapter.getRamUsage(pattern);
+    await this.deps.sync.getRamUsage(pattern);
     return true;
-  };
+  }
 
-  const showRamUsageLocal = async () => {
+  async showRamUsageLocal() {
     const pattern = '**/*.{js,ts,script}';
-    const files = await fg(pattern, { cwd: wsAdapter.server.config.root });
+    const files = await fg(pattern, { cwd: this.deps.vite.root });
     files.sort();
     // filter out non-script files, dts, and deadends
     const fileMap = new Map<string, ResolvedData>();
     for (const file of files) {
-      if (file.endsWith('.d.ts') || file === wsAdapter.server.config.viteburner.dts) {
+      if (file.endsWith('.d.ts') || file === this.deps.vite.config.dts) {
         continue;
       }
-      const resolvedData = wsAdapter.getRamUsageLocalData(file);
+      const resolvedData = this.deps.sync.getRamUsageLocalData(file);
       if (resolvedData.length === 0) {
         continue;
       }
@@ -95,20 +122,20 @@ export function createApi(wsAdapter: WsAdapter): ViteBurnerPluginCommands {
     if (!file) {
       return false;
     }
-    if (!fs.existsSync(resolve(wsAdapter.server.config.root, file))) {
+    if (!fs.existsSync(resolve(this.deps.vite.root, file))) {
       logger.error('ram', `file ${file} does not exist`);
       return false;
     }
     // check if file in filemap
     if (fileMap.has(file)) {
-      await wsAdapter.getRamUsageLocalRaw(file, fileMap.get(file) as ResolvedData);
+      await this.deps.sync.getRamUsageLocalRaw(file, fileMap.get(file) as ResolvedData);
     } else {
-      await wsAdapter.getRamUsageLocal(file);
+      await this.deps.sync.getRamUsageLocal(file);
     }
     return true;
-  };
+  }
 
-  const showRamUsageRemote = async () => {
+  async showRamUsageRemote() {
     const { server } = await prompt({
       type: 'text',
       name: 'server',
@@ -118,7 +145,7 @@ export function createApi(wsAdapter: WsAdapter): ViteBurnerPluginCommands {
     if (!server) {
       return false;
     }
-    const filenames = await wsAdapter.getFileNames(server);
+    const filenames = await this.deps.sync.getFileNames(server);
     if (!filenames) {
       return false;
     }
@@ -131,11 +158,11 @@ export function createApi(wsAdapter: WsAdapter): ViteBurnerPluginCommands {
     if (!filename) {
       return false;
     }
-    await wsAdapter.getRamUsageRemote(server, filename);
+    await this.deps.sync.getRamUsageRemote(server, filename);
     return true;
-  };
+  }
 
-  const showRamUsageRaw = async (): Promise<boolean> => {
+  private async showRamUsageRaw(): Promise<boolean> {
     const { filter } = await prompt({
       type: 'select',
       name: 'filter',
@@ -153,41 +180,20 @@ export function createApi(wsAdapter: WsAdapter): ViteBurnerPluginCommands {
     }
 
     if (filter === 'all') {
-      return showRamUsageAll();
+      return this.showRamUsageAll();
     } else if (filter === 'glob') {
-      return showRamUsageGlob();
+      return this.showRamUsageGlob();
     } else if (filter === 'local') {
-      return showRamUsageLocal();
+      return this.showRamUsageLocal();
     } else if (filter === 'remote') {
-      return showRamUsageRemote();
+      return this.showRamUsageRemote();
     }
 
     return false;
-  };
+  }
 
-  const showRamUsage = async () => {
-    const result = await showRamUsageRaw();
+  async showRamUsage() {
+    const result = await this.showRamUsageRaw();
     logger.info('ram', result ? 'done' : 'cancelled');
-  };
-
-  return {
-    quit: () => {
-      logger.info('bye');
-      process.exit();
-    },
-    displayStatus,
-    fullUpload: () => {
-      if (checkConnection()) fullUpload();
-    },
-    fullDownload: () => {
-      if (checkConnection()) fullDownload();
-    },
-    showRamUsage: () => {
-      if (checkConnection()) return showRamUsage();
-    },
-    showRamUsageAll,
-    showRamUsageGlob,
-    showRamUsageLocal,
-    showRamUsageRemote,
-  };
+  }
 }
