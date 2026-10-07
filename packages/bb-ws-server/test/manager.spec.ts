@@ -130,6 +130,41 @@ describe('WsManager active client', () => {
     manager.close();
   });
 
+  it('shares one server per port and keeps it open while either manager holds it', async () => {
+    const port = nextPort++;
+    const previous = new WsManager({ port });
+    const current = new WsManager({ port });
+    // A manager built while another is up reuses the running server instead of binding again.
+    expect(current.wss).toBe(previous.wss);
+
+    const ws = await connect(port);
+    await waitForClients(current, 1);
+
+    // The restart overlap: the old manager goes away while its replacement is already serving, and
+    // the port has to outlive the old one.
+    previous.close();
+
+    autoRespond(ws);
+    await expect(current.pushFile({ filename: 'a.js', content: '', server: 'home' })).resolves.toBe('OK');
+
+    current.close();
+    ws.close();
+  });
+
+  it('releases the port when the last manager closes', async () => {
+    const port = nextPort++;
+    const manager = new WsManager({ port });
+    const ws = await connect(port);
+    await waitForClients(manager, 1);
+
+    const server = manager.wss;
+    manager.close();
+    ws.close();
+
+    // Nothing is listening any more, so the port is free to be bound again.
+    await vi.waitFor(() => expect(server.address()).toBeNull(), { timeout: 5000 });
+  });
+
   it('rejects a request while no client is connected', async () => {
     const manager = new WsManager({ port: nextPort++ });
     await expect(manager.pushFile({ filename: 'a.js', content: '', server: 'home' })).rejects.toThrow('No connection');

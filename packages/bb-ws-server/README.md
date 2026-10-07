@@ -4,6 +4,8 @@ Server side of the [Bitburner Remote API](https://github.com/bitburner-official/
 
 Bitburner connects to this package's WebSocket server as a client; `WsManager` sends the protocol's request/response calls to it and returns the validated results. One port serves one active client: the last client to connect, which is the one every request is sent to and the only one whose responses are accepted.
 
+The server under a port is shared and held for as long as any manager uses it, so a host that rebuilds its manager while the old one is still up — a dev server restarting on a config change, say — reuses the running server instead of binding again. `close` gives up that manager's hold, and the last hold closes the port.
+
 ## Usage
 
 ```ts

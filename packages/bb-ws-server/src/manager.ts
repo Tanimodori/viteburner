@@ -1,6 +1,6 @@
 import { RawData, WebSocket, WebSocketServer } from 'ws';
 import { z } from 'zod';
-import { acquireWss, getActiveClient } from './allocator';
+import { acquireWss, getActiveClient, releaseWss } from './allocator';
 import { consoleLogger, Logger } from './logger';
 import {
   wsResponseSchema,
@@ -56,6 +56,10 @@ export type ConnectedHandler = (ws: WebSocket) => Promisable<Fn | void>;
  * responses are accepted only from it. A client that was superseded stays connected but goes quiet —
  * closing it here would look like an unexpected disconnect to the game and, when the player enabled
  * `RemoteFileApiReconnectionDelay`, start a reconnect loop between the competing clients.
+ *
+ * The server itself is shared per port and held for as long as any manager uses it, so a host that
+ * restarts (rebuilding its manager while the old one is still up) reuses the running one instead of
+ * binding again. `close` gives up this manager's hold, and the last hold closes the port.
  */
 export class WsManager {
   options: Required<WsManagerOptions>;
@@ -68,6 +72,8 @@ export class WsManager {
   private serverUnregisters: Fn[];
   /** The client the connected handlers were last run for, used to detect a change of active client. */
   private announced: WebSocket | undefined;
+  /** `close` gives up this manager's hold on the port, so it must do so exactly once. */
+  private closed = false;
 
   constructor(options: WsManagerOptions) {
     this.options = {
@@ -294,6 +300,10 @@ export class WsManager {
     });
   }
   close() {
+    if (this.closed) {
+      return;
+    }
+    this.closed = true;
     // remove all handlers
     this.serverUnregisters.forEach((unregister) => unregister());
     this.serverUnregisters = [];
@@ -303,5 +313,7 @@ export class WsManager {
     }
     this.handlers = [];
     this.announced = undefined;
+    // Give up this manager's hold: the last one releases the port.
+    releaseWss(this.options.port);
   }
 }

@@ -16,23 +16,28 @@ import { EventBus } from '@/services/bus';
  *
  * It publishes the two connection transitions on the bus and answers the protocol calls, and knows
  * nothing about files, transforms, or the config — a request in, a response out.
+ *
+ * `start` opens the port and `stop` closes it, so this service owns the port for exactly its own
+ * lifetime rather than leaving it bound behind it.
  */
 export class WsService {
-  readonly manager: WsManager;
+  private manager?: WsManager;
 
   constructor(
-    options: WsManagerOptions,
+    private readonly options: WsManagerOptions,
     private readonly bus: EventBus,
-  ) {
-    this.manager = new WsManager(options);
-  }
+  ) {}
 
   get connected() {
-    return this.manager.connected;
+    return this.manager?.connected ?? false;
   }
 
   start() {
-    this.manager.onConnected((ws) => {
+    if (this.manager) {
+      return;
+    }
+    const manager = new WsManager(this.options);
+    manager.onConnected((ws) => {
       logger.info('conn', '', 'connected');
       void this.bus.emit('ws:connected', undefined);
       const onClose = () => {
@@ -44,33 +49,42 @@ export class WsService {
         ws.off('close', onClose);
       };
     });
+    this.manager = manager;
   }
 
   stop() {
-    this.manager.close();
+    this.manager?.close();
+    this.manager = undefined;
+  }
+
+  private get started(): WsManager {
+    if (!this.manager) {
+      throw new Error('the websocket service is not started');
+    }
+    return this.manager;
   }
 
   pushFile(params: PushFileParams) {
-    return this.manager.pushFile(params);
+    return this.started.pushFile(params);
   }
 
   deleteFile(params: DeleteFileParams) {
-    return this.manager.deleteFile(params);
+    return this.started.deleteFile(params);
   }
 
   getAllFiles(params: GetAllFilesParams) {
-    return this.manager.getAllFiles(params);
+    return this.started.getAllFiles(params);
   }
 
   getFileNames(params: GetFileNamesParams) {
-    return this.manager.getFileNames(params);
+    return this.started.getFileNames(params);
   }
 
   calculateRam(params: CalculateRamParams) {
-    return this.manager.calculateRam(params);
+    return this.started.calculateRam(params);
   }
 
   getDefinitionFile() {
-    return this.manager.getDefinitionFile();
+    return this.started.getDefinitionFile();
   }
 }

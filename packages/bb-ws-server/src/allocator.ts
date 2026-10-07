@@ -1,29 +1,54 @@
 import { WebSocket, WebSocketServer } from 'ws';
 
 interface WsServerEntry {
-  port: number;
   wss: WebSocketServer;
+  /** How many managers are using this server. */
+  refs: number;
 }
 
-let entry: WsServerEntry | null = null;
+/** The one server per port, and how many managers are holding it. */
+const entries = new Map<number, WsServerEntry>();
 
 /**
- * Returns the WebSocketServer bound to `port`, creating it on first use.
+ * Returns the WebSocketServer bound to `port`, creating it on first use and counting one user.
  *
  * A WsManager is rebuilt whenever its host restarts the surrounding server while the process stays
- * alive (vite does this on a config change). The manager therefore does not own the server: asking
- * for the same port again returns the running one instead of binding a second time and failing with
- * EADDRINUSE. Asking for a different port retires the previous server and its clients.
+ * alive (vite does this on a config change), and for a moment the old and new managers both exist.
+ * They therefore share one server per port rather than each binding its own — asking for a port
+ * already in use here returns the running server instead of failing with EADDRINUSE.
+ *
+ * The count is what keeps it alive: the server is closed by the last `releaseWss` for the port, so
+ * it never outlives the managers that use it.
  */
 export function acquireWss(port: number): WebSocketServer {
-  if (entry === null || entry.port !== port) {
-    if (entry) {
-      entry.wss.clients.forEach((client) => client.close());
-      entry.wss.close();
-    }
-    entry = { port, wss: new WebSocketServer({ port }) };
+  let entry = entries.get(port);
+  if (!entry) {
+    entry = { wss: new WebSocketServer({ port }), refs: 0 };
+    entries.set(port, entry);
   }
+  entry.refs++;
   return entry.wss;
+}
+
+/**
+ * Gives up one user of `port`'s server, closing it when none are left.
+ *
+ * Closing on the last release makes the port's lifetime exactly the union of its users: a manager
+ * that goes away — a host shutting down, or one side of a restart — does not leave a bound port
+ * behind for whatever runs next.
+ */
+export function releaseWss(port: number): void {
+  const entry = entries.get(port);
+  if (!entry) {
+    return;
+  }
+  entry.refs--;
+  if (entry.refs > 0) {
+    return;
+  }
+  entries.delete(port);
+  entry.wss.clients.forEach((client) => client.close());
+  entry.wss.close();
 }
 
 /**
@@ -45,20 +70,21 @@ export function getActiveClient(wss: WebSocketServer): WebSocket | undefined {
 }
 
 /**
- * Closes the shared server and disconnects its clients.
+ * Closes every server and disconnects its clients, whatever its user count.
  *
- * WsManager deliberately does not call this: a host that restarts must be able to reuse the running
- * server (see `acquireWss`). Tests use it to release the port and let the process exit.
+ * This is the escape hatch for a host that wants the ports gone regardless of who is still holding
+ * them — a test does this between cases so a manager left open cannot fail the next one.
  */
 export function closeWss(): Promise<void> {
-  return new Promise((resolve) => {
-    if (entry === null) {
-      resolve();
-      return;
-    }
-    const closing = entry;
-    entry = null;
-    closing.wss.clients.forEach((client) => client.terminate());
-    closing.wss.close(() => resolve());
-  });
+  const closing = [...entries.values()];
+  entries.clear();
+  return Promise.all(
+    closing.map(
+      (entry) =>
+        new Promise<void>((resolve) => {
+          entry.wss.clients.forEach((client) => client.terminate());
+          entry.wss.close(() => resolve());
+        }),
+    ),
+  ).then(() => undefined);
 }
