@@ -1,20 +1,17 @@
 import type { Plugin, ResolvedConfig } from 'vite';
+import type { ResolvedViteBurnerConfig } from '@/types';
 
 /** The name the plugin registers under, and the key `findViteBurnerPlugin` looks it up by. */
 export const viteburnerPluginName = 'viteburner';
 
 /**
- * What the plugin can be asked to do, one method per capability.
+ * The commands the plugin runs against a live dev server.
  *
- * This is the plugin's whole public surface: a caller holding only the resolved config — the CLI, a
- * test, another plugin — asks for a command through the plugin object instead of through the dev
- * server's websocket. Nothing here names an input: which key, click, or request asks for which
- * command is the caller's business.
- *
- * A command needs a running dev server, so the api answers only between the plugin's `buildStart`
- * and `buildEnd`; outside that window every method is a no-op.
+ * Nothing here names an input: which key, click, or request asks for which command is the caller's
+ * business. A command needs a running dev server, so these answer only between the plugin's
+ * `buildStart` and `buildEnd`; outside that window each one is a no-op.
  */
-export interface ViteBurnerPluginApi {
+export interface ViteBurnerPluginCommands {
   /** Stop the daemon. */
   quit(): void;
   /** Print the game connection state and how many files are waiting to sync. */
@@ -33,6 +30,23 @@ export interface ViteBurnerPluginApi {
   showRamUsageLocal(): void | Promise<unknown>;
   /** Pick one script on a named server and report its RAM cost. */
   showRamUsageRemote(): void | Promise<unknown>;
+}
+
+/**
+ * What the plugin can be asked to do, one method per capability.
+ *
+ * This is the plugin's whole public surface: a caller holding only the resolved config — the CLI, a
+ * test, another plugin — asks for a command through the plugin object instead of through the dev
+ * server's websocket.
+ */
+export interface ViteBurnerPluginApi extends ViteBurnerPluginCommands {
+  /**
+   * The viteburner config this dev server resolved, the same object on `resolvedConfig.viteburner`.
+   *
+   * A read of config the plugin already resolved, so unlike the commands it answers as soon as
+   * `configResolved` has run and needs no watcher.
+   */
+  getPluginConfig(): ResolvedViteBurnerConfig | undefined;
 }
 
 export interface ViteBurnerPlugin extends Plugin {

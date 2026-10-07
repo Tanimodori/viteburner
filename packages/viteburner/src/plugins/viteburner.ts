@@ -1,10 +1,17 @@
 import { resolve } from 'pathe';
 import { UserConfig } from 'vite';
 import { logger } from '@/console';
-import { HmrData, ViteBurnerInlineConfig, ViteBurnerServer, ViteBurnerUserConfig } from '@/types';
+import {
+  HmrData,
+  ResolvedConfig,
+  ResolvedViteBurnerConfig,
+  ViteBurnerInlineConfig,
+  ViteBurnerServer,
+  ViteBurnerUserConfig,
+} from '@/types';
 import { WsManager, WsAdapter } from '@/ws';
 import { loadConfig, normalizeRequestId, slash } from '..';
-import { ViteBurnerPlugin, ViteBurnerPluginApi, viteburnerPluginName } from './api';
+import { ViteBurnerPlugin, ViteBurnerPluginApi, ViteBurnerPluginCommands, viteburnerPluginName } from './api';
 import { createApi } from './commands';
 import { WatchManager } from './watch';
 
@@ -40,11 +47,15 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): ViteBurn
   const resolvedVirtualModuleId = '\0' + virtualModuleId;
   let server: ViteBurnerServer;
   let wsAdapter: WsAdapter;
-  let commands: ViteBurnerPluginApi | undefined;
+  let commands: ViteBurnerPluginCommands | undefined;
+  // The config the plugin resolved, captured at `configResolved` so `getPluginConfig` can answer
+  // without a running server — the commands below all need one, this read does not.
+  let pluginConfig: ResolvedViteBurnerConfig | undefined;
   // The api is one stable object handed out once: a command needs the dev server, so the commands
   // behind it exist only between `buildStart` and `buildEnd`, and a caller that kept the api keeps a
   // handle that no-ops rather than reaching into a closed server.
   const api: ViteBurnerPluginApi = {
+    getPluginConfig: () => pluginConfig,
     quit: () => commands?.quit(),
     displayStatus: () => commands?.displayStatus(),
     fullUpload: () => commands?.fullUpload(),
@@ -66,7 +77,8 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): ViteBurn
       config.viteburner = await loadConfig(inlineConfig);
       return getDefaultConfig();
     },
-    configResolved() {
+    configResolved(config) {
+      pluginConfig = (config as unknown as ResolvedConfig).viteburner;
       logger.info('config', 'config resolved');
     },
     // save server instance

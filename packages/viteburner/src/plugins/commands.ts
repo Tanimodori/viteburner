@@ -6,15 +6,15 @@ import prompt from 'prompts';
 import { logger } from '@/console';
 import { isScriptFile } from '@/utils';
 import { ResolvedData, WsAdapter } from '@/ws';
-import { ViteBurnerPluginApi } from './api';
+import { ViteBurnerPluginCommands } from './api';
 
 /**
  * The commands the plugin runs, over the dev server it was started for.
  *
- * Nothing here knows about keys or about this package's CLI: the api is the plugin's whole public
+ * Nothing here knows about keys or about this package's CLI: `ViteBurnerPluginCommands` is the whole
  * surface, and which input asks for which command is the caller's business.
  */
-export function createApi(wsAdapter: WsAdapter): ViteBurnerPluginApi {
+export function createApi(wsAdapter: WsAdapter): ViteBurnerPluginCommands {
   const padding = 18;
   const printStatus = (tag: string, msg: string) => {
     logger.info('status', pc.reset(tag.padStart(padding)), msg);
