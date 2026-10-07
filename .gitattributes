@@ -18,6 +18,10 @@ packages/viteburner/bin/viteburner.js text eol=lf
 # fail the comparison on every platform, so these are pinned to LF.
 tests/viteburner-e2e-test/test/fixture/dist/** text eol=lf
 
+# The E2E RAM baseline is compared against report lines the harness joins with "\n", so it needs the
+# same LF pin as the dump baselines above.
+tests/viteburner-e2e-test/test/fixture/ram/** text eol=lf
+
 # Don't allow people to merge changes to these generated files, because the result
 # may be invalid.  You need to run "rush update" again.
 pnpm-lock.yaml               merge=text

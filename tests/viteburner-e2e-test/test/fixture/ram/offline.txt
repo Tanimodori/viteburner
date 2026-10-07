@@ -1,0 +1,15 @@
+ram fetching ram usage of scripts...
+ram src/deep/multi-entry.ts: 1.6 GB
+ram src/enum/index.ts: 1.6 GB
+ram src/foo.txt (ignored)
+ram src/import/absolute.ts: 1.6 GB
+ram src/import/main.ts: 1.6 GB
+ram src/import/relative.ts: 1.6 GB
+ram src/importExternal/main.ts -> @home:/importExternal/main.js (Cannot calculate RAM usage of an invalid script. Filename: /importExternal/main.js)
+ram src/importExternal/main.ts (no target found)
+ram src/importGlob/index.ts: 1.6 GB
+ram src/importGlob/modules/bar.ts: 1.6 GB
+ram src/importGlob/modules/foo.ts: 1.6 GB
+ram src/ns1.script: 1.6 GB
+ram src/template.ts: 1.6 GB
+ram done

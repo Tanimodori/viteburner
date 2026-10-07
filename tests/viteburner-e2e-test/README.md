@@ -6,25 +6,25 @@
 
 ## 一条流程，两条腿
 
-整套测试只有**一个 spec、六个步骤**。mode 只决定步骤跑在哪个游戏上，不决定跑哪些步骤：
+整套测试只有**一个 spec、九个步骤**。mode 只决定步骤跑在哪个游戏上，不决定跑哪些步骤：
 
 - **离线腿**（默认，`rushx test:e2e`）：游戏取自固定版构建（v3.0.1，commit `1540b4d5`），从 `test/.cache/` 经回环地址 serve。结论确定，是默认命令。
-- **在线腿**（`rushx test:e2e:live`）：同一个 spec、同样六步，但游戏取自 <https://bitburner-official.github.io/>，会随上游更新漂移，因此不在默认命令里。
+- **在线腿**（`rushx test:e2e:live`）：同一个 spec、同样九步，但游戏取自 <https://bitburner-official.github.io/>，会随上游更新漂移，因此不在默认命令里。
 
 因此一条行为要么两条腿都被证明，要么在漂移的那条腿上报错。（`test/mode.ts` 暴露 `live` 供选择游戏源；`vitest.config.ts` 用同一条件给离线腿挂上「下载固定构建」的 global setup。）
 
 ## 测试的四个阶段
 
-`test/e2e.spec.ts` 里的 `beforeAll` / `afterAll` 与六个 `it` 就是这四个阶段：
+`test/e2e.spec.ts` 里的 `beforeAll` / `afterAll` 与九个 `it` 就是这四个阶段：
 
 1. **fixture**（`beforeAll` 前半）：把只读的 fixture 工程（包根 `src/`）复制到 `test/.tmp/project/`；离线腿另外确保固定构建已下载并 serve 到回环地址。
 2. **before-test**（`beforeAll` 后半）：起真实 CLI（`cli/vite.ts`）与浏览器（`web/browser.ts`），加载游戏、关掉教程，通过 Remote API 把游戏连到 CLI，并等 fixture 的**每个**文件都完成初次同步。
-3. **test**（六个 `it`）：六步测试，读的都是阶段 2 建立起来的状态；只有最后一步会改动状态（新增源文件、再删掉）。
+3. **test**（九个 `it`）：九步测试，读的都是阶段 2 建立起来的状态；第 6 步会改动工程副本（新增源文件、再删掉），第 9 步会退出 CLI，所以它必须排最后。
 4. **after-test**（`afterAll`）：关浏览器、停 CLI、关静态服务，并删除工程副本（`E2E_KEEP=1` 时保留供人工检查）。
 
-`vitest.config.ts` 的 `threads: false` 是让阶段 2 的状态能跨六个 `it` 存活的依据：一个浏览器、一个 CLI、一个游戏、一条 websocket。
+`vitest.config.ts` 的 `threads: false` 是让阶段 2 的状态能跨九个 `it` 存活的依据：一个浏览器、一个 CLI、一个游戏、一条 websocket。
 
-### 六步测试
+### 九步测试
 
 1. 每个 fixture 文件都上传到游戏：CLI 日志里有该文件的 `hmr add … (done)`，游戏侧 `ls` 也列得出。
 2. 游戏能 `cat` 回每个文件且内容正确：转换过的带 inline sourcemap，原样复制的没有。
@@ -32,6 +32,11 @@
 4. 每个可执行脚本逐个 `run`，核对其输出行，且没有运行时错误。
 5. 本游戏拒绝执行的文件（`ns1.script`、`importExternal/main.js`）报告拒绝信息，而不是假装成功。
 6. 新增源文件实时同步到游戏、能被 `cat`/`run`，删除后在游戏里消失。
+7. CLI 的按键处理器有响应：`h` 打印帮助、`s` 打印状态（含 connection: connected）、`u` 触发全量上传并把 fixture 文件按 `hmr change … (done)` 重传。
+8. `r` 打开 `prompts` 的 RAM 查询菜单并选默认的「All local scripts」：CLI 向游戏逐文件问 RAM，报告与提交在 `test/fixture/ram/offline.txt` 的基线逐字比对（**仅离线腿**：数值是游戏算的，会随游戏版本漂移）。
+9. `q` 优雅退出 CLI：日志打 `bye`，进程以 code 0 结束。
+
+第 7、8 步打的是 CLI 自己的键盘处理（`console.ts` 的 `onKeypress` / `task.ts` 的 `handleKeyInput`），不是游戏终端。CLI 由 `cli/cli.ts` 以 **piped stdin** 启动，`ViteburnerCli.sendKey()` 写入的每个字符就是一个 `keypress` 事件。stdin 不是 TTY，所以 CLI 会打一条 not-a-TTY 警告并跳过 raw mode——这些键走 `key.name`，不受影响；`prompts` 的菜单在 pipe 下照常渲染、方向键/回车/Ctrl+C 都能用。退出键（Ctrl+C、ESC）各自会让进程结束，一个 CLI 实例只能测一次退出，故只覆盖了 `q`。
 
 ## 目录结构
 
@@ -39,7 +44,7 @@
 src/                fixture 工程本体（包根 src/ 下为 vite.config.ts、tsconfig.json 与待上传的 src/src/**），只读；
                     测试前整份复制到 test/.tmp/project/，测试只跑副本
 test/
-  e2e.spec.ts        主测试：四个阶段 + 六步测试
+  e2e.spec.ts        主测试：四个阶段 + 九步测试
   mode.ts            当前是哪条腿（import.meta.env.MODE）
   paths.ts           包根，供各域推导 fixture/cache/tmp 路径
   env.d.ts           声明 import.meta.env.MODE
@@ -53,10 +58,12 @@ test/
     manifest.ts       fixture 清单：上传/落点/转换/期望内容/运行结论 —— 同步结果的唯一事实来源
     dump.ts           dump 基线路径与 inline sourcemap 归一化（第 3 步的逐字比对）
     dist/             dump 基线（golden file）：第 3 步逐字比对的转换结果，提交进仓库
-    verify-script.ts  六步测试第 6 步新增的那个脚本，及其来源/上传路径
+    ram.ts            RAM 报告基线路径与日志归一化（第 8 步的逐字比对）
+    ram/              RAM 基线（golden file）：第 8 步在固定构建上取到的 RAM 报告，提交进仓库
+    verify-script.ts  九步测试第 6 步新增的那个脚本，及其来源/上传路径
     manifest.spec.ts  不开浏览器、不跑 CLI，只校验清单与磁盘内容一致
   cli/               cli 操作，vite 框架搭建
-    cli.ts            起停真实 CLI 进程，捕获并可等待其日志
+    cli.ts            起停真实 CLI 进程，捕获并可等待其日志；以 piped stdin 启动，sendKey() 送按键
     vite.ts           用 fixture 工程装配一次 CLI（选端口、等待 watching）
   web/               浏览器控制、游戏控制
     browser.ts        按所需 flags 启动 Chromium
@@ -79,7 +86,7 @@ test/
 
 - `test.beforeAll` / `test.afterAll` → `beforeAll` / `afterAll`；`test.describe.configure({ mode: 'serial' })` 不再需要——`vitest.config.ts` 设了 `threads: false`，文件内本就是顺序执行。
 - Playwright 的自动重试断言 `expect(locator).toContainText(...)` → `expectLocatorText()`（`test/web/game.ts`），内部是 `vi.waitFor` 轮询 `locator.innerText()`。`vi.waitFor` 是 0.34.6 就有的 API，等价于新版的 `expect.poll`。
-- `test.step(...)` → 没有等价 API（0.34.6 未提供）。六步测试改为六个顶层 `it`，一次性的准备放进 `beforeAll`，失败点因此就是失败的那一项，而不是一串无关报错。
+- `test.step(...)` → 没有等价 API（0.34.6 未提供）。九步测试改为九个顶层 `it`，一次性的准备放进 `beforeAll`，失败点因此就是失败的那一项，而不是一串无关报错。
 - `playwright.config.ts` 的 `launchOptions.args` → `test/web/browser.ts` 的 `launchGameBrowser()`。
 - `@playwright/test` 的 `devices[...]` 与 projects → 由 `--mode` 选腿：`vitest run`（默认 mode `test`）跑离线腿，`vitest run --mode live` 跑在线腿。两条腿共用同一个 spec，mode 只切换游戏源。
 - 失败时把 CLI 日志写文件（`testInfo.attach`）→ `onTestFailed` 里打印日志尾部，控制台就是证据。

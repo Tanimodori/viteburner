@@ -203,7 +203,10 @@ export function escapeRegExp(text: string) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-/** The CLI log line that proves one file finished uploading to the game. */
-export function uploadLogPattern(file: FixtureFile) {
-  return new RegExp(`${escapeRegExp(`hmr add ${file.source} -> @home:${gamePath(file.upload)}`)} \\(done\\)`);
+/**
+ * The CLI log line that proves one file finished uploading to the game. `event` is the watch event
+ * that drove the upload: `add` for the initial sync, `change` when a keypress forces a full upload.
+ */
+export function uploadLogPattern(file: FixtureFile, event = 'add') {
+  return new RegExp(`${escapeRegExp(`hmr ${event} ${file.source} -> @home:${gamePath(file.upload)}`)} \\(done\\)`);
 }

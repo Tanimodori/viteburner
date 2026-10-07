@@ -5,6 +5,7 @@ import { ViteBurner, startViteBurner, stopViteBurner } from './cli/vite';
 import { dumpBaselinePath, endsWithInlineSourcemap, normalizeDump } from './fixture/dump';
 import { FIXTURE_FILES, GAME_DIRECTORIES, uploadLogPattern } from './fixture/manifest';
 import { E2eProject, createProject, removeProject } from './fixture/project';
+import { RAM_BASELINE_PATH, normalizeRamReport } from './fixture/ram';
 import { VERIFY_MARKER, VERIFY_SCRIPT, VERIFY_SOURCE, VERIFY_UPLOAD } from './fixture/verify-script';
 import { ensureGame } from './local/ensure-game';
 import { StaticServer, startStaticServer } from './local/static-server';
@@ -25,7 +26,7 @@ import {
 /**
  * One flow, two legs.
  *
- * The suite is a single file with a single six-step test body. The mode only chooses the game the
+ * The suite is a single file with a single nine-step test body. The mode only chooses the game the
  * steps run against: the offline leg (default) serves the pinned build from `test/.cache/` over
  * loopback, and the online leg (`--mode live`) loads the real site. Everything else — the fixture
  * project, the real built CLI, the browser, the assertions — is shared, so a behaviour is either
@@ -37,11 +38,12 @@ import {
  *                    pinned build is downloaded and serving.
  *   2. before-test — start the CLI and the browser, load the game, connect it over the Remote API,
  *                    and wait for the initial sync of every fixture file.
- *   3. test        — the six steps below. They are read-only against the state phase 2 established;
- *                    only the last one mutates (adds a source, then removes it).
+ *   3. test        — the nine steps below. Steps 1–5, 7 and 8 read the state phase 2 established; step
+ *                    6 is the only one that mutates the project copy (adds a source, then removes it),
+ *                    and step 9 quits the CLI, so it has to run last.
  *   4. after-test  — close the browser and the CLI, and drop the project copy.
  *
- * `threads: false` in `vitest.config.ts` is what lets phase 2 live across the six steps in one
+ * `threads: false` in `vitest.config.ts` is what lets phase 2 live across the nine steps in one
  * process: one browser, one CLI, one game, one websocket.
  */
 
@@ -225,5 +227,72 @@ describe(`viteburner E2E (${live ? 'online' : 'offline'})`, () => {
     await vite.cli.waitForLog(/hmr unlink src\/e2e-verify\.ts -> @home:\/e2e-verify\.js \(done\)/, 90_000);
     const after = await listDirectory(page, '.');
     expect(after).not.toContain(VERIFY_UPLOAD);
+  });
+
+  it('step 7: answers CLI keypresses for help, status, and a full upload', async () => {
+    watchCliLog();
+
+    // These keystrokes go to the CLI's own key handler, not the game: the CLI is started with a
+    // piped stdin (see `cli/cli.ts`) and each `sendKey` is one `keypress` event. The log is
+    // cumulative, so each wait is given the mark taken just before its key — the startup banner
+    // already printed a status block that a later `s` would otherwise match.
+
+    // `h` — the help block is printed only by the handler.
+    const beforeHelp = vite.cli.log.length;
+    vite.cli.sendKey('h');
+    await vite.cli.waitForLog(/Watch Usage/, 20_000, beforeHelp);
+
+    // `s` — a fresh status block after the key. The connected game is what the handler reports.
+    const beforeStatus = vite.cli.log.length;
+    vite.cli.sendKey('s');
+    await vite.cli.waitForLog(/connection:.*connected/, 20_000, beforeStatus);
+    expect(vite.cli.log.slice(beforeStatus), 'status block after s').toContain('STATUS');
+
+    // `u` — a full upload re-triggers every watched file, so a fixture file is re-sent as a `change`
+    // (the initial sync in `beforeAll` was the `add`).
+    const sample = FIXTURE_FILES[0];
+    const beforeUpload = vite.cli.log.length;
+    vite.cli.sendKey('u');
+    await vite.cli.waitForLog(/force full-upload triggered/, 20_000, beforeUpload);
+    await vite.cli.waitForLog(uploadLogPattern(sample, 'change'), 90_000, beforeUpload);
+  });
+
+  it('step 8: answers r with the interactive RAM report', async () => {
+    watchCliLog();
+
+    // `r` opens the `prompts` select — the game is connected, so `checkConnection()` passes. The
+    // picker renders to the same stdout as the log, so the command is driven from the outside: wait
+    // for the prompt to appear, then submit the default ("All local scripts") with Return.
+    const before = vite.cli.log.length;
+    vite.cli.sendKey('r');
+    await vite.cli.waitForLog(/Which script do you want to check\?/, 20_000, before);
+    vite.cli.sendKey('\r');
+    await vite.cli.waitForLog(/ram done/, 60_000, before);
+
+    // The CLI asks the connected game for each script's RAM cost and logs one line per file. Keep
+    // only those lines: the prompts redraws share the buffer but carry no `[viteburner]` prefix.
+    const report = normalizeRamReport(vite.cli.log.slice(before));
+    expect(report, 'the report should name a fixture source').toContain('ram src/template.ts:');
+
+    // The costs are the game's, so the golden file is only meaningful on the pinned build: the online
+    // leg's numbers drift with the live release. There the interaction is still exercised above; only
+    // the byte-for-byte comparison is skipped.
+    if (!live) {
+      await expect(report).toMatchFileSnapshot(RAM_BASELINE_PATH);
+    }
+  });
+
+  it('step 9: quits the CLI on the q keypress', async () => {
+    watchCliLog();
+
+    // `q` is the documented graceful quit: the handler logs `bye` and calls `process.exit()` with no
+    // code. It ends the CLI every earlier step ran against, so this is the last step; `afterAll`'s
+    // `stop()` is a no-op once the process has already exited.
+    const before = vite.cli.log.length;
+    vite.cli.sendKey('q');
+    await vite.cli.waitForLog(/bye/, 20_000, before);
+    const { code, signal } = await vite.cli.waitForExit(15_000);
+    expect(signal, 'a graceful quit is not a signal').toBeNull();
+    expect(code, 'q exits with code 0').toBe(0);
   });
 });
