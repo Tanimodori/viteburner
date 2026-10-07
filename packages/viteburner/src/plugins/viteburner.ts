@@ -1,9 +1,11 @@
 import { resolve } from 'pathe';
-import { Plugin, UserConfig } from 'vite';
-import { logger, setHandler } from '@/console';
+import { UserConfig } from 'vite';
+import { logger } from '@/console';
 import { HmrData, ViteBurnerInlineConfig, ViteBurnerServer, ViteBurnerUserConfig } from '@/types';
 import { WsManager, WsAdapter } from '@/ws';
-import { handleKeyInput, loadConfig, normalizeRequestId, slash } from '..';
+import { loadConfig, normalizeRequestId, slash } from '..';
+import { ViteBurnerPlugin, ViteBurnerPluginApi, viteburnerPluginName } from './api';
+import { createApi } from './commands';
 import { WatchManager } from './watch';
 
 declare module 'vite' {
@@ -34,13 +36,29 @@ export function getDefaultConfig(): UserConfig {
   };
 }
 
-export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
+export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): ViteBurnerPlugin {
   const resolvedVirtualModuleId = '\0' + virtualModuleId;
   let server: ViteBurnerServer;
   let wsAdapter: WsAdapter;
+  let commands: ViteBurnerPluginApi | undefined;
+  // The api is one stable object handed out once: a command needs the dev server, so the commands
+  // behind it exist only between `buildStart` and `buildEnd`, and a caller that kept the api keeps a
+  // handle that no-ops rather than reaching into a closed server.
+  const api: ViteBurnerPluginApi = {
+    quit: () => commands?.quit(),
+    displayStatus: () => commands?.displayStatus(),
+    fullUpload: () => commands?.fullUpload(),
+    fullDownload: () => commands?.fullDownload(),
+    showRamUsage: () => commands?.showRamUsage(),
+    showRamUsageAll: () => commands?.showRamUsageAll(),
+    showRamUsageGlob: () => commands?.showRamUsageGlob(),
+    showRamUsageLocal: () => commands?.showRamUsageLocal(),
+    showRamUsageRemote: () => commands?.showRamUsageRemote(),
+  };
 
   return {
-    name: 'viteburner',
+    name: viteburnerPluginName,
+    api,
     apply: 'serve',
     // Load viteburner.config.xx, merge with config, and resolve
     async config(config: ViteBurnerUserConfig) {
@@ -101,8 +119,8 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
       server.onHmrMessage((data) => wsAdapter.handleHmrMessage(data));
       server.watchManager.init();
 
-      // create key handler
-      setHandler(handleKeyInput(wsAdapter));
+      // create the commands the api runs
+      commands = createApi(wsAdapter);
     },
     // virtual entry
     resolveId(id: string) {
@@ -119,7 +137,7 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): Plugin {
     buildEnd() {
       server.watchManager.close();
       wsAdapter.manager.close();
-      setHandler();
+      commands = undefined;
     },
   };
 }

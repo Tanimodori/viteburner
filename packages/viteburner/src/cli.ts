@@ -1,7 +1,9 @@
 import cac from 'cac';
 import { createServer } from 'vite';
 import pkg from '../package.json';
-import { logger } from './console';
+import { logger, setHandler } from './console';
+import { createKeyHandler, displayWatchAndHelp } from './keys';
+import { findViteBurnerPlugin } from './plugins/api';
 import { viteburnerPlugin } from './plugins/viteburner';
 import { ViteBurnerInlineConfig } from './types';
 
@@ -32,11 +34,23 @@ export async function startDev(options: any) {
 
   // create server
   logger.info('vite', 'creating dev server...');
-  createServer({
+  const server = await createServer({
     ...(cwd && { root: cwd }),
     viteburner: resolveInlineConfig,
     plugins: [viteburnerPlugin(resolveInlineConfig)],
   });
+
+  // Keypresses are the CLI's input and the plugin's api is the only way in, so the CLI keeps the key
+  // map and the help that documents it, and calls the matching api command for each key it answers.
+  const plugin = findViteBurnerPlugin(server.config);
+  if (!plugin) {
+    throw new Error('the viteburner plugin is not part of this config');
+  }
+  setHandler(createKeyHandler(plugin.api));
+
+  // Startup banner: the daemon's state, then the hint for the keys above.
+  plugin.api.displayStatus();
+  displayWatchAndHelp();
 }
 
 export async function main() {

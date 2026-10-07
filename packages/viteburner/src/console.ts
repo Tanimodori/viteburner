@@ -109,6 +109,13 @@ let handler: KeypressHandler | undefined;
 export function setHandler(value?: KeypressHandler) {
   handler = value;
 }
-onKeypress((ctx) => {
+
+/**
+ * The key reader every keypress reaches, forwarded to whatever `setHandler` installed.
+ *
+ * Exported as a control rather than a setter because a command that needs the terminal for itself —
+ * an interactive prompt reading stdin — has to suspend this reader before it starts.
+ */
+export const keyInput = onKeypress((ctx) => {
   handler?.(ctx);
 });

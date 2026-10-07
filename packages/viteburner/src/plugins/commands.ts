@@ -3,27 +3,18 @@ import { resolve } from 'path';
 import fg from 'fast-glob';
 import pc from 'picocolors';
 import prompt from 'prompts';
-import { KeyHandlerContext, KeypressHandler, logger } from './console';
-import { isScriptFile } from './utils';
-import { WsAdapter, ResolvedData } from './ws';
+import { logger } from '@/console';
+import { isScriptFile } from '@/utils';
+import { ResolvedData, WsAdapter } from '@/ws';
+import { ViteBurnerPluginApi } from './api';
 
-export function displayKeyHelpHint() {
-  logger.info(
-    'help',
-    pc.dim('press ') +
-      pc.reset(pc.bold('h')) +
-      pc.dim(' to show help, press ') +
-      pc.reset(pc.bold('q')) +
-      pc.dim(' to exit'),
-  );
-}
-
-export function displayWatchAndHelp() {
-  logger.info('vite', pc.reset('watching for file changes...'));
-  displayKeyHelpHint();
-}
-
-export function handleKeyInput(wsAdapter: WsAdapter): KeypressHandler {
+/**
+ * The commands the plugin runs, over the dev server it was started for.
+ *
+ * Nothing here knows about keys or about this package's CLI: the api is the plugin's whole public
+ * surface, and which input asks for which command is the caller's business.
+ */
+export function createApi(wsAdapter: WsAdapter): ViteBurnerPluginApi {
   const padding = 18;
   const printStatus = (tag: string, msg: string) => {
     logger.info('status', pc.reset(tag.padStart(padding)), msg);
@@ -38,25 +29,6 @@ export function handleKeyInput(wsAdapter: WsAdapter): KeypressHandler {
     const pendingStrStyled = pending ? pc.yellow(pendingStr) : pc.dim(pendingStr);
     printStatus('pending:', pendingStrStyled);
     logger.info('status', pc.dim('')); // avoid (x2)
-  };
-
-  displayStatus();
-  displayWatchAndHelp();
-
-  const displayHelp = () => {
-    logger.info('help');
-    const commands = [
-      ['u', 'upload all files'],
-      ['d', 'download all files'],
-      ['s', 'show status'],
-      ['r', 'show RAM usage of scripts'],
-      ['q', 'quit'],
-    ];
-    logger.info('help', pc.reset(pc.bold('Watch Usage')));
-    for (const [key, desc] of commands) {
-      logger.info('help', `press ${pc.reset(pc.bold(key))}${pc.dim(' to ')}${desc}`);
-    }
-    logger.info('help', pc.dim('')); // avoid (x2)
   };
 
   const checkConnection = () => {
@@ -193,46 +165,29 @@ export function handleKeyInput(wsAdapter: WsAdapter): KeypressHandler {
     return false;
   };
 
-  const showRamUsage = async (ctx: KeyHandlerContext) => {
-    ctx.off();
+  const showRamUsage = async () => {
     const result = await showRamUsageRaw();
-    if (result) {
-      logger.info('ram', 'done');
-    } else {
-      logger.info('ram', 'cancelled');
-    }
-    ctx.on();
+    logger.info('ram', result ? 'done' : 'cancelled');
   };
 
-  return async (ctx) => {
-    const { key } = ctx;
-    let isKeyHandled = true;
-    if (key.name === 'q') {
-      // q to quit
+  return {
+    quit: () => {
       logger.info('bye');
       process.exit();
-    } else if (key.name === 's') {
-      // s to show status
-      displayStatus();
-    } else if (key.name === 'h') {
-      // h to show help
-      displayHelp();
-    } else if (key.name === 'u') {
-      // u to update all
+    },
+    displayStatus,
+    fullUpload: () => {
       if (checkConnection()) fullUpload();
-    } else if (key.name === 'd') {
-      // d to download all
+    },
+    fullDownload: () => {
       if (checkConnection()) fullDownload();
-    } else if (key.name === 'r') {
-      // f to show ram usage
-      if (checkConnection()) await showRamUsage(ctx);
-    } else {
-      isKeyHandled = false;
-    }
-
-    // tailing info
-    if (isKeyHandled) {
-      displayWatchAndHelp();
-    }
+    },
+    showRamUsage: () => {
+      if (checkConnection()) return showRamUsage();
+    },
+    showRamUsageAll,
+    showRamUsageGlob,
+    showRamUsageLocal,
+    showRamUsageRemote,
   };
 }
