@@ -3,6 +3,7 @@ import { resolve } from 'path';
 import chokidar, { FSWatcher, WatchOptions } from 'chokidar';
 import fg from 'fast-glob';
 import { isMatch } from 'micromatch';
+import { logger } from '@/console';
 import { EventBus } from '@/services/bus';
 import { ResolvedWatchItem } from '@/types';
 import { removeStartingSlash, slash } from '@/utils';
@@ -69,17 +70,21 @@ export class WatchService {
     }
     // emit the event
     const item = this.findItem(file);
-    if (item) {
-      void this.bus.emit('fs:changed', {
-        ...item,
-        file: slash(file),
-        event,
-        initial: this.initial,
-        timestamp: Date.now(),
-      });
-    } else {
-      throw new Error(`File ${file} does not match any patterns`);
+    if (!item) {
+      // chokidar only reports files one of these patterns matched, and `fullReload` globs the same
+      // patterns, so this is a pattern-set bug rather than anything the player did. Report it and
+      // keep watching: throwing here would surface as an uncaught exception in a chokidar callback
+      // and take the daemon down.
+      logger.warn('watch', `${file} does not match any patterns`);
+      return;
     }
+    void this.bus.emit('fs:changed', {
+      ...item,
+      file: slash(file),
+      event,
+      initial: this.initial,
+      timestamp: Date.now(),
+    });
   }
 
   setEnabled(value: boolean) {
