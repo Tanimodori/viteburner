@@ -114,6 +114,30 @@ importers:
         specifier: ^0.34.6
         version: 0.34.6(playwright@1.63.0)
 
+  ../../tests/viteburner-config-test:
+    devDependencies:
+      '@types/node':
+        specifier: ^18.14.1
+        version: 18.19.130
+      oxfmt:
+        specifier: ^0.72.0
+        version: 0.72.0
+      oxlint:
+        specifier: ^1.87.0
+        version: 1.87.0
+      typescript:
+        specifier: ^4.9.5
+        version: 4.9.5
+      vite:
+        specifier: ^4.1.4
+        version: 4.5.14(@types/node@18.19.130)
+      viteburner:
+        specifier: workspace:*
+        version: link:../../packages/viteburner
+      vitest:
+        specifier: ^0.34.6
+        version: 0.34.6(playwright@1.63.0)
+
   ../../tests/viteburner-e2e-test:
     devDependencies:
       '@types/node':
@@ -534,6 +558,13 @@ packages:
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
+
+  '@oxfmt/binding-linux-arm64-musl@0.72.0':
+    resolution: {integrity: sha512-poafnbsPpJhR+5Mbwpf8CscugTyiRAzjTOxRVn8ra3X2jnURs2xL5Du2xl5g2iW85lICMglpmLf8jDjZEbNgzQ==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
 
   '@oxfmt/binding-linux-ppc64-gnu@0.72.0':
     resolution: {integrity: sha512-zNUi0gKRsO7S3IfPzsTbnm88OedPuX32hmZFWZRWHvWJlAoZRwVbeO6Nb3hng4vDgL7qUKp4TGqzPz1mhsycYg==}
@@ -1629,6 +1660,9 @@ snapshots:
   '@oxfmt/binding-linux-arm64-gnu@0.72.0':
     optional: true
 
+  '@oxfmt/binding-linux-arm64-musl@0.72.0':
+    optional: true
+
   '@oxfmt/binding-linux-ppc64-gnu@0.72.0':
     optional: true
 
@@ -2121,6 +2155,7 @@ snapshots:
       '@oxfmt/binding-linux-arm-gnueabihf': 0.72.0
       '@oxfmt/binding-linux-arm-musleabihf': 0.72.0
       '@oxfmt/binding-linux-arm64-gnu': 0.72.0
+      '@oxfmt/binding-linux-arm64-musl': 0.72.0
       '@oxfmt/binding-linux-ppc64-gnu': 0.72.0
       '@oxfmt/binding-linux-riscv64-gnu': 0.72.0
       '@oxfmt/binding-linux-riscv64-musl': 0.72.0
