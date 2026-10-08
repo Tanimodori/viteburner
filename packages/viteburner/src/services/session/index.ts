@@ -4,7 +4,7 @@ import { SyncService } from '@/services/sync';
 import { ViteService } from '@/services/vite';
 import { WatchService } from '@/services/watch';
 import { WsService } from '@/services/ws';
-import type { ResolvedViteBurnerConfig } from '@/types';
+import type { ResolvedViteBurnerConfig, ViteBurnerStatus } from '@/types';
 import { EventBus } from '@/utils/bus';
 
 /**
@@ -18,6 +18,9 @@ import { EventBus } from '@/utils/bus';
  * The event bus is the session's own, created here and published as `events` for whoever wants to
  * observe this session's external events; the subscriptions made in `start` are torn down with the
  * session that made them.
+ *
+ * A session is also what a caller holds to ask the daemon anything: the services above for the
+ * operations, and `getStatus` for a read of the whole thing.
  */
 export class Session {
   readonly vite: ViteService;
@@ -67,5 +70,14 @@ export class Session {
     this.ws.stop();
     this.watch.stop();
     this.events.emit('vite:closed', undefined);
+  }
+
+  /** The daemon's state, as data for a caller to render however it likes. */
+  getStatus(): ViteBurnerStatus {
+    return {
+      connected: this.ws.connected,
+      port: this.vite.config.port,
+      pending: this.sync.pending,
+    };
   }
 }

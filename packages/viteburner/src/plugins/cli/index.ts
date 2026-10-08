@@ -19,19 +19,21 @@ export interface CliPluginOptions {
  *
  * The CLI adds this plugin next to the viteburner one, which is what keeps the daemon plugin free of
  * any notion of a keyboard, a prompt, or a terminal. A key is answered by looking the viteburner
- * plugin up in the resolved config and running the command that key names — the key map and the
- * commands themselves are the CLI's (`keys.ts`, `commands.ts`), and the daemon plugin knows none of
- * them.
+ * plugin up in the resolved config, asking it for the running session, and running the command that
+ * key names — the key map and the commands themselves are the CLI's (`keys.ts`, `commands.ts`), and
+ * the daemon plugin knows none of them.
  *
  * A config-change restart reuses this plugin instance (vite re-resolves the CLI's inline config), so
  * the reader is created once and `configResolved` only re-points it at the plugin of the config that
- * is now current; the reader outlives the dev server the same way stdin does.
+ * is now current; the reader outlives the dev server the same way stdin does. The session does not
+ * outlive it, so each key asks for the one that is live now rather than holding the one that was up
+ * when the reader started.
  *
  * Adding this plugin to a config that is not the CLI's would put the CLI's keys on that dev server's
  * terminal — including the force-exit on esc/ctrl+c — and fight vite's own key shortcuts for stdin.
  */
 export function cliPlugin(options: CliPluginOptions = {}): Plugin {
-  // The viteburner plugin of the config that is currently resolved, and so the api a key answers to.
+  // The viteburner plugin of the config that is currently resolved, and so the session a key answers to.
   let plugin: ViteBurnerPlugin | undefined;
   const keypress = createKeypress(options.input);
 
@@ -49,7 +51,14 @@ export function cliPlugin(options: CliPluginOptions = {}): Plugin {
         logger.warn('cli', 'the viteburner plugin is not part of this config: keys are not answered');
         return;
       }
-      startKeypress(keypress, (key) => dispatchKey(key, found.api, keypress));
+      startKeypress(keypress, (key) => {
+        // Re-read per key: a restart replaces the session while this reader stays attached.
+        const session = found.api.getSession();
+        if (!session) {
+          return;
+        }
+        return dispatchKey(key, session, keypress);
+      });
     },
   };
 }

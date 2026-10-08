@@ -1,6 +1,6 @@
 import pc from 'picocolors';
 import { logger } from '@/console';
-import type { ViteBurnerPluginApi } from '@/plugins/viteburner/api';
+import type { Session } from '@/services/session';
 import { displayRamUsage, displayStatus, quit } from './commands';
 import { resumeKeypress, suspendKeypress } from './keypress';
 import type { Keypress } from './keypress';
@@ -39,7 +39,7 @@ function displayHelp() {
 }
 
 export interface KeyAction {
-  run(api: ViteBurnerPluginApi): void | Promise<unknown>;
+  run(session: Session): void | Promise<unknown>;
   /**
    * The action keeps the terminal for itself — it opens a prompt that reads stdin — so the key reader
    * has to let go of it first.
@@ -47,18 +47,18 @@ export interface KeyAction {
   interactive?: boolean;
 }
 
-/** The keys the CLI answers, and the plugin api operation each one runs. */
+/** The keys the CLI answers, and the session operation each one runs. */
 export const keyActions: Record<string, KeyAction> = {
   q: { run: quit },
   s: { run: displayStatus },
   h: { run: displayHelp },
-  u: { run: (api) => api.fullUpload() },
-  d: { run: (api) => api.fullDownload() },
+  u: { run: (session) => session.sync.fullUpload() },
+  d: { run: (session) => session.sync.fullDownload() },
   r: { run: displayRamUsage, interactive: true },
 };
 
 /** Answer one keypress: run the key's operation, then print the hint that ends the turn. */
-export async function dispatchKey(key: string, api: ViteBurnerPluginApi, keypress: Keypress) {
+export async function dispatchKey(key: string, session: Session, keypress: Keypress) {
   const action = keyActions[key];
   if (!action) {
     return;
@@ -67,7 +67,7 @@ export async function dispatchKey(key: string, api: ViteBurnerPluginApi, keypres
     suspendKeypress(keypress);
   }
   try {
-    await action.run(api);
+    await action.run(session);
   } finally {
     if (action.interactive) {
       resumeKeypress(keypress);

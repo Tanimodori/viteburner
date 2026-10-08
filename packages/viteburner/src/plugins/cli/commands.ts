@@ -1,14 +1,15 @@
 import pc from 'picocolors';
 import prompt from 'prompts';
 import { logger } from '@/console';
-import type { ViteBurnerPluginApi } from '@/plugins/viteburner/api';
+import type { Session } from '@/services/session';
 import { isScriptFile } from '@/utils/path';
 
 /**
  * The commands the CLI runs on the player's behalf: everything the plugin refuses to know about.
  *
  * The daemon answers questions and runs operations; choosing what to ask, rendering the answer, and
- * ending the process are here, next to the keys that ask for them.
+ * ending the process are here, next to the keys that ask for them. Each command is handed the session
+ * of the running dev server and reaches the service it needs itself.
  */
 
 const padding = 18;
@@ -18,11 +19,8 @@ function printStatus(tag: string, msg: string) {
 }
 
 /** Render the daemon's state as the status block. */
-export function displayStatus(api: ViteBurnerPluginApi) {
-  const status = api.getStatus();
-  if (!status) {
-    return;
-  }
+export function displayStatus(session: Session) {
+  const status = session.getStatus();
   logger.info('status');
   logger.info('status', ' '.repeat(padding - 4) + pc.reset(pc.bold(pc.inverse(pc.green(' STATUS ')))));
   printStatus('connection:', status.connected ? pc.green('connected') : pc.yellow('disconnected'));
@@ -34,24 +32,24 @@ export function displayStatus(api: ViteBurnerPluginApi) {
 }
 
 /** Leave: stop the daemon's services, then end the process. */
-export function quit(api: ViteBurnerPluginApi) {
+export function quit(session: Session) {
   logger.info('bye');
-  api.dispose();
+  session.dispose();
   process.exit(0);
 }
 
 /**
  * Ask which RAM scope to report, then report it.
  *
- * The questioning is the CLI's: the plugin is asked only for the data a choice needs, and told which
+ * The questioning is the CLI's: the session is asked only for the data a choice needs, and told which
  * report to run once the player has chosen.
  */
-export async function displayRamUsage(api: ViteBurnerPluginApi) {
-  const reported = await askRamScope(api);
+export async function displayRamUsage(session: Session) {
+  const reported = await askRamScope(session);
   logger.info('ram', reported ? 'done' : 'cancelled');
 }
 
-async function askRamScope(api: ViteBurnerPluginApi): Promise<boolean> {
+async function askRamScope(session: Session): Promise<boolean> {
   const { filter } = await prompt({
     type: 'select',
     name: 'filter',
@@ -66,7 +64,7 @@ async function askRamScope(api: ViteBurnerPluginApi): Promise<boolean> {
   });
 
   if (filter === 'all') {
-    await api.showRamUsageAll();
+    await session.sync.getRamUsage();
     return true;
   }
 
@@ -80,12 +78,12 @@ async function askRamScope(api: ViteBurnerPluginApi): Promise<boolean> {
     if (!pattern) {
       return false;
     }
-    await api.showRamUsageGlob(pattern);
+    await session.sync.getRamUsage(pattern);
     return true;
   }
 
   if (filter === 'local') {
-    const files = await api.getRamUsageLocalFiles();
+    const files = await session.sync.getRamUsageLocalFiles();
     const { file } = await prompt({
       type: 'autocomplete',
       name: 'file',
@@ -95,7 +93,7 @@ async function askRamScope(api: ViteBurnerPluginApi): Promise<boolean> {
     if (!file) {
       return false;
     }
-    await api.showRamUsageLocal(file);
+    await session.sync.getRamUsageLocal(file);
     return true;
   }
 
@@ -109,7 +107,7 @@ async function askRamScope(api: ViteBurnerPluginApi): Promise<boolean> {
     if (!server) {
       return false;
     }
-    const filenames = await api.getFileNames(server);
+    const filenames = await session.sync.getFileNames(server);
     if (!filenames) {
       return false;
     }
@@ -122,7 +120,7 @@ async function askRamScope(api: ViteBurnerPluginApi): Promise<boolean> {
     if (!filename) {
       return false;
     }
-    await api.showRamUsageRemote(server, filename);
+    await session.sync.getRamUsageRemote(server, filename);
     return true;
   }
 

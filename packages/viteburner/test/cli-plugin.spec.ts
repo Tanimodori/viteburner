@@ -76,19 +76,26 @@ describe('the CLI plugin in a real dev server', () => {
     const plugin = findViteBurnerPlugin(server.config);
     expect(plugin, 'the plugin is part of the resolved config').toBeDefined();
     // `s` renders the status block from this read, so the spy is the CLI's question to the daemon.
-    const status = vi.spyOn(plugin!.api, 'getStatus');
+    const first = plugin!.api.getSession();
+    expect(first, 'the first server started a session').toBeDefined();
+    const firstStatus = vi.spyOn(first!, 'getStatus');
 
     // The reader is attached during `createServer`, so one key written right after it resolves is
     // already answered — the same window a plain vite startup would give it.
     input.write('s');
-    await vi.waitFor(() => expect(status).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(firstStatus).toHaveBeenCalledTimes(1));
 
     // A config-change restart reuses this plugin instance and re-runs `configResolved` and
-    // `configureServer`. The reader must not be attached a second time: the next key dispatches once,
-    // not twice, and it still reaches the replacement session's api.
+    // `configureServer`, but replaces the session. The reader must not be attached a second time: the
+    // next key dispatches once, not twice, and it reaches the replacement session rather than the
+    // closed one.
     await server.restart();
+    const second = plugin!.api.getSession();
+    expect(second, 'the replacement server started a session').toBeDefined();
+    expect(second, 'the restart replaced the session').not.toBe(first);
+    const secondStatus = vi.spyOn(second!, 'getStatus');
     input.write('s');
-    await vi.waitFor(() => expect(status).toHaveBeenCalledTimes(2));
+    await vi.waitFor(() => expect(secondStatus).toHaveBeenCalledTimes(1));
   });
 
   it('leaves a config without the viteburner plugin alone instead of breaking startup', async () => {

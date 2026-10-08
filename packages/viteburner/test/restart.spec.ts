@@ -104,12 +104,12 @@ describe('a config-change restart', () => {
 
     await server.restart();
 
-    // The api routes to the replacement session. `fullUpload` is the command the old teardown
+    // `getSession` hands back the replacement session. `fullUpload` is the command the old teardown
     // cleared, so after a restart it answered nothing at all and no push followed.
     const plugin = findViteBurnerPlugin(server.config);
     expect(plugin, 'the plugin is part of the restarted config').toBeDefined();
     first.pushes.length = 0;
-    plugin?.api.fullUpload();
+    plugin?.api.getSession()?.sync.fullUpload();
     await vi.waitFor(() => expect(first.pushes).toContain('a.js'), { timeout: 20_000 });
 
     // A game that connects after the restart is adopted by the replacement too — the same
@@ -120,7 +120,7 @@ describe('a config-change restart', () => {
     game = second;
     await vi.waitFor(() => expect(second.calls).toContain('getDefinitionFile'), { timeout: 20_000 });
     second.pushes.length = 0;
-    plugin?.api.fullUpload();
+    plugin?.api.getSession()?.sync.fullUpload();
     await vi.waitFor(() => expect(second.pushes).toContain('a.js'), { timeout: 20_000 });
   });
 });

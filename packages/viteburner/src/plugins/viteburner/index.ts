@@ -35,6 +35,10 @@ export function getDefaultConfig(): UserConfig {
  * per-server state of its own beyond the session `configureServer` creates, and ties that session's
  * teardown to the dev server that owns it rather than to "the current session".
  *
+ * The plugin's own api is only the two reads that are not the session's: the resolved config, and the
+ * session itself. Everything a caller does is done on the session it gets from `getSession()` — see
+ * `plugins/cli` for the CLI's use of it.
+ *
  * The event bus the services publish their external events on belongs to the session that owns them
  * (see `Session.events`), not to this plugin: it is the daemon's ingress, not an interface the CLI or
  * any other caller reaches into. Which key asks for which operation is decided by the CLI that adds
@@ -43,33 +47,16 @@ export function getDefaultConfig(): UserConfig {
 export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): ViteBurnerPlugin {
   const resolvedVirtualModuleId = '\0' + virtualModuleId;
   // The config the plugin resolved, captured at `configResolved` so `getPluginConfig` can answer
-  // without a running server — the commands below all need one, this read does not.
+  // without a running server — the session needs one, this read does not.
   let pluginConfig: ResolvedViteBurnerConfig | undefined;
-  // The services of the dev server currently running. The api is one stable object handed out once,
-  // so it routes through this rather than being rebuilt: a caller that kept the api keeps a handle
-  // that no-ops while no server is up, instead of reaching into a closed one.
+  // The services of the dev server currently running, or undefined between servers. `getSession`
+  // reads this rather than caching it, so a caller that holds the plugin reaches the session that is
+  // live now instead of a closed one.
   let session: Session | undefined;
 
   const api: ViteBurnerPluginApi = {
+    getSession: () => session,
     getPluginConfig: () => pluginConfig,
-    dispose: () => {
-      session?.dispose();
-      session = undefined;
-    },
-    getStatus: () =>
-      session && {
-        connected: session.ws.connected,
-        port: session.vite.config.port,
-        pending: session.sync.pending,
-      },
-    fullUpload: () => session?.sync.fullUpload(),
-    fullDownload: () => session?.sync.fullDownload(),
-    showRamUsageAll: () => session?.sync.getRamUsage(),
-    showRamUsageGlob: (pattern) => session?.sync.getRamUsage(pattern),
-    showRamUsageLocal: (file) => session?.sync.getRamUsageLocal(file),
-    showRamUsageRemote: (server, filename) => session?.sync.getRamUsageRemote(server, filename),
-    getRamUsageLocalFiles: async () => (session ? session.sync.getRamUsageLocalFiles() : []),
-    getFileNames: async (server) => (session ? session.sync.getFileNames(server) : null),
   };
 
   return {

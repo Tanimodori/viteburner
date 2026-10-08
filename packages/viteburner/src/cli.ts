@@ -45,7 +45,12 @@ export async function startDev(options: any) {
   if (!plugin) {
     throw new Error('the viteburner plugin is not part of this config');
   }
-  displayStatus(plugin.api);
+  // `createServer` ran `configureServer`, so the session is already up; a missing one is a real bug.
+  const session = plugin.api.getSession();
+  if (!session) {
+    throw new Error('the viteburner session was not started');
+  }
+  displayStatus(session);
   displayWatchAndHelp();
 }
 
