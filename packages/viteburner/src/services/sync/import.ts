@@ -2,7 +2,7 @@ import { parse as acornParse } from 'acorn';
 import MagicString from 'magic-string';
 import { logger } from '@/console';
 import type { WatchService } from '@/services/watch';
-import { forceStartingSlash, isExternalUrl, normalizeRequestId } from '@/utils';
+import { forceStartingSlash, isExternalUrl, normalizeRequestId } from '@/utils/path';
 
 export interface FixImportPathOptions {
   filename: string;

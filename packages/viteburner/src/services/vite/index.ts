@@ -1,7 +1,7 @@
 import { resolve } from 'pathe';
 import type { TransformResult, ViteDevServer } from 'vite';
 import type { ResolvedViteBurnerConfig } from '@/types';
-import { normalizeRequestId, slash } from '@/utils';
+import { normalizeRequestId, slash } from '@/utils/path';
 
 /**
  * The dev server as the rest of the daemon needs it: the resolved viteburner config, and the three

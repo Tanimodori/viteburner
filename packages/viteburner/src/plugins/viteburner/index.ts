@@ -1,7 +1,6 @@
 import type { UserConfig } from 'vite';
 import { loadConfig } from '@/config';
 import { logger } from '@/console';
-import { EventBus } from '@/services/bus';
 import { Session } from '@/services/session';
 import type { ResolvedConfig, ResolvedViteBurnerConfig, ViteBurnerInlineConfig, ViteBurnerUserConfig } from '@/types';
 import { viteburnerPluginName } from './api';
@@ -36,12 +35,12 @@ export function getDefaultConfig(): UserConfig {
  * per-server state of its own beyond the session `configureServer` creates, and ties that session's
  * teardown to the dev server that owns it rather than to "the current session".
  *
- * The event bus the services publish their external events on is this plugin's own: it is the
- * daemon's ingress, not an interface the CLI or any other caller reaches into. Which key asks for
- * which operation is decided by the CLI that adds this plugin — see `plugins/cli`.
+ * The event bus the services publish their external events on belongs to the session that owns them
+ * (see `Session.events`), not to this plugin: it is the daemon's ingress, not an interface the CLI or
+ * any other caller reaches into. Which key asks for which operation is decided by the CLI that adds
+ * this plugin — see `plugins/cli`.
  */
 export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): ViteBurnerPlugin {
-  const bus = new EventBus();
   const resolvedVirtualModuleId = '\0' + virtualModuleId;
   // The config the plugin resolved, captured at `configResolved` so `getPluginConfig` can answer
   // without a running server — the commands below all need one, this read does not.
@@ -92,7 +91,7 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): ViteBurn
       if (!pluginConfig) {
         throw new Error('the viteburner config was not resolved before the dev server was created');
       }
-      const created = new Session(devServer, pluginConfig, bus);
+      const created = new Session(devServer, pluginConfig);
       created.start();
       session = created;
 

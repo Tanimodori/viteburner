@@ -17,7 +17,7 @@ import {
   removeStartingSlash,
   slash,
   writeFile,
-} from '@/utils';
+} from '@/utils/path';
 import { fixImportPath } from './import';
 
 export interface FileContent {

@@ -9,7 +9,7 @@ import {
   normalizeRequestId,
   removeStartingSlash,
   slash,
-} from '@/utils';
+} from '@/utils/path';
 
 /**
  * `getSourceMapString` emits an inline sourcemap comment. The literal below is safe to write

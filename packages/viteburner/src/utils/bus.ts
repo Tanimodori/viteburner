@@ -2,7 +2,7 @@ import { logger } from '@/console';
 import type { HmrData, ResolvedViteBurnerConfig } from '@/types';
 
 /**
- * Everything that reaches the daemon from outside it.
+ * Everything that reaches a session from outside it.
  *
  * Only the three external sources publish here: the file watcher, the game's socket, and vite's
  * server lifecycle. Everything else is a direct call between the services that make up a session, so
@@ -28,10 +28,12 @@ export interface AppEvents {
 export type EventHandler<T> = (payload: T) => void | Promise<void>;
 
 /**
- * The ingress the services subscribe to.
+ * The ingress a session's services publish their external events on, created and held by that
+ * session.
  *
- * Dispatch is sequential and fault-isolated: one handler that throws is logged and the rest still
- * run, so a subscriber cannot take the daemon down by rejecting.
+ * Dispatch is synchronous and fault-isolated: handlers are called in subscription order, and one
+ * that throws — or returns a promise that rejects — is logged while the rest still run, so a
+ * subscriber cannot take the daemon down by rejecting.
  */
 export class EventBus {
   // Handlers are stored under their bare event key with the payload erased to `never`: only `on`
@@ -52,17 +54,22 @@ export class EventBus {
     };
   }
 
-  async emit<K extends keyof AppEvents>(event: K, payload: AppEvents[K]): Promise<void> {
+  emit<K extends keyof AppEvents>(event: K, payload: AppEvents[K]): void {
     const set = this.handlers.get(event);
     if (!set) {
       return;
     }
+    const fail = (e: unknown) => {
+      logger.error('event', `${String(event)} handler failed: ${String(e)}`);
+    };
     // Snapshot so a handler that subscribes or unsubscribes mid-dispatch cannot change this run.
     for (const handler of Array.from(set)) {
       try {
-        await (handler as EventHandler<AppEvents[K]>)(payload);
+        // Handlers may be async; `Promise.resolve` settles the returned promise with the same catch,
+        // so a rejection is reported here instead of surfacing as an unhandled rejection.
+        void Promise.resolve((handler as EventHandler<AppEvents[K]>)(payload)).catch(fail);
       } catch (e) {
-        logger.error('event', `${String(event)} handler failed: ${String(e)}`);
+        fail(e);
       }
     }
   }

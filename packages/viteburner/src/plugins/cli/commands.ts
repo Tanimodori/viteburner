@@ -2,7 +2,7 @@ import pc from 'picocolors';
 import prompt from 'prompts';
 import { logger } from '@/console';
 import type { ViteBurnerPluginApi } from '@/plugins/viteburner/api';
-import { isScriptFile } from '@/utils';
+import { isScriptFile } from '@/utils/path';
 
 /**
  * The commands the CLI runs on the player's behalf: everything the plugin refuses to know about.

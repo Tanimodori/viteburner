@@ -1,5 +1,5 @@
 import { ResolvedViteBurnerConfig, ViteBurnerConfig, WatchItem } from '@/types';
-import { defaultDownloadLocation, defaultUploadLocation, fixStartingSlash } from '@/utils';
+import { defaultDownloadLocation, defaultUploadLocation, fixStartingSlash } from '@/utils/path';
 
 /** The definition file the game serves, unless the config names another. */
 export const defaultDts = 'NetscriptDefinitions.d.ts';

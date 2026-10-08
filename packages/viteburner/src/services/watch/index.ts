@@ -4,15 +4,15 @@ import chokidar, { FSWatcher, WatchOptions } from 'chokidar';
 import fg from 'fast-glob';
 import { isMatch } from 'micromatch';
 import { logger } from '@/console';
-import { EventBus } from '@/services/bus';
 import { ResolvedWatchItem } from '@/types';
-import { removeStartingSlash, slash } from '@/utils';
+import { EventBus } from '@/utils/bus';
+import { removeStartingSlash, slash } from '@/utils/path';
 
 /**
  * The file watcher, and the source of the `fs:changed` event.
  *
  * It knows which pattern matched (and so where a file uploads), but nothing about the game: it turns
- * a chokidar event into one `fs:changed` payload on the bus.
+ * a chokidar event into one `fs:changed` payload on the session's bus.
  */
 export class WatchService {
   items: ResolvedWatchItem[];
@@ -25,7 +25,7 @@ export class WatchService {
   constructor(
     items: ResolvedWatchItem[],
     options: WatchOptions,
-    private readonly bus: EventBus,
+    private readonly events: EventBus,
   ) {
     this.items = items;
     this.options = options;
@@ -78,7 +78,7 @@ export class WatchService {
       logger.warn('watch', `${file} does not match any patterns`);
       return;
     }
-    void this.bus.emit('fs:changed', {
+    this.events.emit('fs:changed', {
       ...item,
       file: slash(file),
       event,

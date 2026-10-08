@@ -9,7 +9,7 @@ import { cliPlugin } from '../src/plugins/cli';
 import { viteburnerPlugin } from '../src/plugins/viteburner';
 import { findViteBurnerPlugin } from '../src/plugins/viteburner/api';
 import type { ViteBurnerUserConfig } from '../src/types';
-import { slash } from '../src/utils';
+import { slash } from '../src/utils/path';
 
 /**
  * The CLI's key plugin inside a real `createServer`, checked without a terminal or a built CLI.

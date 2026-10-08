@@ -9,13 +9,13 @@ import type {
 import { WsManager } from 'bb-ws-server';
 import pc from 'picocolors';
 import { logger } from '@/console';
-import { EventBus } from '@/services/bus';
+import { EventBus } from '@/utils/bus';
 
 /**
  * The transport: the game connects here, and this is the side that speaks the Remote API to it.
  *
- * It publishes the two connection transitions on the bus and answers the protocol calls, and knows
- * nothing about files, transforms, or the config — a request in, a response out.
+ * It publishes the two connection transitions on the session's bus and answers the protocol calls,
+ * and knows nothing about files, transforms, or the config — a request in, a response out.
  *
  * `start` opens the port and `stop` closes it, so this service owns the port for exactly its own
  * lifetime rather than leaving it bound behind it.
@@ -25,7 +25,7 @@ export class WsService {
 
   constructor(
     private readonly options: WsManagerOptions,
-    private readonly bus: EventBus,
+    private readonly events: EventBus,
   ) {}
 
   get connected() {
@@ -39,10 +39,10 @@ export class WsService {
     const manager = new WsManager(this.options);
     manager.onConnected((ws) => {
       logger.info('conn', '', 'connected');
-      void this.bus.emit('ws:connected', undefined);
+      this.events.emit('ws:connected', undefined);
       const onClose = () => {
         logger.info('conn', '', pc.yellow('disconnected'));
-        void this.bus.emit('ws:disconnected', undefined);
+        this.events.emit('ws:disconnected', undefined);
       };
       ws.on('close', onClose);
       return () => {
