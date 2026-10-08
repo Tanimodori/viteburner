@@ -1,9 +1,19 @@
-import type { Plugin, ResolvedConfig } from 'vite';
-import type { Session } from '@/services/session';
+import type { Plugin } from 'vite';
 import type { ResolvedViteBurnerConfig } from '@/types';
+import type { Session } from './session';
 
 /** The name the plugin registers under, and the key `findViteBurnerPlugin` looks it up by. */
 export const viteburnerPluginName = 'viteburner';
+
+/** The daemon's state, as data for a caller to render however it likes. */
+export interface ViteBurnerStatus {
+  /** Whether the game is the active client of the websocket port. */
+  connected: boolean;
+  /** The port the game connects to. */
+  port: number;
+  /** How many watched files are still waiting to sync. */
+  pending: number;
+}
 
 /**
  * What the plugin itself can be asked for: the config it resolved, and the session of the dev server
@@ -38,9 +48,4 @@ export interface ViteBurnerPluginApi {
 export interface ViteBurnerPlugin extends Plugin {
   name: typeof viteburnerPluginName;
   api: ViteBurnerPluginApi;
-}
-
-/** The viteburner plugin among a resolved config's plugins, for callers that hold only the config. */
-export function findViteBurnerPlugin(config: ResolvedConfig): ViteBurnerPlugin | undefined {
-  return config.plugins.find((plugin) => plugin.name === viteburnerPluginName) as ViteBurnerPlugin | undefined;
 }

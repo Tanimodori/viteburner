@@ -7,7 +7,7 @@ import { createServer, type ViteDevServer } from 'vite';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cliPlugin } from '../src/plugins/cli';
 import { viteburnerPlugin } from '../src/plugins/viteburner';
-import { findViteBurnerPlugin } from '../src/plugins/viteburner/api';
+import { findViteBurnerPlugin } from '../src/plugins/viteburner';
 import type { ViteBurnerUserConfig } from '../src/types';
 import { slash } from '../src/utils/path';
 

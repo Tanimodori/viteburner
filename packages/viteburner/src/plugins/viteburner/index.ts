@@ -1,10 +1,15 @@
-import type { UserConfig } from 'vite';
+import type { ResolvedConfig as ViteResolvedConfig, UserConfig } from 'vite';
 import { loadConfig } from '@/config';
 import { logger } from '@/console';
-import { Session } from '@/services/session';
 import type { ResolvedConfig, ResolvedViteBurnerConfig, ViteBurnerInlineConfig, ViteBurnerUserConfig } from '@/types';
-import { viteburnerPluginName } from './api';
-import type { ViteBurnerPlugin, ViteBurnerPluginApi } from './api';
+import { Session } from './session';
+import { viteburnerPluginName } from './types';
+import type { ViteBurnerPlugin, ViteBurnerPluginApi } from './types';
+
+// The plugin's whole public surface: the plugin factory below, and the session and types it hands
+// out, re-exported so a caller needs only this module.
+export * from './session';
+export * from './types';
 
 export const virtualModuleId = 'virtual:viteburner-entry';
 
@@ -109,4 +114,9 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): ViteBurn
       }
     },
   };
+}
+
+/** The viteburner plugin among a resolved config's plugins, for callers that hold only the config. */
+export function findViteBurnerPlugin(config: ViteResolvedConfig): ViteBurnerPlugin | undefined {
+  return config.plugins.find((plugin) => plugin.name === viteburnerPluginName) as ViteBurnerPlugin | undefined;
 }

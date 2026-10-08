@@ -1,7 +1,7 @@
 import pc from 'picocolors';
 import prompt from 'prompts';
 import { logger } from '@/console';
-import type { Session } from '@/services/session';
+import type { Session } from '@/plugins/viteburner';
 import { isScriptFile } from '@/utils/path';
 
 /**

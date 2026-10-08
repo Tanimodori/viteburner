@@ -4,8 +4,9 @@ import { SyncService } from '@/services/sync';
 import { ViteService } from '@/services/vite';
 import { WatchService } from '@/services/watch';
 import { WsService } from '@/services/ws';
-import type { ResolvedViteBurnerConfig, ViteBurnerStatus } from '@/types';
+import type { ResolvedViteBurnerConfig } from '@/types';
 import { EventBus } from '@/utils/bus';
+import type { ViteBurnerStatus } from './types';
 
 /**
  * The services of one dev server, and the composition root that wires them.

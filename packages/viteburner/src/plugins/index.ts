@@ -2,5 +2,4 @@
 // CLI and added to its dev server; `viteburnerPlugin` is the daemon itself, meant for any vite config
 // that wants the file sync.
 export * from './cli';
-export * from './viteburner/api';
 export * from './viteburner';
