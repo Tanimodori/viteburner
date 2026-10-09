@@ -4,18 +4,19 @@ import os from 'node:os';
 import path from 'node:path';
 import { PassThrough } from 'node:stream';
 import { createServer, type ViteDevServer } from 'vite';
-import { findViteBurnerPlugin, slash, viteburnerPlugin, type ViteBurnerUserConfig } from 'vite-plugin-viteburner';
+import { slash, viteburnerPlugin, type ViteBurnerUserConfig } from 'vite-plugin-viteburner';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cliPlugin } from '../src/plugins/cli';
+import { startCliKeys } from '../src/plugins/cli/keys';
 
 /**
- * The CLI's key plugin inside a real `createServer`, checked without a terminal or a built CLI.
+ * The CLI plugin's api inside a real `createServer`, checked without a terminal or a built CLI.
  *
- * The question this answers is whether attaching the key reader from a vite plugin hook survives the
- * ordinary startup flow — including the config-change restart that replaces the dev server while
- * reusing the plugin instance. The reader is given a `PassThrough` (the `cliPlugin` seam) instead of
- * `process.stdin`, so one key written to it is exactly one `keypress` event and the test runner's own
- * stdin is never touched.
+ * The question this answers is whether the api reaches the daemon session that is live now — including
+ * after the config-change restart that replaces the dev server while reusing the plugin instance. The
+ * key reader is the CLI's own (`startCliKeys`, wired exactly as `cli.ts` does it) and is given a
+ * `PassThrough` instead of `process.stdin`, so one key written to it is exactly one `keypress` event
+ * and the test runner's own stdin is never touched; the plugin itself knows nothing about it.
  *
  * The daemon plugin comes from `vite-plugin-viteburner` by name — the same dependency the built CLI
  * resolves at runtime — so this package must be built before this spec runs (`rush build` orders it
@@ -60,39 +61,39 @@ describe('the CLI plugin in a real dev server', () => {
     return root;
   }
 
-  it('answers a key through the viteburner plugin, and keeps answering after a restart', async () => {
+  it('answers a key through the api, and keeps answering after a restart', async () => {
     const port = await freePort();
     const dir = makeProject();
     const inline = { cwd: dir, port };
+    // The CLI's own reader, over a stream a test controls; handed the plugin's api.
+    const plugin = cliPlugin();
     const input = new PassThrough();
+    startCliKeys(plugin.api, input);
+
     // Typed as the user config so the `viteburner` key is allowed where vite's own InlineConfig would
     // reject the extra property.
     const config: ViteBurnerUserConfig = {
       root: dir,
       logLevel: 'silent',
       viteburner: inline,
-      plugins: [viteburnerPlugin(inline), cliPlugin({ input })],
+      plugins: [viteburnerPlugin(inline), plugin],
     };
     server = await createServer(config);
 
-    const plugin = findViteBurnerPlugin(server.config);
-    expect(plugin, 'the plugin is part of the resolved config').toBeDefined();
     // `s` renders the status block from this read, so the spy is the CLI's question to the daemon.
-    const first = plugin!.api.getSession();
+    const first = plugin.api.getSession();
     expect(first, 'the first server started a session').toBeDefined();
     const firstStatus = vi.spyOn(first!, 'getStatus');
 
-    // The reader is attached during `createServer`, so one key written right after it resolves is
-    // already answered — the same window a plain vite startup would give it.
+    // The reader was attached before the server existed, so one key written right after it resolves
+    // is already answered — the same window a plain vite startup would give it.
     input.write('s');
     await vi.waitFor(() => expect(firstStatus).toHaveBeenCalledTimes(1));
 
-    // A config-change restart reuses this plugin instance and re-runs `configResolved` and
-    // `configureServer`, but replaces the session. The reader must not be attached a second time: the
-    // next key dispatches once, not twice, and it reaches the replacement session rather than the
-    // closed one.
+    // A config-change restart re-resolves this plugin instance and replaces the session. The api must
+    // reach the replacement: the next key dispatches once, not twice, and lands on the new session.
     await server.restart();
-    const second = plugin!.api.getSession();
+    const second = plugin.api.getSession();
     expect(second, 'the replacement server started a session').toBeDefined();
     expect(second, 'the restart replaced the session').not.toBe(first);
     const secondStatus = vi.spyOn(second!, 'getStatus');
@@ -100,17 +101,16 @@ describe('the CLI plugin in a real dev server', () => {
     await vi.waitFor(() => expect(secondStatus).toHaveBeenCalledTimes(1));
   });
 
-  it('leaves a config without the viteburner plugin alone instead of breaking startup', async () => {
+  it('answers nothing, and leaves the server up, in a config without the daemon plugin', async () => {
     const dir = makeProject();
-    const input = new PassThrough();
 
     // What a user's own vite config would look like if it carried the CLI plugin by mistake: startup
-    // must still succeed, and the keys must have nothing to answer rather than take the server down.
-    server = await createServer({ root: dir, logLevel: 'silent', plugins: [cliPlugin({ input })] });
-    expect(findViteBurnerPlugin(server.config), 'no viteburner plugin in this config').toBeUndefined();
+    // must still succeed, and the api must have nothing to answer rather than take the server down.
+    const plugin = cliPlugin();
+    server = await createServer({ root: dir, logLevel: 'silent', plugins: [plugin] });
 
-    input.write('s');
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(plugin.api.getSession(), 'no daemon plugin means no session').toBeUndefined();
+    plugin.api.displayStatus(); // must be a no-op, not a throw
     expect(slash(server.config.root), 'the server is still up').toBe(slash(dir));
   });
 });

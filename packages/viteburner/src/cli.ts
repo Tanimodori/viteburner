@@ -1,9 +1,10 @@
 import cac from 'cac';
 import { createServer } from 'vite';
-import { findViteBurnerPlugin, logger, viteburnerPlugin } from 'vite-plugin-viteburner';
+import { logger, viteburnerPlugin } from 'vite-plugin-viteburner';
 import type { ViteBurnerInlineConfig } from 'vite-plugin-viteburner';
 import pkg from '../package.json';
-import { cliPlugin, displayStatus, displayWatchAndHelp } from './plugins/cli';
+import { cliPlugin } from './plugins/cli';
+import { displayWatchAndHelp, startCliKeys } from './plugins/cli/keys';
 
 const cli = cac('viteburner');
 
@@ -31,25 +32,21 @@ export async function startDev(options: any) {
   logger.info('version', pkg.version);
 
   logger.info('vite', 'creating dev server...');
-  // Two plugins, two control planes: the daemon's, and the CLI's own keys and help. Only the CLI adds
-  // the second, which is why the daemon plugin never learns what a key is.
-  const server = await createServer({
+  // Two plugins, two control planes: the daemon's, and the CLI's own commands published as an api.
+  // Only the CLI adds the second, which is why the daemon plugin never learns what a CLI command is.
+  const plugin = cliPlugin();
+  // The keys are the CLI's own reader, started before the server exists — a key pressed during
+  // startup reaches an api with no session and is ignored. Neither plugin ever sees a keystroke.
+  startCliKeys(plugin.api);
+
+  await createServer({
     ...(cwd && { root: cwd }),
     viteburner: resolveInlineConfig,
-    plugins: [viteburnerPlugin(resolveInlineConfig), cliPlugin()],
+    plugins: [viteburnerPlugin(resolveInlineConfig), plugin],
   });
 
   // Startup banner: the daemon's state, then the hint for the keys above.
-  const plugin = findViteBurnerPlugin(server.config);
-  if (!plugin) {
-    throw new Error('the viteburner plugin is not part of this config');
-  }
-  // `createServer` ran `configureServer`, so the session is already up; a missing one is a real bug.
-  const session = plugin.api.getSession();
-  if (!session) {
-    throw new Error('the viteburner session was not started');
-  }
-  displayStatus(session);
+  plugin.api.displayStatus();
   displayWatchAndHelp();
 }
 

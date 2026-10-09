@@ -1,9 +1,8 @@
 import pc from 'picocolors';
 import { logger } from 'vite-plugin-viteburner';
-import type { Session } from 'vite-plugin-viteburner';
-import { displayRamUsage, displayStatus, quit } from './commands';
-import { resumeKeypress, suspendKeypress } from './keypress';
-import type { Keypress } from './keypress';
+import { createKeypress, resumeKeypress, startKeypress, suspendKeypress } from './keypress';
+import type { KeyInput, Keypress } from './keypress';
+import type { CliPluginApi } from './types';
 
 export function displayKeyHelpHint() {
   logger.info(
@@ -21,25 +20,8 @@ export function displayWatchAndHelp() {
   displayKeyHelpHint();
 }
 
-/** The keys this CLI answers, and what each one does. The daemon plugin knows none of them. */
-function displayHelp() {
-  logger.info('help');
-  const commands = [
-    ['u', 'upload all files'],
-    ['d', 'download all files'],
-    ['s', 'show status'],
-    ['r', 'show RAM usage of scripts'],
-    ['q', 'quit'],
-  ];
-  logger.info('help', pc.reset(pc.bold('Watch Usage')));
-  for (const [key, desc] of commands) {
-    logger.info('help', `press ${pc.reset(pc.bold(key))}${pc.dim(' to ')}${desc}`);
-  }
-  logger.info('help', pc.dim('')); // avoid (x2)
-}
-
 export interface KeyAction {
-  run(session: Session): void | Promise<unknown>;
+  run(api: CliPluginApi): void | Promise<unknown>;
   /**
    * The action keeps the terminal for itself — it opens a prompt that reads stdin — so the key reader
    * has to let go of it first.
@@ -47,18 +29,33 @@ export interface KeyAction {
   interactive?: boolean;
 }
 
-/** The keys the CLI answers, and the session operation each one runs. */
+/** The keys this CLI answers, and the api operation each one runs. The plugin knows none of them. */
 export const keyActions: Record<string, KeyAction> = {
-  q: { run: quit },
-  s: { run: displayStatus },
-  h: { run: displayHelp },
-  u: { run: (session) => session.sync.fullUpload() },
-  d: { run: (session) => session.sync.fullDownload() },
-  r: { run: displayRamUsage, interactive: true },
+  q: { run: (api) => api.quit() },
+  s: { run: (api) => api.displayStatus() },
+  h: { run: (api) => api.displayHelp() },
+  u: { run: (api) => api.fullUpload() },
+  d: { run: (api) => api.fullDownload() },
+  r: { run: (api) => api.displayRamUsage(), interactive: true },
 };
 
+/**
+ * Start the CLI's key reader over `input` (`process.stdin` by default), answering every key through
+ * `api`.
+ *
+ * This is the CLI's own wiring, not the plugin's: the plugin publishes the operations, the CLI
+ * decides that a terminal is being read and which key runs which operation. Starting it before the
+ * dev server exists is fine — a key pressed during startup reaches an api with no session and is
+ * ignored. The returned reader can be handed to `stopKeypress`.
+ */
+export function startCliKeys(api: CliPluginApi, input?: KeyInput): Keypress {
+  const keypress = createKeypress(input);
+  startKeypress(keypress, (key) => dispatchKey(key, api, keypress));
+  return keypress;
+}
+
 /** Answer one keypress: run the key's operation, then print the hint that ends the turn. */
-export async function dispatchKey(key: string, session: Session, keypress: Keypress) {
+export async function dispatchKey(key: string, api: CliPluginApi, keypress: Keypress) {
   const action = keyActions[key];
   if (!action) {
     return;
@@ -67,7 +64,7 @@ export async function dispatchKey(key: string, session: Session, keypress: Keypr
     suspendKeypress(keypress);
   }
   try {
-    await action.run(session);
+    await action.run(api);
   } finally {
     if (action.interactive) {
       resumeKeypress(keypress);
