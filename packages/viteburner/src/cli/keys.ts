@@ -21,6 +21,8 @@ export function displayWatchAndHelp() {
 }
 
 export interface KeyAction {
+  /** What the key does, as `displayHelp` lists it. */
+  description: string;
   run(api: CliApi): void | Promise<unknown>;
   /**
    * The action keeps the terminal for itself — it opens a prompt that reads stdin — so the key reader
@@ -29,15 +31,32 @@ export interface KeyAction {
   interactive?: boolean;
 }
 
-/** The keys this CLI answers, and the api operation each one runs. The daemon knows none of them. */
+/**
+ * The keys this CLI answers, and what each one does — the single source of truth for the keyboard.
+ *
+ * The declaration order is the order the help lists them in: `displayHelp` renders this map rather
+ * than repeating it, so a key cannot exist in one and be missing from the other. Most entries run an
+ * api operation; `h` runs the help itself, which needs no session and so is not on the api. The daemon
+ * knows none of this.
+ */
 export const keyActions: Record<string, KeyAction> = {
-  q: { run: (api) => api.quit() },
-  s: { run: (api) => api.displayStatus() },
-  h: { run: (api) => api.displayHelp() },
-  u: { run: (api) => api.fullUpload() },
-  d: { run: (api) => api.fullDownload() },
-  r: { run: (api) => api.displayRamUsage(), interactive: true },
+  u: { description: 'upload all files', run: (api) => api.fullUpload() },
+  d: { description: 'download all files', run: (api) => api.fullDownload() },
+  s: { description: 'show status', run: (api) => api.displayStatus() },
+  r: { description: 'show RAM usage of scripts', run: (api) => api.displayRamUsage(), interactive: true },
+  h: { description: 'show help', run: displayHelp },
+  q: { description: 'quit', run: (api) => api.quit() },
 };
+
+/** The keys this CLI answers, rendered from the map above. */
+export function displayHelp() {
+  logger.info('help');
+  logger.info('help', pc.reset(pc.bold('Watch Usage')));
+  for (const [key, action] of Object.entries(keyActions)) {
+    logger.info('help', `press ${pc.reset(pc.bold(key))}${pc.dim(' to ')}${action.description}`);
+  }
+  logger.info('help', pc.dim('')); // avoid (x2)
+}
 
 /**
  * Start the CLI's key reader over `input` (`process.stdin` by default), answering every key through

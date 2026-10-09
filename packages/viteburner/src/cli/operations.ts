@@ -4,12 +4,13 @@ import { isScriptFile, logger } from 'vite-plugin-viteburner';
 import type { Session } from 'vite-plugin-viteburner';
 
 /**
- * The CLI's commands: the operations the plugin publishes on its api, and the rendering of their
- * answers.
+ * The operations the CLI performs against the daemon on the player's behalf, and the rendering of
+ * their answers.
  *
  * Each one is handed the session of the running dev server and reaches the service it needs itself —
- * `createCliApi` in `api.ts` is what binds them to the session that is live when they are called. The
- * keys that ask for them, and the terminal they are read from, are the CLI's — see `keys.ts`.
+ * `createCliApi` in `api.ts` is what binds them to the session that is live when they are called.
+ * Which key asks for which operation, and the help that lists them, belong to the keyboard side — see
+ * `keys.ts`.
  */
 
 const padding = 18;
@@ -36,23 +37,6 @@ export function quit(session: Session) {
   logger.info('bye');
   session.dispose();
   process.exit(0);
-}
-
-/** Print the commands this CLI answers. The keys that reach them are the CLI's, not the plugin's. */
-export function displayHelp() {
-  logger.info('help');
-  const commands = [
-    ['u', 'upload all files'],
-    ['d', 'download all files'],
-    ['s', 'show status'],
-    ['r', 'show RAM usage of scripts'],
-    ['q', 'quit'],
-  ];
-  logger.info('help', pc.reset(pc.bold('Watch Usage')));
-  for (const [key, desc] of commands) {
-    logger.info('help', `press ${pc.reset(pc.bold(key))}${pc.dim(' to ')}${desc}`);
-  }
-  logger.info('help', pc.dim('')); // avoid (x2)
 }
 
 /**
