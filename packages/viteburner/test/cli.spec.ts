@@ -4,19 +4,20 @@ import os from 'node:os';
 import path from 'node:path';
 import { PassThrough } from 'node:stream';
 import { createServer, type ViteDevServer } from 'vite';
-import { slash, viteburnerPlugin, type ViteBurnerUserConfig } from 'vite-plugin-viteburner';
+import { viteburnerPlugin, type ViteBurnerUserConfig } from 'vite-plugin-viteburner';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cliPlugin } from '../src/plugins/cli';
-import { startCliKeys } from '../src/plugins/cli/keys';
+import { createCliApi } from '../src/cli/api';
+import { startCliKeys } from '../src/cli/keys';
 
 /**
- * The CLI plugin's api inside a real `createServer`, checked without a terminal or a built CLI.
+ * The CLI's api against a real `createServer`, checked without a terminal or a built CLI.
  *
- * The question this answers is whether the api reaches the daemon session that is live now — including
- * after the config-change restart that replaces the dev server while reusing the plugin instance. The
- * key reader is the CLI's own (`startCliKeys`, wired exactly as `cli.ts` does it) and is given a
- * `PassThrough` instead of `process.stdin`, so one key written to it is exactly one `keypress` event
- * and the test runner's own stdin is never touched; the plugin itself knows nothing about it.
+ * The CLI is not a plugin: it creates the daemon plugin, keeps the instance, and reaches the session
+ * through it — `createCliApi(() => daemon.api.getSession())`, exactly what `cli.ts` does. The question
+ * this answers is whether that held instance follows the config-change restart that replaces the dev
+ * server, since the api's liveness rests on it. The key reader is the CLI's own (`startCliKeys`, wired
+ * as `cli.ts` wires it) over a `PassThrough`, so one key written to it is exactly one `keypress` event
+ * and the test runner's own stdin is never touched.
  *
  * The daemon plugin comes from `vite-plugin-viteburner` by name — the same dependency the built CLI
  * resolves at runtime — so this package must be built before this spec runs (`rush build` orders it
@@ -39,7 +40,7 @@ async function freePort(): Promise<number> {
   });
 }
 
-describe('the CLI plugin in a real dev server', () => {
+describe('the CLI against a real dev server', () => {
   let server: ViteDevServer | undefined;
   let root: string | undefined;
 
@@ -61,14 +62,16 @@ describe('the CLI plugin in a real dev server', () => {
     return root;
   }
 
-  it('answers a key through the api, and keeps answering after a restart', async () => {
+  it('answers a key through the held daemon plugin, and keeps answering after a restart', async () => {
     const port = await freePort();
     const dir = makeProject();
     const inline = { cwd: dir, port };
-    // The CLI's own reader, over a stream a test controls; handed the plugin's api.
-    const plugin = cliPlugin();
+    // The CLI's composition, minus its cac entry: hold the daemon plugin it created, build the api
+    // over it, and read keys with its own reader.
+    const daemon = viteburnerPlugin(inline);
+    const api = createCliApi(() => daemon.api.getSession());
     const input = new PassThrough();
-    startCliKeys(plugin.api, input);
+    startCliKeys(api, input);
 
     // Typed as the user config so the `viteburner` key is allowed where vite's own InlineConfig would
     // reject the extra property.
@@ -76,24 +79,25 @@ describe('the CLI plugin in a real dev server', () => {
       root: dir,
       logLevel: 'silent',
       viteburner: inline,
-      plugins: [viteburnerPlugin(inline), plugin],
+      plugins: [daemon],
     };
     server = await createServer(config);
 
     // `s` renders the status block from this read, so the spy is the CLI's question to the daemon.
-    const first = plugin.api.getSession();
+    const first = api.getSession();
     expect(first, 'the first server started a session').toBeDefined();
     const firstStatus = vi.spyOn(first!, 'getStatus');
 
-    // The reader was attached before the server existed, so one key written right after it resolves
-    // is already answered — the same window a plain vite startup would give it.
+    // The reader was attached before the server existed, so one key written right after it resolves is
+    // already answered — the same window a plain vite startup would give it.
     input.write('s');
     await vi.waitFor(() => expect(firstStatus).toHaveBeenCalledTimes(1));
 
-    // A config-change restart re-resolves this plugin instance and replaces the session. The api must
-    // reach the replacement: the next key dispatches once, not twice, and lands on the new session.
+    // A config-change restart replaces the session while vite reuses the plugin instance the CLI
+    // holds. The api must reach the replacement: the next key dispatches once, not twice, and lands on
+    // the new session rather than the closed one.
     await server.restart();
-    const second = plugin.api.getSession();
+    const second = api.getSession();
     expect(second, 'the replacement server started a session').toBeDefined();
     expect(second, 'the restart replaced the session').not.toBe(first);
     const secondStatus = vi.spyOn(second!, 'getStatus');
@@ -101,16 +105,15 @@ describe('the CLI plugin in a real dev server', () => {
     await vi.waitFor(() => expect(secondStatus).toHaveBeenCalledTimes(1));
   });
 
-  it('answers nothing, and leaves the server up, in a config without the daemon plugin', async () => {
-    const dir = makeProject();
+  it('answers nothing while no session is up', () => {
+    // What the api is between the two servers of a restart, or before the first one: every command is
+    // a no-op rather than a throw, the way an unanswerable key was.
+    const api = createCliApi(() => undefined);
 
-    // What a user's own vite config would look like if it carried the CLI plugin by mistake: startup
-    // must still succeed, and the api must have nothing to answer rather than take the server down.
-    const plugin = cliPlugin();
-    server = await createServer({ root: dir, logLevel: 'silent', plugins: [plugin] });
-
-    expect(plugin.api.getSession(), 'no daemon plugin means no session').toBeUndefined();
-    plugin.api.displayStatus(); // must be a no-op, not a throw
-    expect(slash(server.config.root), 'the server is still up').toBe(slash(dir));
+    expect(api.getSession(), 'no session to hand out').toBeUndefined();
+    // A no-op, not a throw: `quit` must not reach `process.exit` without a session to dispose.
+    expect(() => api.displayStatus()).not.toThrow();
+    expect(() => api.displayHelp()).not.toThrow();
+    expect(() => api.quit()).not.toThrow();
   });
 });
