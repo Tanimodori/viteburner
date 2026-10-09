@@ -137,7 +137,7 @@
   //     "tools",      // non-shipping projects that are part of the developer toolchain
   //     "prototypes"  // experiments that should mostly be ignored by the review process
   //   ],
-  // 
+  //
   //   /**
   //    * A list of NPM package scopes that will be excluded from review.
   //    * We recommend to exclude TypeScript typings (the "@types" scope), because
@@ -167,14 +167,12 @@
     //   "[^@]+@users\\.noreply\\.github\\.com",
     //   "rush-bot@example\\.org"
     // ],
-
     /**
      * When Rush reports that the address is malformed, the notice can include an example
      * of a recommended email.  Make sure it conforms to one of the allowedEmailRegExps
      * expressions.
      */
     // "sampleEmail": "example@users.noreply.github.com",
-
     /**
      * The commit message to use when committing changes during 'rush publish'.
      *
@@ -183,7 +181,6 @@
      * in the commit message, and then customize Rush's message to contain that string.
      */
     // "versionBumpCommitMessage": "Bump versions [skip ci]",
-
     /**
      * The commit message to use when committing changes during 'rush version'.
      *
@@ -192,13 +189,12 @@
      * in the commit message, and then customize Rush's message to contain that string.
      */
     // "changeLogUpdateCommitMessage": "Update changelogs [skip ci]",
-
     /**
      * The commit message to use when committing changefiles during 'rush change --commit'
      *
      * If no commit message is set it will default to 'Rush change'
      */
-     // "changefilesCommitMessage": "Rush change"
+    // "changefilesCommitMessage": "Rush change"
   },
 
   "repository": {
@@ -223,7 +219,7 @@
      * The default branch name. This tells "rush change" which remote branch to compare against.
      * The default value is "main"
      */
-    "defaultBranch": "main",
+    "defaultBranch": "main"
 
     /**
      * The default remote. This tells "rush change" which remote to compare against if the remote URL is
@@ -286,13 +282,13 @@
    *
    * For more details and instructions, see this article:  https://rushjs.io/pages/advanced/installation_variants/
    */
-   "variants": [
+  "variants": [
     // {
     //   /**
     //    * The folder name for this variant.
     //    */
     //   "variantName": "old-sdk",
-    // 
+    //
     //   /**
     //    * An informative description
     //    */
@@ -326,7 +322,7 @@
    * ".", and "@" characters.
    */
   // "allowedProjectTags": [ "tools", "frontend-team", "1.0.0-release" ],
-  "allowedProjectTags": [ "tool", "library", "test" ],
+  "allowedProjectTags": ["tool", "library", "test"],
 
   /**
    * (Required) This is the inventory of projects to be managed by Rush.
@@ -342,26 +338,26 @@
     //    * The NPM package name of the project (must match package.json)
     //    */
     //   "packageName": "my-app",
-    // 
+    //
     //   /**
     //    * The path to the project folder, relative to the rush.json config file.
     //    */
     //   "projectFolder": "apps/my-app",
-    // 
+    //
     //   /**
     //    * This field is only used if "subspacesEnabled" is true in subspaces.json.
     //    * It specifies the subspace that this project belongs to.  If omitted, then the
     //    * project belongs to the "default" subspace.
     //    */
     //   // "subspaceName": "my-subspace",
-    // 
+    //
     //   /**
     //    * An optional category for usage in the "browser-approved-packages.json"
     //    * and "nonbrowser-approved-packages.json" files.  The value must be one of the
     //    * strings from the "reviewCategories" defined above.
     //    */
     //   "reviewCategory": "production",
-    // 
+    //
     //   /**
     //    * A list of Rush project names that are to be installed from NPM
     //    * instead of linking to the local project.
@@ -388,20 +384,20 @@
     //   "decoupledLocalDependencies": [
     //     // "my-toolchain"
     //   ],
-    // 
+    //
     //   /**
     //    * If true, then this project will be ignored by the "rush check" command.
     //    * The default value is false.
     //    */
     //   // "skipRushCheck": false,
-    // 
+    //
     //   /**
     //    * A flag indicating that changes to this project will be published to npm, which affects
     //    * the Rush change and publish workflows. The default value is false.
     //    * NOTE: "versionPolicyName" and "shouldPublish" are alternatives; you cannot specify them both.
     //    */
     //   // "shouldPublish": false,
-    // 
+    //
     //   /**
     //    * Facilitates postprocessing of a project's files prior to publishing.
     //    *
@@ -410,14 +406,14 @@
     //    * must contain its own package.json file, which is typically a build output.
     //    */
     //   // "publishFolder": "temp/publish",
-    // 
+    //
     //   /**
     //    * An optional version policy associated with the project.  Version policies are defined
     //    * in "version-policies.json" file.  See the "rush publish" documentation for more info.
     //    * NOTE: "versionPolicyName" and "shouldPublish" are alternatives; you cannot specify them both.
     //    */
     //   // "versionPolicyName": "",
-    // 
+    //
     //   /**
     //    * An optional set of custom tags that can be used to select this project.  For example,
     //    * adding "my-custom-tag" will allow this project to be selected by the
@@ -427,14 +423,14 @@
     //    */
     //   // "tags": [ "1.0.0-release", "frontend-team" ]
     // },
-    // 
+    //
     // {
     //   "packageName": "my-controls",
     //   "projectFolder": "libraries/my-controls",
     //   "reviewCategory": "production",
     //   "tags": [ "frontend-team" ]
     // },
-    // 
+    //
     // {
     //   "packageName": "my-toolchain",
     //   "projectFolder": "tools/my-toolchain",
@@ -444,29 +440,29 @@
     {
       "packageName": "bb-ws-server",
       "projectFolder": "packages/bb-ws-server",
-      "tags": [ "library" ]
+      "tags": ["library"]
     },
     {
       "packageName": "vite-plugin-viteburner",
       "projectFolder": "packages/vite-plugin-viteburner",
       "versionPolicyName": "viteburner",
-      "tags": [ "library" ]
+      "tags": ["library"]
     },
     {
       "packageName": "viteburner",
       "projectFolder": "packages/viteburner",
       "versionPolicyName": "viteburner",
-      "tags": [ "tool" ]
+      "tags": ["tool"]
     },
     {
       "packageName": "viteburner-e2e-test",
       "projectFolder": "tests/viteburner-e2e-test",
-      "tags": [ "test" ]
+      "tags": ["test"]
     },
     {
       "packageName": "viteburner-config-test",
       "projectFolder": "tests/viteburner-config-test",
-      "tags": [ "test" ]
+      "tags": ["test"]
     }
   ]
 }

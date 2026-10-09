@@ -23,6 +23,7 @@
     "package-lock.json",
     "**/bin/**",
     "**/test/.cache/**",
-    "**/test/.tmp/**"
+    "**/test/.tmp/**",
+    "common/scripts/**"
   ]
 }
