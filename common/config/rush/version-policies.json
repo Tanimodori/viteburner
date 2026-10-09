@@ -99,4 +99,10 @@
   // 
   //   // "includeEmailInChangeFile": true
   // }
+  {
+    "definitionName": "lockStepVersion",
+    "policyName": "viteburner",
+    "version": "0.5.3",
+    "nextBump": "patch"
+  }
 ]

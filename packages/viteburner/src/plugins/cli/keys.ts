@@ -1,6 +1,6 @@
 import pc from 'picocolors';
-import { logger } from '@/console';
-import type { Session } from '@/plugins/viteburner';
+import { logger } from 'vite-plugin-viteburner';
+import type { Session } from 'vite-plugin-viteburner';
 import { displayRamUsage, displayStatus, quit } from './commands';
 import { resumeKeypress, suspendKeypress } from './keypress';
 import type { Keypress } from './keypress';

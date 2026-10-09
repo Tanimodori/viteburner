@@ -1,8 +1,7 @@
 import pc from 'picocolors';
 import prompt from 'prompts';
-import { logger } from '@/console';
-import type { Session } from '@/plugins/viteburner';
-import { isScriptFile } from '@/utils/path';
+import { isScriptFile, logger } from 'vite-plugin-viteburner';
+import type { Session } from 'vite-plugin-viteburner';
 
 /**
  * The commands the CLI runs on the player's behalf: everything the plugin refuses to know about.

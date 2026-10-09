@@ -1,7 +1,6 @@
 import type { Plugin } from 'vite';
-import { logger } from '@/console';
-import { findViteBurnerPlugin } from '@/plugins/viteburner';
-import type { ViteBurnerPlugin } from '@/plugins/viteburner';
+import { findViteBurnerPlugin, logger } from 'vite-plugin-viteburner';
+import type { ViteBurnerPlugin } from 'vite-plugin-viteburner';
 import { createKeypress, startKeypress } from './keypress';
 import type { KeyInput } from './keypress';
 import { dispatchKey } from './keys';

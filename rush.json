@@ -447,8 +447,15 @@
       "tags": [ "library" ]
     },
     {
+      "packageName": "vite-plugin-viteburner",
+      "projectFolder": "packages/vite-plugin-viteburner",
+      "versionPolicyName": "viteburner",
+      "tags": [ "library" ]
+    },
+    {
       "packageName": "viteburner",
       "projectFolder": "packages/viteburner",
+      "versionPolicyName": "viteburner",
       "tags": [ "tool" ]
     },
     {

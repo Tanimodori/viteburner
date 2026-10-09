@@ -44,7 +44,7 @@ importers:
         specifier: ^0.34.6
         version: 0.34.6(playwright@1.63.0)
 
-  ../../packages/viteburner:
+  ../../packages/vite-plugin-viteburner:
     dependencies:
       acorn:
         specifier: ^8.8.2
@@ -52,9 +52,6 @@ importers:
       bb-ws-server:
         specifier: workspace:*
         version: link:../bb-ws-server
-      cac:
-        specifier: ^6.7.14
-        version: 6.7.14
       chokidar:
         specifier: ^3.5.3
         version: 3.6.0
@@ -73,9 +70,6 @@ importers:
       picocolors:
         specifier: ^1.0.0
         version: 1.1.1
-      prompts:
-        specifier: ^2.4.2
-        version: 2.4.2
       unconfig:
         specifier: ^0.3.7
         version: 0.3.13
@@ -89,9 +83,6 @@ importers:
       '@types/node':
         specifier: ^18.14.1
         version: 18.19.130
-      '@types/prompts':
-        specifier: ^2.4.2
-        version: 2.4.9
       oxfmt:
         specifier: ^0.72.0
         version: 0.72.0
@@ -101,6 +92,49 @@ importers:
       rollup:
         specifier: ^3.30.0
         version: 3.30.0
+      typescript:
+        specifier: ^4.9.5
+        version: 4.9.5
+      vite:
+        specifier: ^4.1.4
+        version: 4.5.14(@types/node@18.19.130)
+      vite-plugin-dts:
+        specifier: 2.0.2
+        version: 2.0.2(@types/node@18.19.130)(rollup@3.30.0)(vite@4.5.14(@types/node@18.19.130))
+      vitest:
+        specifier: ^0.34.6
+        version: 0.34.6(playwright@1.63.0)
+
+  ../../packages/viteburner:
+    dependencies:
+      bb-ws-server:
+        specifier: workspace:*
+        version: link:../bb-ws-server
+      cac:
+        specifier: ^6.7.14
+        version: 6.7.14
+      picocolors:
+        specifier: ^1.0.0
+        version: 1.1.1
+      prompts:
+        specifier: ^2.4.2
+        version: 2.4.2
+      vite-plugin-viteburner:
+        specifier: workspace:*
+        version: link:../vite-plugin-viteburner
+    devDependencies:
+      '@types/node':
+        specifier: ^18.14.1
+        version: 18.19.130
+      '@types/prompts':
+        specifier: ^2.4.2
+        version: 2.4.9
+      oxfmt:
+        specifier: ^0.72.0
+        version: 0.72.0
+      oxlint:
+        specifier: ^1.87.0
+        version: 1.87.0
       typescript:
         specifier: ^4.9.5
         version: 4.9.5

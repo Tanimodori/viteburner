@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path, { relative, resolve } from 'path';
 import fg from 'fast-glob';
-import { match } from 'micromatch';
+import micromatch from 'micromatch';
 import pc from 'picocolors';
 import { logger } from '@/console';
 import type { ViteService } from '@/services/vite';
@@ -99,7 +99,7 @@ export class SyncService {
       }
       const resolvedFile = slash(resolve(this.vite.root, item.file));
       this.vite.importGlobMap?.forEach((value, key) => {
-        if (value.some((pattern) => match([resolvedFile], pattern).length > 0)) {
+        if (value.some((pattern) => micromatch.match([resolvedFile], pattern).length > 0)) {
           // push key to data
           const importer = slash(relative(this.vite.root, key));
           // recursive import, skipping

@@ -4,6 +4,8 @@ Daemon tools of bitburner using vite for script transform, file syncing, RAM mon
 
 [![Version](https://img.shields.io/npm/v/viteburner)](https://www.npmjs.com/package/viteburner) [![Language](https://img.shields.io/github/languages/top/Tanimodori/viteburner)](https://github.com/Tanimodori/viteburner) [![Star](https://img.shields.io/github/stars/Tanimodori/viteburner)](https://github.com/Tanimodori/viteburner/stargazers) [![Download](https://img.shields.io/npm/dm/viteburner)](https://www.npmjs.com/package/viteburner) [![License](https://img.shields.io/npm/l/viteburner)](https://github.com/Tanimodori/viteburner)
 
+This package ships the `viteburner` CLI. The vite plugin it runs is published on its own as [vite-plugin-viteburner](https://www.npmjs.com/package/vite-plugin-viteburner) and re-exported here, so every import below still resolves from `viteburner`.
+
 ## Why viteburner
 
 - Write dynamic config in TypeScript and JavaScript.

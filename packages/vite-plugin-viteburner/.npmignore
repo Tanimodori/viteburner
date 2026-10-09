@@ -1,0 +1,11 @@
+.gitattributes
+.oxlintrc.json
+.oxfmtrc.json
+.zcode/**
+.rush/**
+rush-logs/**
+src/**
+vite.config.ts
+vitest.config.ts
+test/**
+docs/**

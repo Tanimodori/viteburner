@@ -1,10 +1,9 @@
 import cac from 'cac';
 import { createServer } from 'vite';
+import { findViteBurnerPlugin, logger, viteburnerPlugin } from 'vite-plugin-viteburner';
+import type { ViteBurnerInlineConfig } from 'vite-plugin-viteburner';
 import pkg from '../package.json';
-import { logger } from './console';
-import { findViteBurnerPlugin, viteburnerPlugin } from './plugins';
 import { cliPlugin, displayStatus, displayWatchAndHelp } from './plugins/cli';
-import { ViteBurnerInlineConfig } from './types';
 
 const cli = cac('viteburner');
 

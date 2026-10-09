@@ -2,7 +2,7 @@ import fs from 'fs';
 import { resolve } from 'path';
 import chokidar, { FSWatcher, WatchOptions } from 'chokidar';
 import fg from 'fast-glob';
-import { isMatch } from 'micromatch';
+import micromatch from 'micromatch';
 import { logger } from '@/console';
 import { ResolvedWatchItem } from '@/types';
 import { EventBus } from '@/utils/bus';
@@ -39,7 +39,7 @@ export class WatchService {
   }
 
   findItem(file: string) {
-    return this.items.find((item) => isMatch(file, item.pattern));
+    return this.items.find((item) => micromatch.isMatch(file, item.pattern));
   }
 
   start() {

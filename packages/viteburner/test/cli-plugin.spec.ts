@@ -4,12 +4,9 @@ import os from 'node:os';
 import path from 'node:path';
 import { PassThrough } from 'node:stream';
 import { createServer, type ViteDevServer } from 'vite';
+import { findViteBurnerPlugin, slash, viteburnerPlugin, type ViteBurnerUserConfig } from 'vite-plugin-viteburner';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cliPlugin } from '../src/plugins/cli';
-import { viteburnerPlugin } from '../src/plugins/viteburner';
-import { findViteBurnerPlugin } from '../src/plugins/viteburner';
-import type { ViteBurnerUserConfig } from '../src/types';
-import { slash } from '../src/utils/path';
 
 /**
  * The CLI's key plugin inside a real `createServer`, checked without a terminal or a built CLI.
@@ -19,6 +16,11 @@ import { slash } from '../src/utils/path';
  * reusing the plugin instance. The reader is given a `PassThrough` (the `cliPlugin` seam) instead of
  * `process.stdin`, so one key written to it is exactly one `keypress` event and the test runner's own
  * stdin is never touched.
+ *
+ * The daemon plugin comes from `vite-plugin-viteburner` by name — the same dependency the built CLI
+ * resolves at runtime — so this package must be built before this spec runs (`rush build` orders it
+ * first). That boundary is deliberate: it is the plugin's published surface the CLI is written
+ * against, not a private path into its sources.
  */
 
 const CONFIG = JSON.stringify({ watch: [{ pattern: 'src/**/*.ts', transform: false }] }, null, 2);

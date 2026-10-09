@@ -13,8 +13,8 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "paths": {
-      "@ns": ["./NetscriptDefinitions.d.ts"]
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*.ts", "test/**/*.ts", "NetscriptDefinitions.d.ts", "vite.config.ts", "vitest.config.ts"]
+  "include": ["src/**/*.ts", "test/**/*.ts", "vite.config.ts", "vitest.config.ts"]
 }
