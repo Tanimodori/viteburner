@@ -26,8 +26,8 @@ export interface KeyInput extends NodeJS.ReadableStream {
  * The reader's state, held by whoever created it rather than by a module or a class.
  *
  * There is no reader object and no service: the functions below are the whole reader, and this state
- * is all they share, so the CLI plugin that creates one is the only thing that knows the terminal is
- * being read.
+ * is all they share, so the CLI that creates one (`cli.ts`, through `key/index.ts`) is the only thing
+ * that knows the terminal is being read.
  */
 export interface Keypress {
   readonly input: KeyInput;
@@ -56,8 +56,14 @@ export function startKeypress(state: Keypress, onKey: KeyHandler) {
   }
   state.active = true;
   state.listener = async (str: string, key: KeyInfo) => {
-    // esc, ctrl+d or ctrl+c to force exit
-    if (str === '\x03' || str === '\x1B' || (key && key.ctrl && key.name === 'c')) {
+    // esc, ctrl+d or ctrl+c to force exit. The control bytes are what a TTY in raw mode and a pipe
+    // both deliver; the `key` check covers the same chords when readline names them instead.
+    if (
+      str === '\x03' ||
+      str === '\x04' ||
+      str === '\x1B' ||
+      (key && key.ctrl && (key.name === 'c' || key.name === 'd'))
+    ) {
       logger.info('sigterm');
       process.exit(1);
     }
