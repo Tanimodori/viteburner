@@ -8,9 +8,9 @@ import type { Session } from 'vite-plugin-viteburner';
  * their answers.
  *
  * Each one is handed the session of the running dev server and reaches the service it needs itself —
- * `createCliApi` in `api.ts` is what binds them to the session that is live when they are called.
- * Which key asks for which operation, and the help that lists them, belong to the keyboard side — see
- * `keymap.ts`.
+ * `createCliApi` in `api/index.ts` is what binds them to the session that is live when they are
+ * called. Which key asks for which operation, and the help that lists them, belong to the keyboard
+ * side — see `key/mapping.ts`.
  */
 
 const padding = 18;

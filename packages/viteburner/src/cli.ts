@@ -2,9 +2,9 @@ import cac from 'cac';
 import { createServer } from 'vite';
 import { logger, viteburnerPlugin } from 'vite-plugin-viteburner';
 import type { ViteBurnerInlineConfig } from 'vite-plugin-viteburner';
-import pkg from '../../package.json';
+import pkg from '../package.json';
 import { createCliApi } from './api';
-import { displayWatchAndHelp, startCliKeys } from './keymap';
+import { displayWatchAndHelp, startCliKeys } from './key';
 
 const cli = cac('viteburner');
 
@@ -27,7 +27,7 @@ cli.version(pkg.version);
  * through it — `createServer` reuses that same instance across a config-change restart, and the
  * plugin's `getSession` re-reads the session it is holding, so the api follows the replacement
  * without any lookup in the resolved config. The keys are the CLI's own reader, composed here from
- * `keymap.ts` — the daemon plugin never learns what a keystroke or a CLI command is.
+ * `key/` — the daemon plugin never learns what a keystroke or a CLI command is.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function startDev(options: any) {
