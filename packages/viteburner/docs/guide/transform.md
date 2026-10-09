@@ -4,7 +4,7 @@
 | ------------------ | ----------------------- |
 | ![](transform.png) | ![](transform-dest.png) |
 
-When file changes or manual upload is triggered, vitburner will first get all destination of the each changed file, load the file content, transform it if related `WatchItem.transform` is set, dump if `dumpFiles` is setand finally send it to the server.
+When a file changes or a manual upload is triggered, viteburner will first get all destinations of the changed file, load the file content, transform it if the related `WatchItem.transform` is set, dump it if `dumpFiles` is set, and finally send it to the server.
 
 ## Import path
 
@@ -63,7 +63,7 @@ export function relative(ns: NS) {
 }
 ```
 
-This works file for normal vite and ts project. During dev mode, vite will resolve `import` path to the correct file, which is the absolute path to the package root so the vite server can serve it from the file system and transform it.
+This works fine for a normal vite and ts project. During dev mode, vite will resolve `import` path to the correct file, which is the absolute path to the package root so the vite server can serve it from the file system and transform it.
 
 Transformed `main.ts`
 
@@ -78,7 +78,7 @@ export async function main(ns) {
 
 However, this is not the exact file path we want to upload to the server. We want to upload the file to the server as `/import/relative.js` instead of `/src/import/relative.js`. So the `import` path needs to be transformed in the same way as the file path for each uploaded file.
 
-Also, bitburner only supports abosolute path for import, so you can use vite to transform the relative path to absolute path.
+Also, bitburner only supports absolute path for import, so you can use vite to transform the relative path to absolute path.
 
 If you are disabling the `transform` option for a file, you need to make sure the import path is correct manually.
 

@@ -38,8 +38,10 @@ checkout [Quick Start](docs/guide/quick-start.md) for more details if you want t
 
 For detailed documentation, checkout [docs](docs/index.md).
 
+The shape of the `viteburner` key (the same fields go in a standalone `viteburner.config.*`):
+
 ```ts
-export interface ViteBurnerUserConfig {
+export interface ViteBurnerConfig {
   watch?: WatchItem[];
   usePolling?: boolean | { interval?: number; binaryInterval?: number };
   sourcemap?: boolean | 'inline' | 'hidden';
@@ -54,6 +56,7 @@ export interface ViteBurnerUserConfig {
     ignoreSourcemap?: boolean;
   };
   dumpFiles?: string | null | undefined | ((file: string, server: string) => string | null | undefined);
+  cwd?: string;
 }
 
 export interface WatchItem {
@@ -80,7 +83,6 @@ Thank them for inspiring this package.
 - [unconfig](https://github.com/antfu/unconfig)
 - [vite](https://vitejs.dev/)
 - [vitest](https://vitest.dev/)
-- [vite-node](https://www.npmjs.com/package/vite-node)
 
 ## License
 

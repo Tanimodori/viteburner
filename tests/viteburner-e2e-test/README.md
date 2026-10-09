@@ -36,7 +36,7 @@
 8. `r` 打开 `prompts` 的 RAM 查询菜单并选默认的「All local scripts」：CLI 向游戏逐文件问 RAM，报告与提交在 `test/fixture/ram/offline.txt` 的基线逐字比对（**仅离线腿**：数值是游戏算的，会随游戏版本漂移）。
 9. `q` 优雅退出 CLI：日志打 `bye`，进程以 code 0 结束。
 
-第 7、8 步打的是 CLI 自己的键盘处理（`console.ts` 的 `onKeypress` / `task.ts` 的 `handleKeyInput`），不是游戏终端。CLI 由 `cli/cli.ts` 以 **piped stdin** 启动，`ViteburnerCli.sendKey()` 写入的每个字符就是一个 `keypress` 事件。stdin 不是 TTY，所以 CLI 会打一条 not-a-TTY 警告并跳过 raw mode——这些键走 `key.name`，不受影响；`prompts` 的菜单在 pipe 下照常渲染、方向键/回车/Ctrl+C 都能用。退出键（Ctrl+C、ESC）各自会让进程结束，一个 CLI 实例只能测一次退出，故只覆盖了 `q`。
+第 7、8 步打的是 CLI 自己的键盘处理（`key/index.ts` 的 `dispatchKey` 查 `key/mapping.ts` 里的按键表，字符由 `key/reader.ts` 的 `startKeypress` 读出），不是游戏终端。CLI 由 `cli/cli.ts` 以 **piped stdin** 启动，`ViteburnerCli.sendKey()` 写入的每个字符就是一个 `keypress` 事件。stdin 不是 TTY，所以 CLI 会打一条 not-a-TTY 警告并跳过 raw mode——这些键走 `key.name`，不受影响；`prompts` 的菜单在 pipe 下照常渲染、方向键/回车/Ctrl+C 都能用。退出键（Ctrl+C、Ctrl+D、ESC）各自会让进程结束，一个 CLI 实例只能测一次退出，故只覆盖了 `q`。
 
 ## 目录结构
 

@@ -33,7 +33,7 @@ import { ViteBurnerUserConfig } from 'viteburner';
 const config: ViteBurnerUserConfig = {
   // viteburner config here
 };
-export defauilt config;
+export default config;
 ```
 
 ## Example Configs

@@ -106,8 +106,8 @@ describe('the CLI against a real dev server', () => {
   });
 
   it('answers nothing while no session is up', () => {
-    // What the api is between the two servers of a restart, or before the first one: every command is
-    // a no-op rather than a throw, the way an unanswerable key was.
+    // What the api is between the two servers of a restart, or before the first one: every operation
+    // is a no-op rather than a throw, the way an unanswerable key was.
     const api = createCliApi(() => undefined);
 
     expect(api.getSession(), 'no session to hand out').toBeUndefined();

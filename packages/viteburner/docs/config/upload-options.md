@@ -52,15 +52,15 @@ See [Guide/Transform](../guide/transform.md) for more details.
 
 The `location` option tells viteburner which server to upload the file to, and where to put the file on the server.
 
-| typeof location        | servers      | filenames               |
-| ---------------------- | ------------ | ----------------------- |
-| `null` or `undefined`  | `["home"]`   | `defaultUploadLocation` |
-| `string`               | `[location]` | `defaultUploadLocation` |
-| `string[]`             | `location`   | `defaultUploadLocation` |
-| `{server}[]`           | `[server]`   | `defaultUploadLocation` |
-| `{filename}[]`         | `["home"]`   | `filename`              |
-| `{server, filename}[]` | `[server]`   | `filename`              |
-| `function`             | result-based | result-based            |
+| typeof location                          | servers      | filenames               |
+| ---------------------------------------- | ------------ | ----------------------- |
+| `null` or `undefined`                    | `["home"]`   | `defaultUploadLocation` |
+| `string`                                 | `[location]` | `defaultUploadLocation` |
+| `string[]`                               | `location`   | `defaultUploadLocation` |
+| `{ server: string }[]`                   | `[server]`   | `defaultUploadLocation` |
+| `{ filename: string }[]`                 | `["home"]`   | `filename`              |
+| `{ server: string; filename: string }[]` | `[server]`   | `filename`              |
+| `function`                               | result-based | result-based            |
 
 ### Basic examples
 
@@ -163,7 +163,7 @@ const watchItem = {
 
 If the `ignoreInitial` is set to `true`, viteburner will not upload files when the watcher starts. This is useful when you want to upload files only when they are changed.
 
-Note that even if `ignoreInitial` is set to `false`, viteburner will _not_ all upload files when the server reconnects.
+Note that even if `ignoreInitial` is set to `false`, viteburner will _not_ upload all files when the server reconnects.
 
 ## `usePolling`
 

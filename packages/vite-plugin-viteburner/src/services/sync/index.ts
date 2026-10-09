@@ -287,7 +287,7 @@ export class SyncService {
       try {
         filesMap.set(server, await this.ws.getAllFiles({ server }));
       } catch (e) {
-        logger.error(`error: connot get filelist from server ${server}: ${e}`);
+        logger.error(`error: cannot get filelist from server ${server}: ${e}`);
         continue;
       }
     }

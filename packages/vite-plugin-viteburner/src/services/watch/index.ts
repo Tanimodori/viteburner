@@ -117,7 +117,7 @@ export class WatchService {
     return item.location(filename);
   }
 
-  /** Shoutcut of `getUploadFilenames(filename).find(server) */
+  /** Shortcut of `getUploadFilenames(filename).find((item) => item.server === server)` */
   getUploadFilenamesByServer(filename: string, server: string) {
     const filenames = this.getUploadFilenames(filename);
     return filenames.find((item) => item.server === server)?.filename;

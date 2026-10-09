@@ -15,7 +15,8 @@ import type { ViteBurnerUserConfig } from '../src/types';
  * replacement server — running the plugin's `configureServer` for it — and only then closes the one
  * being replaced. That order is the whole difficulty, and this is the guard for it: when the plugin
  * kept one set of services in a closure, the old server's teardown closed the *replacement's*
- * watcher and socket and cleared its commands, so every assertion after the restart failed.
+ * watcher and socket and left the daemon answering nothing, so every assertion after the restart
+ * failed.
  */
 
 const CONFIG = JSON.stringify({ watch: [{ pattern: 'src/**/*.ts', transform: false }] }, null, 2);
@@ -104,8 +105,8 @@ describe('a config-change restart', () => {
 
     await server.restart();
 
-    // `getSession` hands back the replacement session. `fullUpload` is the command the old teardown
-    // cleared, so after a restart it answered nothing at all and no push followed.
+    // `getSession` hands back the replacement session. `fullUpload` is what the old teardown used to
+    // break, so after a restart it answered nothing at all and no push followed.
     const plugin = findViteBurnerPlugin(server.config);
     expect(plugin, 'the plugin is part of the restarted config').toBeDefined();
     first.pushes.length = 0;
@@ -113,7 +114,7 @@ describe('a config-change restart', () => {
     await vi.waitFor(() => expect(first.pushes).toContain('a.js'), { timeout: 20_000 });
 
     // A game that connects after the restart is adopted by the replacement too — the same
-    // `getDefinitionFile` signal, from the session that outlived the restart — and a command still
+    // `getDefinitionFile` signal, from the session that outlived the restart — and an operation still
     // reaches it.
     first.ws.close();
     const second = fakeGame(port);

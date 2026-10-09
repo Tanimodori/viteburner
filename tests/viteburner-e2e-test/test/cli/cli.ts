@@ -65,10 +65,10 @@ export class ViteburnerCli {
     }
     this.child = spawn(process.execPath, [bin, '--cwd', this.cwd, '--port', String(this.port)], {
       cwd: this.packageRoot,
-      // stdin is a pipe so the suite can deliver keystrokes: the CLI's key handler (`onKeypress` in
-      // its `console.ts`) reads `process.stdin` directly. It is not a TTY, so the CLI logs a warning
+      // stdin is a pipe so the suite can deliver keystrokes: the CLI's key reader (`startKeypress` in
+      // its `key/reader.ts`) reads `process.stdin` directly. It is not a TTY, so the CLI logs a warning
       // and skips raw mode, but plain keys and control bytes still arrive as `keypress` events —
-      // which is what the handler switches on.
+      // which is what the reader hands to the key map.
       stdio: ['pipe', 'pipe', 'pipe'],
       windowsHide: true,
     });
