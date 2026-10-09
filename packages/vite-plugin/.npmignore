@@ -5,9 +5,7 @@
 .rush/**
 rush-logs/**
 src/**
-api-extractor.json
 vite.config.ts
 vitest.config.ts
 test/**
 docs/**
-dist/typings-tmp/**

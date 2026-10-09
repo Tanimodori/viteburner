@@ -24,24 +24,6 @@
      * instead of the latest version.
      */
     // "some-library": "1.2.3"
-
-    /**
-     * vite-plugin-dts 2.x deep-imports "@microsoft/api-extractor/lib/collector/Collector.js".
-     * api-extractor >=7.56 added an "exports" map where "./lib/*" rewrites that path to
-     * "lib-commonjs/*.js", producing a nonexistent ".../Collector.js.js", so both packages are
-     * held back to the versions the npm lockfile previously resolved.
-     */
-    "vite-plugin-dts": "2.0.2",
-    "@microsoft/api-extractor": "~7.33.6",
-
-    /**
-     * api-extractor only analyzes compiler outputs with a ".d.ts" extension, and zod >=3.25 splits its
-     * types into ".d.ts" / ".d.cts" files whose internal re-exports land on the latter
-     * ("zod/v3/helpers/typeAliases.d.cts"), which fails the plugin package's type rollup with
-     * "ae-wrong-input-file-type". Holding zod at the last single-format release keeps that rollup
-     * working; @viteburner/bb-ws-server (the only zod user here) does not depend on anything newer.
-     */
-    "zod": "~3.24.0"
   },
 
   /**
@@ -91,12 +73,5 @@
     // "typescript": [
     //   "~2.4.0"
     // ]
-
-    /**
-     * The zod pin above is a tooling workaround, not a requirement of the published packages, whose
-     * declared "^3.20.6" should stay loose for consumers. This is the means rush check offers for
-     * saying so.
-     */
-    "zod": ["~3.24.0"]
   }
 }

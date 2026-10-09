@@ -62,7 +62,7 @@ rushx typecheck        # tsc --noEmit
 rushx lint             # tsc + oxlint + oxfmt --check
 ```
 
-前置：先在 `packages/viteburner` 里 `rushx build`（本包跑的是它的 `dist/` 与 `dist/typings`）；在 Rush 仓库里 `rush build` 会按依赖图先构建它。
+前置：先在 `packages/viteburner` 里 `rushx build`（本包跑的是它的 `dist/`）；在 Rush 仓库里 `rush build` 会按依赖图先构建它。
 
 ## 观察到的行为
 

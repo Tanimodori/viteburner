@@ -40,7 +40,9 @@ export default defineConfig({
     dts({
       include: 'src/**/*.ts',
       entryRoot: resolve(__dirname, 'src'),
-      outputDir: resolve(__dirname, 'dist/typings'),
+      // The rolled-up types land at dist/index.d.ts, next to the JS: the plugin derives that path from
+      // build.outDir, so a nested types directory is not an option — its entry stub would reference
+      // itself, which api-extractor fails on.
       rollupTypes: true,
     }),
   ],
