@@ -1,5 +1,5 @@
 import readline from 'readline';
-import { logger } from 'vite-plugin-viteburner';
+import { logger } from '@viteburner/vite-plugin';
 
 export interface KeyInfo {
   sequence: string;

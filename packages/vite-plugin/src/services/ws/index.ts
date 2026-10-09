@@ -5,8 +5,8 @@ import type {
   GetFileNamesParams,
   PushFileParams,
   WsManagerOptions,
-} from 'bb-ws-server';
-import { WsManager } from 'bb-ws-server';
+} from '@viteburner/bb-ws-server';
+import { WsManager } from '@viteburner/bb-ws-server';
 import pc from 'picocolors';
 import { logger } from '@/console';
 import { EventBus } from '@/utils/bus';

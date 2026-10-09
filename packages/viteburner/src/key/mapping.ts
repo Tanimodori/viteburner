@@ -1,5 +1,5 @@
+import { logger } from '@viteburner/vite-plugin';
 import pc from 'picocolors';
-import { logger } from 'vite-plugin-viteburner';
 import type { CliApi } from '../api';
 
 /**

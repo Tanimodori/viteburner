@@ -1,5 +1,5 @@
 import { PassThrough } from 'node:stream';
-import { logger } from 'vite-plugin-viteburner';
+import { logger } from '@viteburner/vite-plugin';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { CliApi } from '../src/api';
 import { startCliKeys } from '../src/key';

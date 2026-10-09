@@ -5,17 +5,22 @@ import dts from 'vite-plugin-dts';
 
 const externalModules = [
   // exclude all dependencies
-  'bb-ws-server',
+  '@viteburner/vite-plugin',
   'cac',
   'picocolors',
   'prompts',
   'vite',
-  'vite-plugin-viteburner',
   // node builtins
   ...builtinModules,
   // node builtins with prefix
   ...builtinModules.map((name) => `node:${name}`),
 ];
+
+/** The package name an import id belongs to, keeping a scope whole. */
+function packageName(id: string) {
+  const parts = id.split('/');
+  return id.startsWith('@') ? parts.slice(0, 2).join('/') : parts[0];
+}
 
 export default defineConfig({
   build: {
@@ -29,10 +34,7 @@ export default defineConfig({
       formats: ['cjs', 'es'],
     },
     rollupOptions: {
-      external: (src) => {
-        const name = src.split('/')[0];
-        return externalModules.includes(name);
-      },
+      external: (src) => externalModules.includes(packageName(src)),
     },
     outDir: 'dist',
     emptyOutDir: true,

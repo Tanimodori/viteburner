@@ -1,7 +1,7 @@
+import { isScriptFile, logger } from '@viteburner/vite-plugin';
+import type { Session } from '@viteburner/vite-plugin';
 import pc from 'picocolors';
 import prompt from 'prompts';
-import { isScriptFile, logger } from 'vite-plugin-viteburner';
-import type { Session } from 'vite-plugin-viteburner';
 
 /**
  * The operations the CLI performs against the daemon on the player's behalf, and the rendering of

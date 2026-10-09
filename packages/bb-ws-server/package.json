@@ -1,11 +1,13 @@
 {
-  "name": "bb-ws-server",
+  "name": "@viteburner/bb-ws-server",
   "version": "0.1.0",
+  "private": true,
   "description": "WebSocket server speaking the Bitburner Remote API protocol, with a WsManager that drives it.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "exports": {
     ".": {
+      "types": "./dist/typings/index.d.ts",
       "require": "./dist/index.js",
       "import": "./dist/index.mjs"
     }

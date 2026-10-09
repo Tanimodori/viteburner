@@ -1,7 +1,7 @@
+import { logger, viteburnerPlugin } from '@viteburner/vite-plugin';
+import type { ViteBurnerInlineConfig } from '@viteburner/vite-plugin';
 import cac from 'cac';
 import { createServer } from 'vite';
-import { logger, viteburnerPlugin } from 'vite-plugin-viteburner';
-import type { ViteBurnerInlineConfig } from 'vite-plugin-viteburner';
 import pkg from '../package.json';
 import { createCliApi } from './api';
 import { displayWatchAndHelp, startCliKeys } from './key';

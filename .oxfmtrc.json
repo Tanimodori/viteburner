@@ -24,6 +24,10 @@
     "**/bin/**",
     "**/test/.cache/**",
     "**/test/.tmp/**",
-    "common/scripts/**"
+    // Both are Rush's own files rather than ours: the install-run scripts under common/scripts are
+    // generated and rewritten by rush, and repo-state.json is rewritten by every "rush update" with
+    // LF, so checking them only ever reports churn we would have to redo.
+    "common/scripts/**",
+    "common/config/rush/repo-state.json"
   ]
 }

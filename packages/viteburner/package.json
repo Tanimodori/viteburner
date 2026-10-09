@@ -9,6 +9,7 @@
   "module": "./dist/entry.mjs",
   "exports": {
     ".": {
+      "types": "./dist/typings/index.d.ts",
       "require": "./dist/index.js",
       "import": "./dist/index.mjs"
     }
@@ -50,11 +51,10 @@
     "vitest": "^0.34.6"
   },
   "dependencies": {
-    "bb-ws-server": "workspace:*",
+    "@viteburner/vite-plugin": "workspace:*",
     "cac": "^6.7.14",
     "picocolors": "^1.0.0",
-    "prompts": "^2.4.2",
-    "vite-plugin-viteburner": "workspace:*"
+    "prompts": "^2.4.2"
   },
   "peerDependencies": {
     "vite": "^3.0.0 || ^4.0.0"

@@ -438,13 +438,13 @@
     //   "tags": [ "tools" ]
     // }
     {
-      "packageName": "bb-ws-server",
+      "packageName": "@viteburner/bb-ws-server",
       "projectFolder": "packages/bb-ws-server",
       "tags": ["library"]
     },
     {
-      "packageName": "vite-plugin-viteburner",
-      "projectFolder": "packages/vite-plugin-viteburner",
+      "packageName": "@viteburner/vite-plugin",
+      "projectFolder": "packages/vite-plugin",
       "versionPolicyName": "viteburner",
       "tags": ["library"]
     },

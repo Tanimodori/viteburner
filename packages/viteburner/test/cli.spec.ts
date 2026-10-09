@@ -3,8 +3,8 @@ import net from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
 import { PassThrough } from 'node:stream';
+import { viteburnerPlugin, type ViteBurnerUserConfig } from '@viteburner/vite-plugin';
 import { createServer, type ViteDevServer } from 'vite';
-import { viteburnerPlugin, type ViteBurnerUserConfig } from 'vite-plugin-viteburner';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createCliApi } from '../src/api';
 import { startCliKeys } from '../src/key';
@@ -19,7 +19,7 @@ import { startCliKeys } from '../src/key';
  * as `cli.ts` wires it) over a `PassThrough`, so one key written to it is exactly one `keypress` event
  * and the test runner's own stdin is never touched.
  *
- * The daemon plugin comes from `vite-plugin-viteburner` by name — the same dependency the built CLI
+ * The daemon plugin comes from `@viteburner/vite-plugin` by name — the same dependency the built CLI
  * resolves at runtime — so this package must be built before this spec runs (`rush build` orders it
  * first). That boundary is deliberate: it is the plugin's published surface the CLI is written
  * against, not a private path into its sources.

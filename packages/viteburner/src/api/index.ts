@@ -1,4 +1,4 @@
-import type { Session } from 'vite-plugin-viteburner';
+import type { Session } from '@viteburner/vite-plugin';
 import { displayRamUsage, displayStatus, quit } from './operation';
 
 /**

@@ -1,4 +1,4 @@
-# bb-ws-server
+# @viteburner/bb-ws-server
 
 Server side of the [Bitburner Remote API](https://github.com/bitburner-official/bitburner-src/blob/dev/src/Documentation/doc/en/programming/remote_api.md).
 
@@ -6,10 +6,13 @@ Bitburner connects to this package's WebSocket server as a client; `WsManager` s
 
 The server under a port is shared and held for as long as any manager uses it, so a host that rebuilds its manager while the old one is still up — a dev server restarting on a config change, say — reuses the running server instead of binding again. `close` gives up that manager's hold, and the last hold closes the port.
 
+**This package is internal.** It is bundled into `@viteburner/vite-plugin` — which re-exports everything below, as does `viteburner` — rather than published on its own, so only code inside this repository imports it by this name. (That is also why it carries no version that means anything.)
+
 ## Usage
 
 ```ts
-import { WsManager } from 'bb-ws-server';
+// In this repository: '@viteburner/bb-ws-server'. Outside it, the same API arrives from '@viteburner/vite-plugin'.
+import { WsManager } from '@viteburner/bb-ws-server';
 
 const manager = new WsManager({ port: 12525 });
 manager.onConnected(async (client) => {
