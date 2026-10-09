@@ -7,7 +7,7 @@ import { createServer, type ViteDevServer } from 'vite';
 import { viteburnerPlugin, type ViteBurnerUserConfig } from 'vite-plugin-viteburner';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createCliApi } from '../src/cli/api';
-import { startCliKeys } from '../src/cli/keys';
+import { startCliKeys } from '../src/cli/keymap';
 
 /**
  * The CLI's api against a real `createServer`, checked without a terminal or a built CLI.
@@ -112,7 +112,7 @@ describe('the CLI against a real dev server', () => {
 
     expect(api.getSession(), 'no session to hand out').toBeUndefined();
     // A no-op, not a throw: `quit` must not reach `process.exit` without a session to dispose. The
-    // help is not here to check — it lives on the keyboard side (`keys.ts`), which needs no session.
+    // help is not here to check — it lives on the keyboard side (`keymap.ts`), which needs no session.
     expect(() => api.displayStatus()).not.toThrow();
     expect(() => api.quit()).not.toThrow();
   });

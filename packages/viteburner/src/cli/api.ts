@@ -6,10 +6,10 @@ import { displayRamUsage, displayStatus, quit } from './operations';
  * is live.
  *
  * The CLI is not a plugin, so this is not published anywhere — `createCliApi` in this module builds
- * one over the daemon plugin `cli.ts` holds, and `keys.ts` calls it. Each operation reads the session
+ * one over the daemon plugin `cli.ts` holds, and `keymap.ts` calls it. Each operation reads the session
  * that is up now and runs against it, or does nothing while none is (before the first dev server, or
  * between the two servers of a config-change restart), the way an unanswerable key did before the api
- * existed. The help is not here: it needs no session and belongs to the keyboard — see `keys.ts`.
+ * existed. The help is not here: it needs no session and belongs to the keyboard — see `keymap.ts`.
  */
 export interface CliApi {
   /** The services of the daemon's dev server currently running, or `undefined` while none is. */
