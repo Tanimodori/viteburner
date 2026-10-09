@@ -9,8 +9,8 @@ import type { HmrData, ResolvedViteBurnerConfig } from '@/types';
  * this map stays the whole of what can arrive from outside.
  *
  * The player's keyboard is not among them: the keys are the CLI's control plane, read and answered by
- * the CLI's own plugin (`plugins/cli`) against the api this plugin publishes. The bus is the daemon's
- * ingress only, which is what keeps it free of anything the CLI owns.
+ * the CLI's own reader (the `viteburner` package's `src/key/`) against the api this plugin publishes.
+ * The bus is the daemon's ingress only, which is what keeps it free of anything the CLI owns.
  */
 export interface AppEvents {
   /** A dev server was created and its services are running. */

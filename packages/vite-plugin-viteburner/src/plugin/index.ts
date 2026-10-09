@@ -41,13 +41,13 @@ export function getDefaultConfig(): UserConfig {
  * teardown to the dev server that owns it rather than to "the current session".
  *
  * The plugin's own api is only the two reads that are not the session's: the resolved config, and the
- * session itself. Everything a caller does is done on the session it gets from `getSession()` — see
- * `plugins/cli` for the CLI's use of it.
+ * session itself. Everything a caller does is done on the session it gets from `getSession()` — the
+ * CLI is one such caller, reaching it through the plugin instance it created in `src/cli.ts`.
  *
  * The event bus the services publish their external events on belongs to the session that owns them
  * (see `Session.events`), not to this plugin: it is the daemon's ingress, not an interface the CLI or
  * any other caller reaches into. Which key asks for which operation is decided by the CLI that adds
- * this plugin — see `plugins/cli`.
+ * this plugin — the `viteburner` package's `src/cli.ts` and `src/key/`.
  */
 export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): ViteBurnerPlugin {
   const resolvedVirtualModuleId = '\0' + virtualModuleId;
