@@ -410,7 +410,7 @@
    *
    * PNPM documentation: https://pnpm.io/package_json#pnpmpatcheddependencies
    */
-  "globalPatchedDependencies": {},
+  "globalPatchedDependencies": { "@types/ws": "patches/@types__ws.patch" },
 
   /**
    * (USE AT YOUR OWN RISK)  This is a free-form property bag that will be copied into

@@ -44,6 +44,8 @@ export default defineConfig({
       // build.outDir, so a nested types directory is not an option — its entry stub would reference
       // itself, which api-extractor fails on.
       rollupTypes: true,
+      // EXPERIMENT: force api-extractor to inline @types/ws instead of leaving `import ... from 'ws'`.
+      bundledPackages: ['@types/ws'],
     }),
   ],
 });

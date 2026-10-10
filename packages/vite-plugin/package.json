@@ -52,7 +52,6 @@
     "vitest": "^0.34.6"
   },
   "dependencies": {
-    "@types/ws": "^8.5.4",
     "acorn": "^8.8.2",
     "chokidar": "^3.5.3",
     "fast-glob": "^3.2.12",

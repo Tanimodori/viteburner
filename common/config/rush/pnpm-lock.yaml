@@ -6,6 +6,11 @@ settings:
 
 pnpmfileChecksum: sha256-FceiOBivXBfnQ6+mNFF4or5E/6NvJXB3oz3cjl5O7OM=
 
+patchedDependencies:
+  '@types/ws':
+    hash: 294be3127417dd6ab420f731419d0cf0a02624cec60164cd6af03e4ac64c079c
+    path: patches/@types__ws.patch
+
 importers:
 
   .: {}
@@ -24,7 +29,7 @@ importers:
         version: 18.19.130
       '@types/ws':
         specifier: ^8.5.4
-        version: 8.18.2
+        version: 8.18.2(patch_hash=294be3127417dd6ab420f731419d0cf0a02624cec60164cd6af03e4ac64c079c)
       oxfmt:
         specifier: ^0.72.0
         version: 0.72.0
@@ -46,9 +51,6 @@ importers:
 
   ../../packages/vite-plugin:
     dependencies:
-      '@types/ws':
-        specifier: ^8.5.4
-        version: 8.18.2
       acorn:
         specifier: ^8.8.2
         version: 8.19.0
@@ -1896,7 +1898,7 @@ snapshots:
       '@types/node': 18.19.130
       kleur: 3.0.3
 
-  '@types/ws@8.18.2':
+  '@types/ws@8.18.2(patch_hash=294be3127417dd6ab420f731419d0cf0a02624cec60164cd6af03e4ac64c079c)':
     dependencies:
       '@types/node': 18.19.130
 

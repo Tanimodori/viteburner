@@ -1,0 +1,93 @@
+diff --git a/index.d.mts b/index.d.mts
+index 7e619fbb76e221fac53b74a71bc71f2666b0d14f..825d3af651b071c1a6bddbcd6a0083cc682e7160 100644
+--- a/index.d.mts
++++ b/index.d.mts
+@@ -1,6 +1,6 @@
+ /// <reference types="node" />
+ 
+-import { EventEmitter } from "events";
++import { EventEmitter } from "node:events";
+ import {
+     Agent,
+     ClientRequest,
+@@ -8,13 +8,13 @@ import {
+     IncomingMessage,
+     OutgoingHttpHeaders,
+     Server as HTTPServer,
+-} from "http";
+-import { Server as HTTPSServer } from "https";
+-import { createConnection } from "net";
+-import { Duplex, DuplexOptions } from "stream";
+-import { SecureContextOptions } from "tls";
+-import { URL } from "url";
+-import { ZlibOptions } from "zlib";
++} from "node:http";
++import { Server as HTTPSServer } from "node:https";
++import { createConnection } from "node:net";
++import { Duplex, DuplexOptions } from "node:stream";
++import { SecureContextOptions } from "node:tls";
++import { URL } from "node:url";
++import { ZlibOptions } from "node:zlib";
+ 
+ // can not get all overload of BufferConstructor['from'], need to copy all it's first arguments here
+ // https://github.com/microsoft/TypeScript/issues/32164
+diff --git a/index.d.ts b/index.d.ts
+index 55826796f4b2eb9f2ecdd038e747e15e1271998c..e6e25b258cf7ef09f9488234ef3a2d692dda7cd3 100644
+--- a/index.d.ts
++++ b/index.d.ts
+@@ -1,6 +1,6 @@
+ /// <reference types="node" />
+ 
+-import { EventEmitter } from "events";
++import { EventEmitter } from "node:events";
+ import {
+     Agent,
+     ClientRequest,
+@@ -8,13 +8,13 @@ import {
+     IncomingMessage,
+     OutgoingHttpHeaders,
+     Server as HTTPServer,
+-} from "http";
+-import { Server as HTTPSServer } from "https";
+-import { createConnection } from "net";
+-import { Duplex, DuplexOptions } from "stream";
+-import { SecureContextOptions } from "tls";
+-import { URL } from "url";
+-import { ZlibOptions } from "zlib";
++} from "node:http";
++import { Server as HTTPSServer } from "node:https";
++import { createConnection } from "node:net";
++import { Duplex, DuplexOptions } from "node:stream";
++import { SecureContextOptions } from "node:tls";
++import { URL } from "node:url";
++import { ZlibOptions } from "node:zlib";
+ 
+ // can not get all overload of BufferConstructor['from'], need to copy all it's first arguments here
+ // https://github.com/microsoft/TypeScript/issues/32164
+@@ -446,4 +446,25 @@ declare namespace WebSocket {
+     function createWebSocketStream(websocket: WebSocket, options?: DuplexOptions): Duplex;
+ }
+ 
+-export = WebSocket;
++export { WebSocket, WebSocketAlias };
++export type AddressInfo = WebSocket.AddressInfo;
++export type CertMeta = WebSocket.CertMeta;
++export type ClientOptions = WebSocket.ClientOptions;
++export type CloseEvent = WebSocket.CloseEvent;
++export type Data = WebSocket.Data;
++export type ErrorEvent = WebSocket.ErrorEvent;
++export type Event = WebSocket.Event;
++export type EventListenerOptions = WebSocket.EventListenerOptions;
++export type FinishRequestCallback = WebSocket.FinishRequestCallback;
++export type MessageEvent = WebSocket.MessageEvent;
++export type PerMessageDeflateOptions = WebSocket.PerMessageDeflateOptions;
++export type RawData = WebSocket.RawData;
++export type ServerOptions = WebSocket.ServerOptions;
++export type VerifyClientCallbackAsync = WebSocket.VerifyClientCallbackAsync;
++export type VerifyClientCallbackSync = WebSocket.VerifyClientCallbackSync;
++export type WebSocketEventMap = WebSocket.WebSocketEventMap;
++export declare const Server: typeof WebSocket.Server;
++export type Server = WebSocket.Server;
++export declare const WebSocketServer: typeof WebSocket.Server;
++export interface WebSocketServer extends WebSocket.Server {}
++export declare function createWebSocketStream(websocket: WebSocket, options?: DuplexOptions): Duplex;

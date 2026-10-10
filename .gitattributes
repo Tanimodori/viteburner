@@ -22,6 +22,11 @@ tests/viteburner-e2e-test/test/fixture/dist/** text eol=lf
 # same LF pin as the dump baselines above.
 tests/viteburner-e2e-test/test/fixture/ram/** text eol=lf
 
+# pnpm applies these patches line by line against the LF sources that come out of the npm tarball,
+# so the patch itself has to be LF: the `eol=crlf` above would hand a fresh checkout a CRLF patch
+# whose context lines no longer match the files it patches.
+common/pnpm-patches/**      text eol=lf
+
 # Don't allow people to merge changes to these generated files, because the result
 # may be invalid.  You need to run "rush update" again.
 pnpm-lock.yaml               merge=text
