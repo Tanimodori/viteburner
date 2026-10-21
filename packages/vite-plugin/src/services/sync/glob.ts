@@ -1,46 +1,55 @@
 import { posix } from 'path';
+import { parse } from 'acorn';
 import micromatch from 'micromatch';
+import { transformWithEsbuild } from 'vite';
 
-const GLOB_TOKEN = 'import.meta.glob';
+// Vite's esbuild step runs before its import-glob plugin, so for the extensions it transforms the
+// tokens, comments and type arguments have already been normalized. This gate allows that trivia so
+// those calls are not missed; the per-call check below then matches Vite's own importGlobRE against
+// the code Vite actually sees.
+const TRIVIA = String.raw`(?:\s|\/\*[\s\S]*?\*\/|\/\/[^\n]*(?:\n|$))*`;
+const GLOB_CALL = new RegExp(`\\bimport${TRIVIA}\\.${TRIVIA}meta${TRIVIA}\\.${TRIVIA}glob`);
+const VITE_GLOB_CALL = /\bimport\.meta\.glob(?:<\w+>)?\s*\(/;
+
+// The AST is walked generically, so the node shape is intentionally open.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AstNode = { type: string; [key: string]: any };
 
 /**
  * The patterns passed to `import.meta.glob()` in a module.
  *
  * Vite expands these calls during transform, so the patterns are gone from the transformed code.
- * They are read from the source with a small scanner rather than acorn because the source is
- * TypeScript, and acorn cannot parse the type arguments Vite allows on `glob<T>(...)`.
+ * Reading the original TypeScript with acorn would fail on type syntax, and Vite no longer exposes
+ * its own glob map, so the source is first stripped with the esbuild transform Vite already ships
+ * and then parsed. Vite itself only accepts literal patterns, so a static AST walk is sufficient.
  */
-export function importGlobPatterns(code: string): string[] {
-  const patterns: string[] = [];
-  let i = 0;
-  while (i < code.length) {
-    const char = code[i];
-    if (char === '/' && (code[i + 1] === '/' || code[i + 1] === '*')) {
-      i = skipComment(code, i);
-      continue;
-    }
-    if (char === '"' || char === "'" || char === '`') {
-      i = skipString(code, i);
-      continue;
-    }
-    if (
-      code.startsWith(GLOB_TOKEN, i) &&
-      !isIdentifierPart(code[i - 1]) &&
-      !isIdentifierPart(code[i + GLOB_TOKEN.length])
-    ) {
-      let cursor = skipSpaceAndComments(code, i + GLOB_TOKEN.length);
-      if (code[cursor] === '<') {
-        cursor = skipTypeArguments(code, cursor);
-        cursor = skipSpaceAndComments(code, cursor);
-      }
-      if (code[cursor] === '(') {
-        patterns.push(...readFirstArgument(code, cursor + 1));
-      }
-      i = cursor + 1;
-      continue;
-    }
-    i++;
+export async function importGlobPatterns(code: string, filename: string): Promise<string[]> {
+  if (!GLOB_CALL.test(code)) {
+    return [];
   }
+
+  // Parse the same code Vite's import-glob plugin sees: its esbuild step transforms TypeScript and
+  // JSX, and leaves plain JavaScript untouched.
+  let js = code;
+  if (isTransformedByVite(filename)) {
+    try {
+      js = (await transformWithEsbuild(code, filename, { loader: loaderFor(filename) })).code;
+    } catch {
+      return [];
+    }
+  }
+
+  let ast: AstNode;
+  try {
+    ast = parse(js, { ecmaVersion: 'latest', sourceType: 'module' }) as unknown as AstNode;
+  } catch {
+    return [];
+  }
+
+  const patterns: string[] = [];
+  walk(ast, (node) => {
+    patterns.push(...globCallPatterns(node, js));
+  });
   return patterns;
 }
 
@@ -61,122 +70,115 @@ export function matchesImportGlob(importer: string, patterns: string[], file: st
   return micromatch([file], resolved).length > 0;
 }
 
-function isIdentifierPart(char: string | undefined) {
-  return !!char && /[\w$]/.test(char);
+/** Vite's default `vite:esbuild` filter; plain `.js` is deliberately excluded there. */
+function isTransformedByVite(filename: string) {
+  return /\.(m?ts|[jt]sx)$/.test(filename);
 }
 
-function skipLineComment(code: string, start: number) {
-  const end = code.indexOf('\n', start + 2);
-  return end === -1 ? code.length : end + 1;
-}
-
-function skipBlockComment(code: string, start: number) {
-  const end = code.indexOf('*/', start + 2);
-  return end === -1 ? code.length : end + 2;
-}
-
-function skipComment(code: string, start: number) {
-  return code[start + 1] === '/' ? skipLineComment(code, start) : skipBlockComment(code, start);
-}
-
-function skipString(code: string, start: number) {
-  const quote = code[start];
-  let i = start + 1;
-  while (i < code.length) {
-    if (code[i] === '\\') {
-      i += 2;
-    } else if (code[i] === quote) {
-      return i + 1;
-    } else {
-      i++;
-    }
+function loaderFor(filename: string): 'ts' | 'tsx' | 'jsx' | 'js' {
+  const ext = posix.extname(filename).toLowerCase();
+  if (ext === '.tsx') {
+    return 'tsx';
   }
-  return code.length;
-}
-
-function skipSpaceAndComments(code: string, start: number) {
-  let i = start;
-  while (i < code.length) {
-    if (/\s/.test(code[i])) {
-      i++;
-    } else if (code[i] === '/' && (code[i + 1] === '/' || code[i + 1] === '*')) {
-      i = skipComment(code, i);
-    } else {
-      break;
-    }
+  if (ext === '.jsx') {
+    return 'jsx';
   }
-  return i;
+  if (ext === '.ts' || ext === '.mts' || ext === '.cts') {
+    return 'ts';
+  }
+  return 'js';
 }
 
-function skipTypeArguments(code: string, start: number) {
-  let depth = 0;
-  let i = start;
-  while (i < code.length) {
-    const char = code[i];
-    if (char === '"' || char === "'" || char === '`') {
-      i = skipString(code, i);
+function walk(node: unknown, visit: (node: AstNode) => void) {
+  if (!node || typeof node !== 'object') {
+    return;
+  }
+  if (Array.isArray(node)) {
+    for (const child of node) {
+      walk(child, visit);
+    }
+    return;
+  }
+
+  const record = node as Record<string, unknown>;
+  if (typeof record.type === 'string') {
+    visit(record as unknown as AstNode);
+  }
+  for (const [key, value] of Object.entries(record)) {
+    if (key === 'start' || key === 'end' || key === 'loc' || key === 'range') {
       continue;
     }
-    if (char === '/' && (code[i + 1] === '/' || code[i + 1] === '*')) {
-      i = skipComment(code, i);
-      continue;
-    }
-    if (char === '<') {
-      depth++;
-    } else if (char === '>' && code[i - 1] !== '=') {
-      depth--;
-      if (depth === 0) {
-        return i + 1;
-      }
-    }
-    i++;
+    walk(value, visit);
   }
-  return code.length;
 }
 
-function readString(code: string, start: number): { value?: string; end: number } {
-  const quote = code[start];
-  let i = start + 1;
-  while (i < code.length) {
-    if (code[i] === '\\') {
-      i += 2;
-    } else if (code[i] === quote) {
-      const value = code.slice(start + 1, i);
-      // An interpolated template literal is not a static glob pattern.
-      return quote === '`' && value.includes('${') ? { end: i + 1 } : { value, end: i + 1 };
-    } else {
-      i++;
-    }
-  }
-  return { end: code.length };
-}
-
-function readFirstArgument(code: string, start: number): string[] {
-  const i = skipSpaceAndComments(code, start);
-  if (code[i] === '"' || code[i] === "'" || code[i] === '`') {
-    const { value } = readString(code, i);
-    return value === undefined ? [] : [value];
-  }
-  if (code[i] !== '[') {
+function globCallPatterns(node: AstNode, code: string): string[] {
+  if (node.type !== 'CallExpression') {
     return [];
   }
-
-  const patterns: string[] = [];
-  let cursor = i + 1;
-  while (cursor < code.length) {
-    cursor = skipSpaceAndComments(code, cursor);
-    if (code[cursor] === ']') {
-      break;
-    }
-    if (code[cursor] === '"' || code[cursor] === "'" || code[cursor] === '`') {
-      const { value, end } = readString(code, cursor);
-      if (value !== undefined) {
-        patterns.push(value);
-      }
-      cursor = end;
-      continue;
-    }
-    cursor++;
+  const callee = node.callee;
+  if (callee?.type !== 'MemberExpression' || callee.computed) {
+    return [];
   }
-  return patterns;
+  if (callee.property?.type !== 'Identifier' || callee.property.name !== 'glob') {
+    return [];
+  }
+  const object = callee.object;
+  if (object?.type !== 'MetaProperty' || object.meta?.name !== 'import' || object.property?.name !== 'meta') {
+    return [];
+  }
+  // Match Vite's importGlobRE against the code it sees. For a transformed file esbuild has already
+  // removed comments/whitespace; for plain JavaScript this rejects shapes Vite would not expand.
+  let paren = callee.end;
+  while (paren < code.length && /\s/.test(code[paren])) {
+    paren++;
+  }
+  if (code[paren] !== '(' || !VITE_GLOB_CALL.test(code.slice(node.start, paren + 1))) {
+    return [];
+  }
+  if (!Array.isArray(node.arguments) || node.arguments.length < 1 || node.arguments.length > 2) {
+    return [];
+  }
+  const options = node.arguments[1];
+  if (options && options.type !== 'ObjectExpression') {
+    return [];
+  }
+  return staticPatterns(node.arguments[0]);
+}
+
+function staticPatterns(node: AstNode | undefined): string[] {
+  if (!node) {
+    return [];
+  }
+  if (node.type === 'ArrayExpression' && Array.isArray(node.elements)) {
+    const patterns: string[] = [];
+    for (const element of node.elements) {
+      // Vite skips array holes, but rejects any non-literal element.
+      if (!element) {
+        continue;
+      }
+      const pattern = staticPattern(element);
+      if (pattern === undefined) {
+        return [];
+      }
+      patterns.push(pattern);
+    }
+    return patterns;
+  }
+  const pattern = staticPattern(node);
+  return pattern === undefined ? [] : [pattern];
+}
+
+function staticPattern(node: AstNode | null | undefined): string | undefined {
+  if (!node) {
+    return undefined;
+  }
+  if (node.type === 'Literal' && typeof node.value === 'string') {
+    return node.value;
+  }
+  if (node.type === 'TemplateLiteral' && node.expressions?.length === 0) {
+    // Vite uses the raw text, which is what matters for glob escapes.
+    return node.quasis[0]?.value.raw;
+  }
+  return undefined;
 }

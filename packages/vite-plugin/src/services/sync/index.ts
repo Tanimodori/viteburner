@@ -191,7 +191,7 @@ export class SyncService {
     const key = slash(file);
     try {
       const source = await fs.promises.readFile(path.resolve(this.vite.root, key), 'utf8');
-      const patterns = importGlobPatterns(source);
+      const patterns = await importGlobPatterns(source, key);
       if (patterns.length) {
         this.globImporters.set(key, patterns);
       } else {
