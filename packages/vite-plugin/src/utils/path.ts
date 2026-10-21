@@ -1,9 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import pc from 'picocolors';
-import { SourceMap } from 'rollup';
+import type { TransformResult } from 'vite';
 
-export function getSourceMapString(map?: SourceMap | null): string {
+type ViteSourceMap = NonNullable<TransformResult['map']>;
+
+export function getSourceMapString(map?: ViteSourceMap | null): string {
   if (!map) return '';
   const mapDataString = JSON.stringify(map);
   return `//# sourceMappingURL=data:application/json;base64,${Buffer.from(mapDataString).toString('base64')}`;

@@ -1,7 +1,6 @@
 import fs from 'fs';
-import path, { relative, resolve } from 'path';
+import path, { resolve } from 'path';
 import fg from 'fast-glob';
-import micromatch from 'micromatch';
 import pc from 'picocolors';
 import { logger } from '@/console';
 import type { ViteService } from '@/services/vite';
@@ -18,6 +17,7 @@ import {
   slash,
   writeFile,
 } from '@/utils/path';
+import { importGlobPatterns, matchesImportGlob } from './glob';
 import { fixImportPath } from './import';
 
 export interface FileContent {
@@ -52,6 +52,8 @@ export interface SyncServiceDeps {
  */
 export class SyncService {
   buffers: Map<string, HmrData> = new Map();
+  /** Import-glob patterns per importer, recorded from each transformed source. */
+  private readonly globImporters = new Map<string, string[]>();
 
   constructor(private readonly deps: SyncServiceDeps) {}
 
@@ -93,29 +95,27 @@ export class SyncService {
 
   async checkDependencies(data: HmrData[]) {
     for (const item of data) {
-      // change won't affect import glob generated files, skippping
+      // change won't affect import glob generated files, skipping
       if (item.event === 'change') {
         continue;
       }
-      const resolvedFile = slash(resolve(this.vite.root, item.file));
-      this.vite.importGlobMap?.forEach((value, key) => {
-        if (value.some((pattern) => micromatch.match([resolvedFile], pattern).length > 0)) {
-          // push key to data
-          const importer = slash(relative(this.vite.root, key));
-          // recursive import, skipping
-          if (data.some((item) => item.file === importer)) {
-            return;
-          }
-          const importerData = this.watch.findItem(importer);
-          if (importerData?.transform) {
-            data.push({
-              file: importer,
-              timestamp: item.timestamp,
-              initial: item.initial,
-              event: 'change',
-              ...importerData,
-            });
-          }
+      this.globImporters.forEach((patterns, importer) => {
+        if (!matchesImportGlob(importer, patterns, item.file)) {
+          return;
+        }
+        // recursive import, skipping
+        if (data.some((entry) => entry.file === importer)) {
+          return;
+        }
+        const importerData = this.watch.findItem(importer);
+        if (importerData?.transform) {
+          data.push({
+            file: importer,
+            timestamp: item.timestamp,
+            initial: item.initial,
+            event: 'change',
+            ...importerData,
+          });
         }
       });
     }
@@ -175,11 +175,31 @@ export class SyncService {
       if (this.vite.config.sourcemap === 'inline' && module.map) {
         content += getSourceMapString(module.map);
       }
+      await this.recordGlobImporters(data.file);
     } else {
       const buffer = await fs.promises.readFile(path.resolve(this.vite.root, data.file));
       content = buffer.toString();
     }
     return content;
+  }
+
+  /**
+   * Keep the importer's glob patterns current. A parse or read failure only drops the entry: it must
+   * not stop the file itself from being uploaded.
+   */
+  private async recordGlobImporters(file: string) {
+    const key = slash(file);
+    try {
+      const source = await fs.promises.readFile(path.resolve(this.vite.root, key), 'utf8');
+      const patterns = importGlobPatterns(source);
+      if (patterns.length) {
+        this.globImporters.set(key, patterns);
+      } else {
+        this.globImporters.delete(key);
+      }
+    } catch {
+      this.globImporters.delete(key);
+    }
   }
 
   fixImport(content: string, data: HmrData, serverName: string) {
@@ -201,6 +221,9 @@ export class SyncService {
 
     // if true, we need to transmit the file
     const isAdd = data.event !== 'unlink';
+    if (!isAdd) {
+      this.globImporters.delete(slash(data.file));
+    }
 
     // try to get the file content
     let content = '';

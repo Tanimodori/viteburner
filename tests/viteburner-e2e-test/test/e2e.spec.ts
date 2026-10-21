@@ -23,6 +23,15 @@ import {
   runScript,
 } from './web/game';
 
+/** A module that only the fixture's `import.meta.glob('./modules/*.ts')` can see. */
+const GLOB_MODULE_SOURCE = 'importGlob/modules/e2e.ts';
+const GLOB_MODULE_SCRIPT = `import { NS } from '@ns';
+
+export default function e2e(ns: NS) {
+  ns.print('e2e glob');
+}
+`;
+
 /**
  * One flow, two legs.
  *
@@ -227,6 +236,20 @@ describe(`viteburner E2E (${live ? 'online' : 'offline'})`, () => {
     await vite.cli.waitForLog(/hmr unlink src\/e2e-verify\.ts -> @home:\/e2e-verify\.js \(done\)/, 90_000);
     const after = await listDirectory(page, '.');
     expect(after).not.toContain(VERIFY_UPLOAD);
+
+    // A new module matching an existing import.meta.glob is synced, and its importer is re-synced
+    // with it. This used to come from vite's private _importGlobMap.
+    const addMark = vite.cli.log.length;
+    project.writeSource(GLOB_MODULE_SOURCE, GLOB_MODULE_SCRIPT);
+    await vite.cli.waitForLog(/hmr add src\/importGlob\/modules\/e2e\.ts .*\(done\)/, 90_000, addMark);
+    await vite.cli.waitForLog(/hmr change src\/importGlob\/index\.ts .*\(done\)/, 90_000, addMark);
+    expect(await catFile(page, 'importGlob/index.js')).toContain('/importGlob/modules/e2e.js');
+
+    const removeMark = vite.cli.log.length;
+    project.removeSource(GLOB_MODULE_SOURCE);
+    await vite.cli.waitForLog(/hmr unlink src\/importGlob\/modules\/e2e\.ts .*\(done\)/, 90_000, removeMark);
+    await vite.cli.waitForLog(/hmr change src\/importGlob\/index\.ts .*\(done\)/, 90_000, removeMark);
+    expect(await catFile(page, 'importGlob/index.js')).not.toContain('/importGlob/modules/e2e.js');
   });
 
   it('step 7: answers CLI keypresses for help, status, and a full upload', async () => {

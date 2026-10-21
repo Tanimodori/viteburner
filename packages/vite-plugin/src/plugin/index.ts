@@ -16,14 +16,11 @@ export const virtualModuleId = 'virtual:viteburner-entry';
 export function getDefaultConfig(): UserConfig {
   return {
     mode: 'development',
-    optimizeDeps: { disabled: true },
+    // The daemon transforms files on demand; there is nothing to pre-bundle.
+    optimizeDeps: { noDiscovery: true },
     clearScreen: false,
     build: {
       lib: {
-        /**
-         * Meaningless for Vite<3.2.0
-         * @see {@link https://github.com/vitejs/vite/discussions/1736}
-         */
         entry: virtualModuleId,
         formats: ['es'],
       },

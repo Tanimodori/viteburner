@@ -21,11 +21,6 @@ export class ViteService {
     return this.devServer.config.root;
   }
 
-  /** vite's internal map of import-glob patterns to the files that matched them. */
-  get importGlobMap() {
-    return this.devServer._importGlobMap;
-  }
-
   pathToId(file: string) {
     const id = `/@fs/${slash(resolve(this.root, file))}`;
     return normalizeRequestId(id, this.devServer.config.base);

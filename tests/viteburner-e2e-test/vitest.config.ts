@@ -20,10 +20,11 @@ export default defineConfig(({ mode }) => {
       include: ['test/**/*.spec.ts'],
       /*
        * One browser, one CLI process, one game: the flow drives a single websocket and asserts on
-       * terminal output, so files must not fan out into worker threads. `threads: false` also keeps
-       * the fixture's `beforeAll`/`afterAll` in the same process as the assertions.
+       * terminal output, so files must not run at the same time. `fileParallelism: false` also keeps
+       * the fixture's `beforeAll`/`afterAll` in the same fork as the assertions.
        */
-      threads: false,
+      pool: 'forks',
+      fileParallelism: false,
       testTimeout: 120_000,
       hookTimeout: 180_000,
       /*

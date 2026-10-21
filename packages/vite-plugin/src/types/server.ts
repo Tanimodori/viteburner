@@ -6,10 +6,3 @@ export interface HmrData extends WatchItem {
   initial: boolean;
   timestamp: number;
 }
-
-declare module 'vite' {
-  interface ViteDevServer {
-    /** vite internal _importGlobMap for detemine glob hmr */
-    _importGlobMap: Map<string, string[]>;
-  }
-}

@@ -48,9 +48,9 @@ export default defineConfig({
       include: 'src/**/*.ts',
       entryRoot: resolve(__dirname, 'src'),
       // The rolled-up types land at dist/index.d.ts, next to the JS: the plugin derives that path from
-      // build.outDir. The older `outputDir` (a nested types directory) is not honored — it makes the
-      // entry stub reference itself, which api-extractor then fails on.
-      rollupTypes: true,
+      // build.outDir. A nested types directory is not honored — it makes the entry stub reference
+      // itself, which api-extractor then fails on.
+      bundleTypes: true,
     }),
   ],
 });

@@ -58,14 +58,14 @@ export default defineConfig({
     dts({
       include: 'src/**/*.ts',
       entryRoot: resolve(__dirname, 'src'),
-      // The rollup is api-extractor's, driven by vite-plugin-dts. `bundledPackages` is what inlines the
-      // packages this one ships code from rather than depends on: @viteburner/bb-ws-server, whose code is
-      // bundled into dist, and rollup, whose SourceMap type the public surface carries and which a
-      // consumer could not resolve as one of our devDependencies. The rolled file lands at
-      // dist/index.d.ts, next to the JS: the plugin derives that path from build.outDir and does not
-      // honor a nested types directory, which fails silently rather than loudly.
-      rollupTypes: true,
-      bundledPackages: ['@viteburner/bb-ws-server', 'rollup'],
+      // The rollup is api-extractor's, driven by vite-plugin-dts. `bundleTypes.bundledPackages` is what
+      // inlines the packages this one ships code from rather than depends on: @viteburner/bb-ws-server,
+      // whose code is bundled into dist. The rolled file lands at dist/index.d.ts, next to the JS: the
+      // plugin derives that path from build.outDir and does not honor a nested types directory, which
+      // fails silently rather than loudly.
+      bundleTypes: {
+        bundledPackages: ['@viteburner/bb-ws-server'],
+      },
     }),
   ],
 });

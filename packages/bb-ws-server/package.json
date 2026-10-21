@@ -39,14 +39,15 @@
   },
   "homepage": "https://github.com/Tanimodori/viteburner#readme",
   "devDependencies": {
+    "@microsoft/api-extractor": "^7.59.4",
     "@types/node": "^24.19.2",
     "@types/ws": "^8.5.4",
     "oxfmt": "^0.74.0",
     "oxlint": "^1.89.0",
     "typescript": "^5.9.3",
-    "vite": "^4.1.4",
-    "vite-plugin-dts": "3.9.1",
-    "vitest": "^0.34.6"
+    "vite": "^7.3.7",
+    "vite-plugin-dts": "5.1.2",
+    "vitest": "^5.0.5"
   },
   "dependencies": {
     "ws": "^8.12.1",
