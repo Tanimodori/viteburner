@@ -1,12 +1,24 @@
 import fs from 'fs';
 import { resolve } from 'path';
-import chokidar, { FSWatcher, WatchOptions } from 'chokidar';
+import { FSWatcher } from 'chokidar';
+import type { ChokidarOptions } from 'chokidar';
 import fg from 'fast-glob';
 import micromatch from 'micromatch';
 import { logger } from '@/console';
 import { ResolvedWatchItem } from '@/types';
 import { EventBus } from '@/utils/bus';
 import { removeStartingSlash, slash } from '@/utils/path';
+
+/**
+ * The deepest directory a pattern can match under, so the watcher can watch that directory rather
+ * than a glob. chokidar 4 dropped glob support and silently watches nothing when given one.
+ */
+function watchRoot(pattern: string) {
+  const parts = slash(pattern).split('/');
+  const firstGlob = parts.findIndex((part) => /[*?[\]{}()!+@]/.test(part));
+  const staticParts = firstGlob === -1 ? parts.slice(0, -1) : parts.slice(0, firstGlob);
+  return staticParts.join('/') || '.';
+}
 
 /**
  * The file watcher, and the source of the `fs:changed` event.
@@ -16,7 +28,7 @@ import { removeStartingSlash, slash } from '@/utils/path';
  */
 export class WatchService {
   items: ResolvedWatchItem[];
-  options: WatchOptions;
+  options: ChokidarOptions;
   watcher?: FSWatcher;
   initial: boolean;
   enabled: boolean;
@@ -24,7 +36,7 @@ export class WatchService {
 
   constructor(
     items: ResolvedWatchItem[],
-    options: WatchOptions,
+    options: ChokidarOptions,
     private readonly events: EventBus,
   ) {
     this.items = items;
@@ -43,7 +55,14 @@ export class WatchService {
   }
 
   start() {
-    this.watcher = chokidar.watch(this.patterns, this.options);
+    const roots = this.patterns.filter((pattern) => !pattern.startsWith('!')).map(watchRoot);
+    // chokidar's `watch(paths, options)` is only `new FSWatcher(options).add(paths)`. Using the
+    // class directly avoids the default-export shape difference between its CJS and ESM builds.
+    this.watcher = new FSWatcher({
+      ...this.options,
+      ignored: (file: string) => /(^|[\\/])(node_modules|\.git)([\\/]|$)/.test(file),
+    });
+    this.watcher.add(roots.length ? [...new Set(roots)] : ['.']);
     // add watcher to ready watchers when ready
     this.watcher.on('ready', () => {
       this.initial = false;
@@ -53,7 +72,13 @@ export class WatchService {
     const events = ['add', 'unlink', 'change'] as const;
     for (const event of events) {
       this.watcher.on(event, (file: string) => {
-        this.triggerHmr(file, event);
+        const normalized = slash(file);
+        // Watching a directory rather than a glob means events for files no pattern covers arrive
+        // here too; only the matching ones are ours.
+        if (!this.findItem(normalized)) {
+          return;
+        }
+        this.triggerHmr(normalized, event);
       });
     }
   }
@@ -124,6 +149,7 @@ export class WatchService {
   }
 
   stop() {
-    this.watcher?.close();
+    // chokidar 4's close() is async and terminal; the session has already unsubscribed its handlers.
+    void this.watcher?.close();
   }
 }

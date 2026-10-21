@@ -1,4 +1,4 @@
-import { RawData, WebSocket, WebSocketServer } from 'ws';
+import { WebSocket, WebSocketServer } from 'ws';
 import { z } from 'zod';
 import { acquireWss, getActiveClient, releaseWss } from './allocator';
 import { consoleLogger, Logger } from './logger';
@@ -26,7 +26,7 @@ export interface PromiseHolder<T = any> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface MessageSchema<P = undefined, R extends z.ZodTypeAny = z.ZodTypeAny> {
+export interface MessageSchema<P = undefined, R extends z.ZodType = z.ZodType> {
   method: string;
   params?: P;
   validator?: R;
@@ -41,6 +41,9 @@ export interface WsManagerOptions {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Fn = (...args: any[]) => any;
 type Promisable<T> = T | Promise<T>;
+
+/** The payload ws hands a message listener (ws calls this RawData). */
+export type WebSocketMessageData = Buffer | ArrayBuffer | Buffer[];
 
 /** Called when a client becomes the active one. May return a cleanup for that client's handlers. */
 export type ConnectedHandler = (ws: WebSocket) => Promisable<Fn | void>;
@@ -118,7 +121,7 @@ export class WsManager {
     }
   }
   private _adoptClient(ws: WebSocket) {
-    const onMessage = (data: RawData) => {
+    const onMessage = (data: WebSocketMessageData) => {
       // Only the active client can answer a request: a superseded one has none outstanding.
       if (this.client === ws) {
         this.handleMessage(data);
@@ -185,7 +188,7 @@ export class WsManager {
       void this._announce(active);
     }
   }
-  handleMessage(response: RawData) {
+  handleMessage(response: WebSocketMessageData) {
     const parsed = wsResponseSchema.parse(JSON.parse(response.toString()));
     const { id, result, error } = parsed;
     if (!this.trackers[id]) {
@@ -199,7 +202,7 @@ export class WsManager {
     resolve(result);
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async sendMessage<P = undefined, R extends z.ZodTypeAny = z.ZodTypeAny>(options: MessageSchema<P, R>) {
+  async sendMessage<P = undefined, R extends z.ZodType = z.ZodType>(options: MessageSchema<P, R>) {
     const params = options.params;
     const ws = this.client;
 
@@ -223,7 +226,7 @@ export class WsManager {
     const result = new Promise<z.infer<R>>((resolve, reject) => {
       const onResolve = (data: unknown) => {
         try {
-          resolve(options.validator?.parse(data) ?? data);
+          resolve((options.validator?.parse(data) ?? data) as z.infer<R>);
         } catch (e) {
           reject(e);
         } finally {

@@ -22,8 +22,10 @@ export interface WsResponse<R = any> {
 export const wsResponseSchema = z.object({
   jsonrpc: z.literal('2.0'),
   id: z.number(),
-  result: z.any(),
-  error: z.any(),
+  // JSON-RPC responses carry result or error, not necessarily both. zod 4 requires keys whose
+  // schema is z.any() unless they are explicitly optional.
+  result: z.any().optional(),
+  error: z.any().optional(),
 });
 
 // pushFile
