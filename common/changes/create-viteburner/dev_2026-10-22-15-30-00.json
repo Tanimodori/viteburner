@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "create-viteburner",
+      "comment": "Added `create-viteburner` to scaffold a project from the shared `viteburner-template` source.",
+      "type": "none"
+    }
+  ],
+  "packageName": "create-viteburner"
+}

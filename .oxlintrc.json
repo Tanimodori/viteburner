@@ -15,7 +15,8 @@
     "**/NetscriptDefinitions.d.ts",
     "**/bin/**",
     "**/test/.cache/**",
-    "**/test/.tmp/**"
+    "**/test/.tmp/**",
+    "packages/create-viteburner/template/**"
   ],
   "rules": {
     "no-constant-condition": "off",

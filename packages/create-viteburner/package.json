@@ -1,0 +1,63 @@
+{
+  "name": "create-viteburner",
+  "version": "0.5.3",
+  "description": "Scaffold a viteburner project from the official template.",
+  "bin": {
+    "create-viteburner": "bin/create-viteburner.js"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "typings": "dist/index.d.ts",
+  "files": [
+    "bin",
+    "dist",
+    "template"
+  ],
+  "scripts": {
+    "build": "vite build && node scripts/build-template.mjs",
+    "prepack": "npm run build",
+    "test": "npm run lint && npm run test:spec",
+    "test:spec": "vitest run",
+    "lint": "npm run lint:ts && npm run lint:oxlint && npm run format:check",
+    "lint:ts": "tsc --noEmit",
+    "lint:oxlint": "oxlint",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tanimodori/viteburner.git"
+  },
+  "keywords": [
+    "bitburner",
+    "vite",
+    "create",
+    "scaffold"
+  ],
+  "author": "Tanimodori",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Tanimodori/viteburner/issues"
+  },
+  "homepage": "https://github.com/Tanimodori/viteburner#readme",
+  "devDependencies": {
+    "@microsoft/api-extractor": "^7.59.4",
+    "@types/node": "^24.19.2",
+    "oxfmt": "^0.74.0",
+    "oxlint": "^1.89.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.7",
+    "vite-plugin-dts": "5.1.2",
+    "vitest": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}
