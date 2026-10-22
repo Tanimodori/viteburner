@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "ESNext",
+    "lib": ["ESNext", "DOM"],
+    "types": ["vite/client", "node"],
+    "strict": true,
+    "allowJs": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "/src/*": ["./src/*"],
+      "@ns": ["./NetscriptDefinitions.d.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.js", "NetscriptDefinitions.d.ts", "vite.config.ts"]
+}

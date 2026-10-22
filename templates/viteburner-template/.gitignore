@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Downloaded from the game on the first run
+NetscriptDefinitions.d.ts
+
+# Logs and OS files
+*.log
+.DS_Store

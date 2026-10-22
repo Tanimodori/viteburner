@@ -1,0 +1,23 @@
+{
+  "name": "viteburner-template",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A viteburner project template.",
+  "type": "module",
+  "scripts": {
+    "dev": "viteburner",
+    "build": "node -e \"process.exit(0)\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "author": "Tanimodori",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.7",
+    "viteburner": "workspace:*"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}
