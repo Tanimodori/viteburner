@@ -2,11 +2,13 @@
 
 The vite plugin behind [viteburner](https://www.npmjs.com/package/viteburner): it watches your scripts, transforms them with vite, and syncs them to Bitburner over the game's Remote API. It also loads and resolves the `viteburner` config, so the plugin works on its own, with no CLI.
 
-Requires Node.js `>=20.19.0` and Vite 7 (`vite@^7`).
+Requires Node.js `^20.19.0 || >=22.12.0` and Vite 7 (`vite@^7`).
 
 ```bash
 npm i -D @viteburner/vite-plugin vite@^7
 ```
+
+If you are testing a pre-release, install the matching tag explicitly, for example `npm i -D @viteburner/vite-plugin@next vite@^7`.
 
 Add it to any vite config:
 

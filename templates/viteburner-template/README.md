@@ -2,7 +2,7 @@
 
 A [viteburner](https://github.com/Tanimodori/viteburner) project template: write TypeScript, and let viteburner transform and sync your scripts to Bitburner.
 
-Requires Node.js `>=20.19.0`.
+Requires Node.js `^20.19.0 || >=22.12.0`.
 
 ## Getting started
 
@@ -21,6 +21,8 @@ cd viteburner-project
 npm install
 npm run dev
 ```
+
+If you are testing a pre-release, use the matching tag, for example `npm create viteburner@next`; `@latest` stays on the last stable release.
 
 You can also clone the template repository directly:
 
@@ -45,6 +47,8 @@ Upgrade viteburner with your package manager:
 ```bash
 npm i -D viteburner@latest
 ```
+
+During a pre-release, install the matching tag explicitly, for example `npm i -D viteburner@next`.
 
 If you cloned the template repository, you can also merge the upstream template:
 

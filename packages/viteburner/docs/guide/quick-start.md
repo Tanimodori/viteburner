@@ -1,6 +1,6 @@
 # Quick start
 
-Requires Node.js `>=20.19.0`.
+Requires Node.js `^20.19.0 || >=22.12.0`.
 
 ## Using `create-viteburner`
 
@@ -12,6 +12,8 @@ npm run dev
 ```
 
 `npm create viteburner@latest my-project` creates the project in `my-project` instead. The CLI does not prompt and does not install dependencies.
+
+If you are testing a pre-release, use the matching tag, for example `npm create viteburner@next`; `@latest` remains on the last stable release.
 
 In bitburner, select "Options > Remote API", enter the port of viteburner displays (default: `12525`) and click "Connect".
 

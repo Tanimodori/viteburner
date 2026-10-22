@@ -4,9 +4,9 @@ Daemon tools of bitburner using vite for script transform, file syncing, RAM mon
 
 **Packages**
 
-Published to npm: **viteburner** (unscoped), **@viteburner/vite-plugin** (the `@viteburner` scope), and **create-viteburner**. The rest are internal.
+Publishable packages: **viteburner** (unscoped), **@viteburner/vite-plugin** (the `@viteburner` scope), and **create-viteburner**. Pre-releases are published under the `next` tag. The rest are internal.
 
-Runtime requirements: Node.js `>=20.19.0` and Vite 7 (`vite@^7`).
+Runtime requirements: Node.js `^20.19.0 || >=22.12.0` and Vite 7 (`vite@^7`).
 
 - **[@viteburner/bb-ws-server](packages/bb-ws-server/README.md)**: The Bitburner Remote API WebSocket server and its `WsManager` client. Internal — bundled into the plugin, never published
 - **[@viteburner/vite-plugin](packages/vite-plugin/README.md)**: The vite plugin: file watching, transform, sync, and config resolution
@@ -19,7 +19,7 @@ Runtime requirements: Node.js `>=20.19.0` and Vite 7 (`vite@^7`).
 
 ## Development
 
-Development requires Node.js `>=24` (the range Rush enforces in `rush.json`); the published packages themselves run on Node 20.19+.
+Development requires Node.js `>=24` (the range Rush enforces in `rush.json`); the published packages run on Node `^20.19.0 || >=22.12.0`.
 
 To build the projects in this repo, try these shell commands:
 
@@ -30,3 +30,7 @@ rush build
 ```
 
 For more information, see the documentation at: https://rushjs.io/
+
+## Releasing
+
+Publishing is manual and uses `rush publish` from an authenticated local checkout. CI never publishes and stores no credentials. See [RELEASING.md](RELEASING.md) for the beta/final flow and the template mirror export.

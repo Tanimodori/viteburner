@@ -4,7 +4,7 @@ A [viteburner](https://github.com/Tanimodori/viteburner) project template: write
 
 > This repository is generated from [`Tanimodori/viteburner`](https://github.com/Tanimodori/viteburner). Do not edit it directly: change `templates/viteburner-template/` there and run the template export.
 
-Requires Node.js `>=20.19.0`.
+Requires Node.js `^20.19.0 || >=22.12.0`.
 
 ## Create a project
 
@@ -14,6 +14,8 @@ cd viteburner-project
 npm install
 npm run dev
 ```
+
+If you are testing a pre-release, use the matching tag, for example `npm create viteburner@next`; `@latest` stays on the last stable release.
 
 Or clone this repository:
 
@@ -36,6 +38,8 @@ In Bitburner, open **Options > Remote API**, enter the port viteburner prints (d
 ```bash
 npm i -D viteburner@latest
 ```
+
+During a pre-release, install the matching tag explicitly, for example `npm i -D viteburner@next`.
 
 If you cloned this repository, you can also merge the upstream template:
 
