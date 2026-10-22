@@ -59,6 +59,9 @@ function fullConfig(): ResolvedView {
 export const COMPLETE_SUITES: ConfigSuite[] = [
   { dir: 'vite-config-ts', files: ['vite.config.ts'], expected: fullConfig() },
   { dir: 'vite-config-js', files: ['vite.config.js'], expected: fullConfig() },
+  // Vite's function form: the plugin must use the config vite already evaluated with `{ mode }`,
+  // rather than loading the file a second time with no arguments.
+  { dir: 'vite-config-function', files: ['vite.config.js (function)'], expected: fullConfig() },
   { dir: 'viteburner-config-ts', files: ['viteburner.config.ts'], expected: fullConfig() },
   { dir: 'viteburner-config-js', files: ['viteburner.config.js'], expected: fullConfig() },
   { dir: 'viteburner-config-json', files: ['viteburner.config.json'], expected: fullConfig() },

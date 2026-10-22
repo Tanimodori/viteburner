@@ -65,10 +65,10 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): ViteBurn
     name: viteburnerPluginName,
     api,
     apply: 'serve',
-    // Load viteburner.config.xx, merge with config, and resolve
+    // Resolve the config vite already loaded plus any standalone viteburner.config.xx.
     async config(config: ViteBurnerUserConfig) {
       logger.info('config', 'resolving user config...');
-      config.viteburner = await loadConfig(inlineConfig);
+      config.viteburner = await loadConfig(inlineConfig, config);
       return getDefaultConfig();
     },
     configResolved(config) {
