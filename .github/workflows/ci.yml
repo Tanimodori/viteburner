@@ -5,14 +5,42 @@ on:
   pull_request:
     branches: ['main']
 jobs:
-  build:
+  verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 24
-      - name: Rush Install
+          node-version-file: .node-version
+      - name: Rush install
         run: node common/scripts/install-run-rush.js install
-      - name: Rush rebuild
+      - name: Rush check
+        run: node common/scripts/install-run-rush.js check
+      - name: Build and typecheck
         run: node common/scripts/install-run-rush.js rebuild --verbose
+      - name: Unit tests (@viteburner/bb-ws-server)
+        working-directory: packages/bb-ws-server
+        run: node ../../common/scripts/install-run-rushx.js test
+      - name: Unit tests (@viteburner/vite-plugin)
+        working-directory: packages/vite-plugin
+        run: node ../../common/scripts/install-run-rushx.js test
+      - name: Unit tests (viteburner CLI)
+        working-directory: packages/viteburner
+        run: node ../../common/scripts/install-run-rushx.js test
+      - name: Lint and config tests
+        working-directory: tests/viteburner-config-test
+        run: |
+          node ../../common/scripts/install-run-rushx.js lint
+          node ../../common/scripts/install-run-rushx.js test
+      - name: Lint E2E suite
+        working-directory: tests/viteburner-e2e-test
+        run: node ../../common/scripts/install-run-rushx.js lint
+      - name: Install Chromium and the pinned game build
+        working-directory: tests/viteburner-e2e-test
+        run: |
+          npx playwright install --with-deps chromium
+          node ../../common/scripts/install-run-rushx.js setup:game
+      - name: E2E (offline)
+        working-directory: tests/viteburner-e2e-test
+        run: node ../../common/scripts/install-run-rushx.js test:e2e
