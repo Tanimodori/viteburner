@@ -63,6 +63,9 @@ export const COMPLETE_SUITES: ConfigSuite[] = [
   // rather than loading the file a second time with no arguments.
   { dir: 'vite-config-function', files: ['vite.config.js (function)'], expected: fullConfig() },
   { dir: 'viteburner-config-ts', files: ['viteburner.config.ts'], expected: fullConfig() },
+  // A standalone function config: it must be called with vite's `{ command, mode }`, not ignored or
+  // called with no arguments.
+  { dir: 'viteburner-config-function', files: ['viteburner.config.ts (function)'], expected: fullConfig() },
   { dir: 'viteburner-config-js', files: ['viteburner.config.js'], expected: fullConfig() },
   { dir: 'viteburner-config-json', files: ['viteburner.config.json'], expected: fullConfig() },
 ];
@@ -70,11 +73,11 @@ export const COMPLETE_SUITES: ConfigSuite[] = [
 /**
  * Configs split across two files, which must come back merged.
  *
- * Only fields that appear in one file are used, because the order in which a `vite.config` and a
- * `viteburner.config` override each other is not defined. The expectation therefore proves the two
- * sources stack — watch, usePolling and port from the vite config, timeout, dts, ignoreInitial and
- * download from the viteburner config, plus the vite config's `build.sourcemap` as the default — and
- * says nothing about who wins a collision.
+ * Only fields that appear in one file are used, so the suite proves the two sources stack — watch,
+ * usePolling and port from the vite config, timeout, dts, ignoreInitial and download from the
+ * viteburner config, plus the vite config's `build.sourcemap` as the default — without pinning the
+ * precedence. The precedence itself is documented in `load.ts`: standalone values win over the
+ * `viteburner` key, and inline options win over both.
  */
 export const MERGE_SUITES: ConfigSuite[] = [
   {

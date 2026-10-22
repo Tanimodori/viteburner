@@ -31,7 +31,7 @@ export default defineConfig({
 
 This package also carries the Bitburner Remote API transport — `WsManager`, the protocol message types and their zod validators — bundled in rather than depended on, and re-exported here so `import { WsManager } from 'viteburner'` resolves to the same copy the plugin itself runs.
 
-The config can be written in `viteburner.config.ts`/`.js`/`.json` or under `viteburner` in `vite.config.*`; see the [viteburner docs](https://github.com/Tanimodori/viteburner/blob/main/packages/viteburner/docs/index.md).
+The config can be written under `viteburner` in `vite.config.*` or in a standalone `viteburner.config.ts`/`.js`/`.json` file. A standalone file exports the config object or a function that receives vite's `ConfigEnv`; see the [viteburner docs](https://github.com/Tanimodori/viteburner/blob/main/packages/viteburner/docs/index.md).
 
 The `viteburner` package is the CLI built on this plugin and re-exports all of the above.
 

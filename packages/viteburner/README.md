@@ -73,6 +73,8 @@ export type RenameOutputObject = {
 };
 ```
 
+A standalone `viteburner.config.*` file exports this object directly, or a function that receives vite's `ConfigEnv` and returns the config (sync or async). Use the `ViteBurnerConfigExport` type for either form.
+
 ## Thanks
 
 Thank them for inspiring this package.

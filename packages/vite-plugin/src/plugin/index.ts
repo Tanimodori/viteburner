@@ -1,4 +1,4 @@
-import type { ResolvedConfig as ViteResolvedConfig, UserConfig } from 'vite';
+import type { ConfigEnv, ResolvedConfig as ViteResolvedConfig, UserConfig } from 'vite';
 import { loadConfig } from '@/config';
 import { logger } from '@/console';
 import type { ResolvedConfig, ResolvedViteBurnerConfig, ViteBurnerInlineConfig, ViteBurnerUserConfig } from '@/types';
@@ -65,10 +65,11 @@ export function viteburnerPlugin(inlineConfig: ViteBurnerInlineConfig): ViteBurn
     name: viteburnerPluginName,
     api,
     apply: 'serve',
-    // Resolve the config vite already loaded plus any standalone viteburner.config.xx.
-    async config(config: ViteBurnerUserConfig) {
+    // Resolve the config vite already loaded plus any standalone viteburner.config.xx. `env` also
+    // reaches a function-form standalone config, matching what vite passes to vite.config.xx.
+    async config(config: ViteBurnerUserConfig, env: ConfigEnv) {
       logger.info('config', 'resolving user config...');
-      config.viteburner = await loadConfig(inlineConfig, config);
+      config.viteburner = await loadConfig(inlineConfig, config, env);
       return getDefaultConfig();
     },
     configResolved(config) {

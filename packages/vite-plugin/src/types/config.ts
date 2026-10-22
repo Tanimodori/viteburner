@@ -1,4 +1,4 @@
-import type { ResolvedConfig as ViteResolvedConfig, UserConfig } from 'vite';
+import type { ConfigEnv, ResolvedConfig as ViteResolvedConfig, UserConfig } from 'vite';
 
 /**
  * Destinations for the transformed files.
@@ -137,6 +137,22 @@ export interface ViteBurnerConfig {
 }
 
 export type ViteBurnerInlineConfig = Pick<ViteBurnerConfig, 'port' | 'cwd'>;
+
+/**
+ * A function that produces the config for one Vite server.
+ *
+ * `env` is the same `ConfigEnv` Vite passes to a function-form `vite.config.*`, so a config can
+ * branch on `command`, `mode`, `isSsrBuild` or `isPreview`.
+ */
+export type ViteBurnerConfigFactory = (
+  env: ConfigEnv,
+) => ViteBurnerConfig | null | undefined | Promise<ViteBurnerConfig | null | undefined>;
+
+/**
+ * The default export of a standalone `viteburner.config.*` file: either the config itself or a
+ * factory that receives Vite's `ConfigEnv`.
+ */
+export type ViteBurnerConfigExport = ViteBurnerConfig | ViteBurnerConfigFactory;
 
 export interface ViteBurnerUserConfig extends UserConfig {
   /** viteburner related configs */

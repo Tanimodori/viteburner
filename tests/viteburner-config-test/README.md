@@ -66,8 +66,9 @@ rushx lint             # tsc + oxlint + oxfmt --check
 
 ## 观察到的行为
 
-用 `vite@4.5` 实测，六条用例全绿：
+用 `vite@7` 实测，八条用例全绿：
 
-- 五种加载方式解析出的配置**逐字段一致**，包括 `vite.config.*` 里 `build.sourcemap: true` 与 `viteburner.sourcemap: 'inline'` 并存时解析为 `'inline'`（`load.ts` 的 rewrite 让 viteburner 的值胜出）。
+- 七种加载方式解析出的配置**逐字段一致**，包括 `vite.config.*` 里 `build.sourcemap: true` 与 `viteburner.sourcemap: 'inline'` 并存时解析为 `'inline'`（`load.ts` 把 vite 的值放进 unconfig 的 `defaults`，standalone 的值胜出）。
+- standalone `viteburner.config.*` 可以导出对象，也可以导出函数；函数会收到 vite 的 `ConfigEnv`（`command`、`mode` 等），并且可以是 async。fixture 用 `port` 分支同时验证了这一点。
 - `watch[].location` 解析成 `{ filename, server }[]`：默认落点去掉 `src/` 前缀并把 `.ts` 换成 `.js`；对象形式的 `filename` 若带子目录会补上前导斜杠（`data/keep.txt` → `/data/keep.txt`），根目录则不加。
 - `vite.config.js` 与 `viteburner.config.js` 的字段叠加成一份配置，`build.sourcemap` 也作为 sourcemap 默认值传了进来。
