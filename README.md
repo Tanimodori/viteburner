@@ -16,6 +16,8 @@ Runtime requirements: Node.js `>=20.19.0` and Vite 7 (`vite@^7`).
 
 ## Development
 
+Development requires Node.js `>=24` (the range Rush enforces in `rush.json`); the published packages themselves run on Node 20.19+.
+
 To build the projects in this repo, try these shell commands:
 
 ```

@@ -26,7 +26,8 @@ Viteburner will start a Vite Server and a Watcher to watch the files and transfo
 Once setup is done, viteburner will start a key handler to handle the keypresses.
 
 - Press `h` to show the help message.
-- Press `q` to quit viteburner. (or `ESC`, `Ctrl+C`, `Ctrl+D` to force quit)
+- Press `q` or `Esc` to quit viteburner.
+- Press `Ctrl+C` or `Ctrl+D` to force quit at any time.
 - Press `u` to upload the files.
 - Press `d` to download the files.
 - Press `s` to show the status.

@@ -98,7 +98,7 @@ Viteburner works in `dev` mode because:
 - We need to keep the source file structure to sync the files to the game. So the RAM calculation and `scp` files will be correct. There is a way to tell rollup to keep the file structure when bundling but it is more tricky and hacky.
 - Allow us to do HMR and don't need to bundle the files again when we change the files. When we run vite in `build` mode with `--watch`, it will bundle the files again when we change the files. This is not efficient.
 
-Using local NPM dependencies in `build` mode is trivial since `esbuild` will bundle them together. But in `dev` mode, the client needs to track into NPM dependencies and request them from the vite dev server. If the client is a normal browser, it will be able to request them because vite have injected HMR code when starting the dev server. But in `viteburner` or similarly `vite-node` we need to manually track dependencies and send them to the client so it will found them.
+Using local NPM dependencies in `build` mode is trivial since `esbuild` will bundle them together. But in `dev` mode, the client needs to track into NPM dependencies and request them from the vite dev server. If the client is a normal browser, it will be able to request them because vite have injected HMR code when starting the dev server. But in `viteburner`, or another vite-based runner, we need to manually track dependencies and send them to the client so it will find them.
 
 So theoretically it is possible to implement local NPM dependencies in viteburner. Since it is not a frequently request feature, it is not implemented yet but maybe implemented in the future.
 

@@ -91,4 +91,4 @@ export async function main(ns) {
 }
 ```
 
-The absolute import pattern `@/*` can be configured in `vite.config.ts` and `tsconfig.json`. Make sure you are using the same pattern in both files. See [vite docs#resolve-alias](https://vitejs.dev/config/#resolve-alias) and [ts docs#paths](https://www.typescriptlang.org/tsconfig#paths) for more details.
+The absolute import pattern `@/*` can be configured in `vite.config.ts` and `tsconfig.json`. Make sure you are using the same pattern in both files. See [vite docs#resolve-alias](https://vite.dev/config/shared-options.html#resolve-alias) and [ts docs#paths](https://www.typescriptlang.org/tsconfig#paths) for more details.

@@ -11,8 +11,7 @@ npm i -D @viteburner/vite-plugin vite@^7
 Add it to any vite config:
 
 ```ts
-import { viteburnerPlugin } from '@viteburner/vite-plugin';
-import { defineConfig } from 'vite';
+import { defineConfig, viteburnerPlugin } from '@viteburner/vite-plugin';
 
 export default defineConfig({
   plugins: [viteburnerPlugin({})],

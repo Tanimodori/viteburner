@@ -49,7 +49,9 @@ export default defineConfig({
 });
 ```
 
-> Note: The config shown above includes basic vite configs. If your project doesn't have an existing `vite.config.js`/`vite.config.ts`, you may add them into the config. Otherwise you can just add viteburner-specific configs only. You can find more configs in [vite docs](https://vitejs.dev/config/).
+> Note: The config shown above includes basic vite configs. If your project doesn't have an existing `vite.config.js`/`vite.config.ts`, you may add them into the config. Otherwise you can just add viteburner-specific configs only. You can find more configs in [vite docs](https://vite.dev/config/).
+
+> If your project is an ES module (`"type": "module"` in `package.json`), `__dirname` is not defined in `vite.config.*`; use `import.meta.dirname` (Node 20.11+) or `fileURLToPath(new URL('./src', import.meta.url))` instead.
 
 2.  (b) TS or mixed TS+JS setup
 
