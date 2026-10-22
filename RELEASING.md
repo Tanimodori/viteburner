@@ -26,7 +26,6 @@ The policy is currently `0.5.3` with `nextBump: patch`, so a plain bump would pr
 ```bash
 rush version --bump --version-policy viteburner \
   --override-bump preminor --override-prerelease-id beta
-rush format-changelog
 rush rebuild
 git add -A
 git commit -m "release: 0.6.0-beta.0"
@@ -41,7 +40,9 @@ rush version --bump --version-policy viteburner \
   --override-bump prerelease --override-prerelease-id beta
 ```
 
-Because the policy is lockstep and `nextBump` is set, `rush version --bump` consumes the change files, writes the changelogs, and deletes the change files. That is why publishing uses `--include-all`: a later `rush publish --apply --publish` would have no change files left to publish. `--tag next` keeps `latest` on the stable release.
+A prerelease version is handled specially: `rush version --bump` updates the policy and package versions, but Rush deliberately leaves the change files in place and does not write a `0.6.0-beta.0` changelog entry. The entries are saved for the final release. Publishing therefore uses `--include-all`: the normal `--apply` publish path only publishes non-`none` changes and would publish nothing, and the change files are still there. `--tag next` keeps `latest` on the stable release.
+
+The beta tarballs consequently have no beta changelog entry. `create-viteburner`'s `CHANGELOG.md` does not exist yet and is simply omitted from the pack; the final `0.6.0` release creates it.
 
 Add `--target-branch <branch>` to `rush publish` if you also want Rush to push the git version tags; the release commit must already be on that branch.
 
@@ -55,9 +56,10 @@ npm i -D @viteburner/vite-plugin@next vite@^7
 
 ## Final release
 
-Add a change file for the final changelog entry, because the beta already consumed the original change files:
+The beta leaves the original change files in place. Bumping to the final `0.6.0` consumes them, writes the full `0.6.0` changelog, and deletes the change files. Run `rush change` only if you want an additional release note on top of the existing changes:
 
 ```bash
+# optional
 rush change
 ```
 
