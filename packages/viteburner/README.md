@@ -21,7 +21,16 @@ This package ships the `viteburner` CLI. The vite plugin it runs is published on
 
 Prerequisites: [Node.js](https://nodejs.org/en/download/) `>=20.19.0`; existing projects also need Vite 7 (`vite@^7`).
 
-Using [viteburner-template](https://github.com/Tanimodori/viteburner-template)
+Using `create-viteburner`:
+
+```bash
+npm create viteburner@latest
+cd viteburner-project
+npm i
+npm run dev
+```
+
+Or clone [viteburner-template](https://github.com/Tanimodori/viteburner-template) directly:
 
 ```bash
 git clone https://github.com/Tanimodori/viteburner-template.git

@@ -2,9 +2,20 @@
 
 Requires Node.js `>=20.19.0`.
 
-## Using [viteburner-template](https://github.com/Tanimodori/viteburner-template)
+## Using `create-viteburner`
 
-Prerequisites: [Node.js](https://nodejs.org/en/download/)
+```bash
+npm create viteburner@latest
+cd viteburner-project
+npm i
+npm run dev
+```
+
+`npm create viteburner@latest my-project` creates the project in `my-project` instead. The CLI does not prompt and does not install dependencies.
+
+In bitburner, select "Options > Remote API", enter the port of viteburner displays (default: `12525`) and click "Connect".
+
+## Using [viteburner-template](https://github.com/Tanimodori/viteburner-template) directly
 
 ```bash
 git clone https://github.com/Tanimodori/viteburner-template.git
