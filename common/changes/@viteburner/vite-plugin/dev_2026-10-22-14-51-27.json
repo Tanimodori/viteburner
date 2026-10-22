@@ -1,0 +1,30 @@
+{
+  "changes": [
+    {
+      "packageName": "@viteburner/vite-plugin",
+      "comment": "Initial release of the Vite plugin as a separate package. Existing configs can keep importing `viteburnerPlugin` from `viteburner`.",
+      "type": "none"
+    },
+    {
+      "packageName": "@viteburner/vite-plugin",
+      "comment": "Requires Node.js 20.19 or newer and Vite 7.",
+      "type": "none"
+    },
+    {
+      "packageName": "@viteburner/vite-plugin",
+      "comment": "Added `getPluginConfig()` to read the resolved configuration.",
+      "type": "none"
+    },
+    {
+      "packageName": "@viteburner/vite-plugin",
+      "comment": "Fixed `vite.config.*` being evaluated twice, which broke function-form Vite configs.",
+      "type": "none"
+    },
+    {
+      "packageName": "@viteburner/vite-plugin",
+      "comment": "Fixed the bundled declarations to use type-only imports that resolve under Node16/NodeNext module resolution.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@viteburner/vite-plugin"
+}

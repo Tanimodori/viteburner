@@ -24,10 +24,14 @@
     "**/bin/**",
     "**/test/.cache/**",
     "**/test/.tmp/**",
-    // Both are Rush's own files rather than ours: the install-run scripts under common/scripts are
+    // These are Rush's own files rather than ours: the install-run scripts under common/scripts are
     // generated and rewritten by rush, and repo-state.json is rewritten by every "rush update" with
-    // LF, so checking them only ever reports churn we would have to redo.
+    // LF, so checking them only ever reports churn we would have to redo. CHANGELOG.json/CHANGELOG.md
+    // are rewritten by "rush publish --apply" in a format oxfmt would immediately change (no blank
+    // line between a version heading and its date), so leave them alone as well.
     "common/scripts/**",
-    "common/config/rush/repo-state.json"
+    "common/config/rush/repo-state.json",
+    "**/CHANGELOG.json",
+    "**/CHANGELOG.md"
   ]
 }

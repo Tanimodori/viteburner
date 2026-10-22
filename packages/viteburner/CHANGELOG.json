@@ -1,0 +1,296 @@
+{
+  "name": "viteburner",
+  "entries": [
+    {
+      "version": "0.5.3",
+      "tag": "v0.5.3",
+      "date": "Tue, 14 Mar 2023 07:17:09 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixed the `defineConfig` type definitions."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.2",
+      "tag": "v0.5.2",
+      "date": "Sat, 25 Feb 2023 08:10:10 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixed issue #16 by invalidating the changed file before calling `fetchModule`."
+          },
+          {
+            "comment": "Handled SSR and external modules when resolving imports."
+          },
+          {
+            "comment": "Switched to Node's `builtinModules` and dropped the `builtin-modules` dependency."
+          },
+          {
+            "comment": "Re-enabled type rollup for the published declarations."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.1",
+      "tag": "v0.5.1",
+      "date": "Mon, 30 Jan 2023 13:51:37 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "The peer dependency now accepts both Vite 3 and Vite 4."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.0",
+      "tag": "v0.5.0",
+      "date": "Mon, 30 Jan 2023 13:44:09 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Added support for Vite 4 and raised the peer dependency accordingly."
+          },
+          {
+            "comment": "Fixed the exclusion of Node built-in modules from the uploaded bundle."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.2",
+      "tag": "v0.4.2",
+      "date": "Fri, 25 Nov 2022 13:40:15 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "External and URL imports are now ignored, and unknown import paths are left untouched (fixes #12)."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.1",
+      "tag": "v0.4.1",
+      "date": "Mon, 07 Nov 2022 02:55:11 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Added the `usePolling` option for chokidar-based file watching."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.0",
+      "tag": "v0.4.0",
+      "date": "Fri, 04 Nov 2022 02:37:57 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Changes to files referenced by `import.meta.glob` now trigger HMR for the dependent modules."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.3",
+      "tag": "v0.3.3",
+      "date": "Sat, 29 Oct 2022 08:28:54 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixed import resolution for request IDs that need normalization (fixes #8)."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.2",
+      "tag": "v0.3.2",
+      "date": "Fri, 28 Oct 2022 15:45:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "The plugin is now applied only for the dev server (`serve`), never during `build`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.1",
+      "tag": "v0.3.1",
+      "date": "Fri, 28 Oct 2022 15:42:40 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "The WebSocket server is reused across sessions instead of being recreated."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.0",
+      "tag": "v0.3.0",
+      "date": "Fri, 28 Oct 2022 08:30:23 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Viteburner can now be used as a Vite plugin via `viteburnerPlugin()`."
+          },
+          {
+            "comment": "Fixed WebSocket client cleanup on reset and key handling after restarts."
+          },
+          {
+            "comment": "Fixed config loading, working-directory handling and plugin injection order."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.6",
+      "tag": "v0.2.6",
+      "date": "Fri, 28 Oct 2022 01:05:41 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixed the merge of the `watch.location` config option."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.5",
+      "tag": "v0.2.5",
+      "date": "Thu, 27 Oct 2022 03:29:45 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Absolute imports starting with `/src/...` are now supported."
+          },
+          {
+            "comment": "Warns when stdin is not a TTY, where interactive keys are unavailable."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.4",
+      "tag": "v0.2.4",
+      "date": "Wed, 26 Oct 2022 07:13:07 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Exported public config and server types."
+          },
+          {
+            "comment": "Config resolution now uses `resolveConfig`."
+          },
+          {
+            "comment": "Fixed Vite cache invalidation after file changes, HMR updates, the `transform` default (now `false`) and CLI defaults."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.3",
+      "tag": "v0.2.3",
+      "date": "Tue, 25 Oct 2022 08:27:06 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "`dumpFiles` is now server-sensitive: dumps are written per server."
+          },
+          {
+            "comment": "Fixed `loadConfig` and the config type definitions."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.2",
+      "tag": "v0.2.2",
+      "date": "Mon, 24 Oct 2022 12:38:08 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "`fixImportPath` rewrites local imports to the filenames used inside the game, fixing `/root/path/file.js` output."
+          },
+          {
+            "comment": "Added docs for TypeScript setup and sync-only usage."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.1",
+      "tag": "v0.2.1",
+      "date": "Sat, 22 Oct 2022 20:11:12 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixed: unhandled keys no longer trigger the tailing help message."
+          },
+          {
+            "comment": "Version bumps now build before publishing."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.1-0",
+      "tag": "v0.2.1-0",
+      "date": "Sat, 22 Oct 2022 19:49:40 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixed the published `bin` entry so the `viteburner` command is installed."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.0",
+      "tag": "v0.2.0",
+      "date": "Sat, 22 Oct 2022 18:28:44 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Added an interactive CLI with status output, help, manual full reload and keypress handling."
+          },
+          {
+            "comment": "Added remote file downloads, per-server file dumps, remote path autocomplete and selectable upload filters."
+          },
+          {
+            "comment": "Added RAM usage reporting, `defineConfig`, `ignoreSourcemap` and `EADDRINUSE` handling."
+          },
+          {
+            "comment": "Added local script discovery and enforced watch inclusion."
+          },
+          {
+            "comment": "Fixed upload filenames, repeated full uploads, console formatting and hint colors."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "v0.1.0",
+      "date": "Thu, 20 Oct 2022 12:16:08 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Initial release: a Vite-powered daemon that watches local files, compiles TypeScript and syncs scripts to Bitburner through the Remote API WebSocket."
+          },
+          {
+            "comment": "Supports configuration through the `viteburner` key in `vite.config.*` or a standalone `viteburner.config.*` file."
+          }
+        ]
+      }
+    }
+  ]
+}

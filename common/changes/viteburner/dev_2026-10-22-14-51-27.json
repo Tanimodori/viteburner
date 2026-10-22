@@ -1,0 +1,60 @@
+{
+  "changes": [
+    {
+      "packageName": "viteburner",
+      "comment": "The package is now part of a Rush monorepo. `viteburner` remains the CLI and re-exports the plugin; the plugin is also published separately as `@viteburner/vite-plugin`.",
+      "type": "none"
+    },
+    {
+      "packageName": "viteburner",
+      "comment": "Requires Node.js 20.19 or newer and Vite 7.",
+      "type": "none"
+    },
+    {
+      "packageName": "viteburner",
+      "comment": "Upgraded to Vite 7, Vitest 5 and vite-plugin-dts 5. `import.meta.glob` tracking no longer relies on Vite's internal `_importGlobMap`.",
+      "type": "none"
+    },
+    {
+      "packageName": "viteburner",
+      "comment": "CLI keyboard shortcuts work again. `q` and `Esc` are ordinary shortcuts that do nothing when no session is active, while `Ctrl+C` and `Ctrl+D` always terminate the process, including while a prompt is open.",
+      "type": "none"
+    },
+    {
+      "packageName": "viteburner",
+      "comment": "The key map is now the single source of truth for shortcuts, and the help output lists `h`.",
+      "type": "none"
+    },
+    {
+      "packageName": "viteburner",
+      "comment": "Changing `viteburner` configuration no longer tears down the replacement dev server; the watched files are re-scanned and uploaded after the restart.",
+      "type": "none"
+    },
+    {
+      "packageName": "viteburner",
+      "comment": "Added `getPluginConfig()` to read the resolved plugin configuration.",
+      "type": "none"
+    },
+    {
+      "packageName": "viteburner",
+      "comment": "The CLI control channel no longer travels over the Vite WebSocket, so no HMR port is reserved and no separate CLI client is created.",
+      "type": "none"
+    },
+    {
+      "packageName": "viteburner",
+      "comment": "Fixed `vite.config.*` being evaluated twice, which broke function-form Vite configs.",
+      "type": "none"
+    },
+    {
+      "packageName": "viteburner",
+      "comment": "Fixed the bundled declarations to use type-only imports that resolve under Node16/NodeNext module resolution.",
+      "type": "none"
+    },
+    {
+      "packageName": "viteburner",
+      "comment": "Fixed a watched file that matches no configured location being thrown instead of reported in the log.",
+      "type": "none"
+    }
+  ],
+  "packageName": "viteburner"
+}
