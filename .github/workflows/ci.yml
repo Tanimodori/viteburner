@@ -28,6 +28,14 @@ jobs:
       - name: Unit tests (viteburner CLI)
         working-directory: packages/viteburner
         run: node ../../common/scripts/install-run-rushx.js test
+      - name: Unit tests (create-viteburner)
+        working-directory: packages/create-viteburner
+        run: node ../../common/scripts/install-run-rushx.js test
+      - name: Lint and scaffold E2E
+        working-directory: tests/viteburner-create-test
+        run: |
+          node ../../common/scripts/install-run-rushx.js lint
+          node ../../common/scripts/install-run-rushx.js test
       - name: Lint and config tests
         working-directory: tests/viteburner-config-test
         run: |
