@@ -6,6 +6,8 @@ Daemon tools of bitburner using vite for script transform, file syncing, RAM mon
 
 Published to npm: **viteburner** (unscoped) and **@viteburner/vite-plugin** (the `@viteburner` scope). The rest are internal.
 
+Runtime requirements: Node.js `>=20.19.0` and Vite 7 (`vite@^7`).
+
 - **[@viteburner/bb-ws-server](packages/bb-ws-server/README.md)**: The Bitburner Remote API WebSocket server and its `WsManager` client. Internal — bundled into the plugin, never published
 - **[@viteburner/vite-plugin](packages/vite-plugin/README.md)**: The vite plugin: file watching, transform, sync, and config resolution
 - **[viteburner](packages/viteburner/README.md)**: The CLI built on the plugin, and re-exporting it

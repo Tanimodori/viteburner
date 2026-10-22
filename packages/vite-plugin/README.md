@@ -2,6 +2,12 @@
 
 The vite plugin behind [viteburner](https://www.npmjs.com/package/viteburner): it watches your scripts, transforms them with vite, and syncs them to Bitburner over the game's Remote API. It also loads and resolves the `viteburner` config, so the plugin works on its own, with no CLI.
 
+Requires Node.js `>=20.19.0` and Vite 7 (`vite@^7`).
+
+```bash
+npm i -D @viteburner/vite-plugin vite@^7
+```
+
 Add it to any vite config:
 
 ```ts
@@ -25,7 +31,7 @@ export default defineConfig({
 
 This package also carries the Bitburner Remote API transport — `WsManager`, the protocol message types and their zod validators — bundled in rather than depended on, and re-exported here so `import { WsManager } from 'viteburner'` resolves to the same copy the plugin itself runs.
 
-The config can be written in `viteburner.config.ts`/`.js`/`.json` or under `viteburner` in `vite.config.*`; see the [viteburner docs](https://github.com/Tanimodori/viteburner/tree/main/packages/viteburner/docs).
+The config can be written in `viteburner.config.ts`/`.js`/`.json` or under `viteburner` in `vite.config.*`; see the [viteburner docs](https://github.com/Tanimodori/viteburner/blob/main/packages/viteburner/docs/index.md).
 
 The `viteburner` package is the CLI built on this plugin and re-exports all of the above.
 

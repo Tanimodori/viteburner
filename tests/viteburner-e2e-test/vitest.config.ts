@@ -9,7 +9,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
  *
  * `vitest run` (mode `test`) drives the offline leg against the pinned game build; `vitest run --mode
  * live` drives the online leg against the official site. Both collect `test/e2e.spec.ts` and run the
- * same six steps — the mode only decides which game they run against (see `test/mode.ts` and
+ * same nine steps — the mode only decides which game they run against (see `test/mode.ts` and
  * `test/e2e.spec.ts`). The global setup below is attached only to the offline leg, because only it
  * needs the pinned build downloaded and verified.
  */

@@ -19,7 +19,7 @@ This package ships the `viteburner` CLI. The vite plugin it runs is published on
 
 ## Quick start
 
-Prerequisites: [Node.js](https://nodejs.org/en/download/)
+Prerequisites: [Node.js](https://nodejs.org/en/download/) `>=20.19.0`; existing projects also need Vite 7 (`vite@^7`).
 
 Using [viteburner-template](https://github.com/Tanimodori/viteburner-template)
 
@@ -32,11 +32,11 @@ npm run dev
 
 In bitburner, select "Options > Remote API", enter the port of viteburner displays (default: `12525`) and click "Connect".
 
-checkout [Quick Start](docs/guide/quick-start.md) for more details if you want to use viteburner in your existing project.
+checkout [Quick Start](https://github.com/Tanimodori/viteburner/blob/main/packages/viteburner/docs/guide/quick-start.md) for more details if you want to use viteburner in your existing project.
 
 ## API
 
-For detailed documentation, checkout [docs](docs/index.md).
+For detailed documentation, checkout [docs](https://github.com/Tanimodori/viteburner/blob/main/packages/viteburner/docs/index.md).
 
 The shape of the `viteburner` key (the same fields go in a standalone `viteburner.config.*`):
 

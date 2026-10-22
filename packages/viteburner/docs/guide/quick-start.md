@@ -1,5 +1,7 @@
 # Quick start
 
+Requires Node.js `>=20.19.0`.
+
 ## Using [viteburner-template](https://github.com/Tanimodori/viteburner-template)
 
 Prerequisites: [Node.js](https://nodejs.org/en/download/)
@@ -18,8 +20,10 @@ In bitburner, select "Options > Remote API", enter the port of viteburner displa
 1. Install devDependencies
 
 ```bash
-npm i -D viteburner vite
+npm i -D viteburner vite@^7
 ```
+
+viteburner 0.6 requires Vite 7. Installing the latest Vite (8.x) currently fails peer resolution; pin Vite 7 until Vite 8 support ships.
 
 2. (a) Sync-only setup
 

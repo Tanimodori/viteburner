@@ -22,7 +22,7 @@
 3. **test**（九个 `it`）：九步测试，读的都是阶段 2 建立起来的状态；第 6 步会改动工程副本（新增源文件、再删掉），第 9 步会退出 CLI，所以它必须排最后。
 4. **after-test**（`afterAll`）：关浏览器、停 CLI、关静态服务，并删除工程副本（`E2E_KEEP=1` 时保留供人工检查）。
 
-`vitest.config.ts` 的 `threads: false` 是让阶段 2 的状态能跨九个 `it` 存活的依据：一个浏览器、一个 CLI、一个游戏、一条 websocket。
+`vitest.config.ts` 的 `pool: 'forks'` + `fileParallelism: false` 是让阶段 2 的状态能跨九个 `it` 存活的依据：一个浏览器、一个 CLI、一个游戏、一条 websocket。
 
 ### 九步测试
 
@@ -36,7 +36,7 @@
 8. `r` 打开 `prompts` 的 RAM 查询菜单并选默认的「All local scripts」：CLI 向游戏逐文件问 RAM，报告与提交在 `test/fixture/ram/offline.txt` 的基线逐字比对（**仅离线腿**：数值是游戏算的，会随游戏版本漂移）。
 9. `q` 优雅退出 CLI：日志打 `bye`，进程以 code 0 结束。
 
-第 7、8 步打的是 CLI 自己的键盘处理（`key/index.ts` 的 `dispatchKey` 查 `key/mapping.ts` 里的按键表，字符由 `key/reader.ts` 的 `startKeypress` 读出），不是游戏终端。CLI 由 `cli/cli.ts` 以 **piped stdin** 启动，`ViteburnerCli.sendKey()` 写入的每个字符就是一个 `keypress` 事件。stdin 不是 TTY，所以 CLI 会打一条 not-a-TTY 警告并跳过 raw mode——这些键走 `key.name`，不受影响；`prompts` 的菜单在 pipe 下照常渲染、方向键/回车/Ctrl+C 都能用。退出键（Ctrl+C、Ctrl+D、ESC）各自会让进程结束，一个 CLI 实例只能测一次退出，故只覆盖了 `q`。
+第 7、8 步打的是 CLI 自己的键盘处理（`key/index.ts` 的 `dispatchKey` 查 `key/mapping.ts` 里的按键表，字符由 `key/reader.ts` 的 `startKeypress` 读出），不是游戏终端。CLI 由 `cli/cli.ts` 以 **piped stdin** 启动，`ViteburnerCli.sendKey()` 写入的每个字符就是一个 `keypress` 事件。stdin 不是 TTY，所以 CLI 会打一条 not-a-TTY 警告并跳过 raw mode——这些键走 `key.name`，不受影响；`prompts` 的菜单在 pipe 下照常渲染、方向键/回车/Ctrl+C 都能用。Ctrl+C/Ctrl+D 是强制退出（任何情况下都结束进程）；`q`/ESC 是普通快捷键，走 `api.quit`，没有 session 时无害。一个 CLI 实例只能测一次退出，故只覆盖了 `q`。
 
 ## 目录结构
 
@@ -78,18 +78,18 @@ test/
 - 可运行并通过：`template.js`、`deep/multi-entry.js`、`enum/index.js`、`import/main.js`（相对路径、`@/`、`/src/` 三种写法都解析到同一批上传文件）、`importGlob/index.js`（`import.meta.glob` 在转换期展开）。
 - 上传成功但本构建拒绝执行，测试固定这一事实：`ns1.script` 报 `Running .script files is unsupported`（v3 已移除 Netscript 1.0），`importExternal/main.js` 报 `Invalid module path: "https://unpkg.com/…"`（游戏自身的模块加载器不接受 URL 导入，转换阶段按 issue #12 有意原样保留）。
 
-## 从 Playwright 迁到 vitest
+## 测试运行器
 
-原先 `packages/viteburner` 下由 `@playwright/test` 承担 runner，本包改为 **vitest 驱动，浏览器控制用 `playwright` 库**。这是本仓库的版本约束决定的：`vitest@0.34.6` 是支持 `vite@4` 的最后一个稳定版（见仓库记忆 `tsx-migration`），因此不能跟着新 vitest 用 `@vitest/browser` 之类需要更高 vite 的集成。
+本包用 **vitest 驱动，浏览器控制用 `playwright` 库**（当前 vitest 5 / Vite 7）。它不依赖 `@vitest/browser`：浏览器是由 `playwright` 直接启动的，测试从外部断言 CLI 与游戏之间的真实链路。
 
-映射关系：
+几个与 Playwright runner 不同的地方：
 
-- `test.beforeAll` / `test.afterAll` → `beforeAll` / `afterAll`；`test.describe.configure({ mode: 'serial' })` 不再需要——`vitest.config.ts` 设了 `threads: false`，文件内本就是顺序执行。
-- Playwright 的自动重试断言 `expect(locator).toContainText(...)` → `expectLocatorText()`（`test/web/game.ts`），内部是 `vi.waitFor` 轮询 `locator.innerText()`。`vi.waitFor` 是 0.34.6 就有的 API，等价于新版的 `expect.poll`。
-- `test.step(...)` → 没有等价 API（0.34.6 未提供）。九步测试改为九个顶层 `it`，一次性的准备放进 `beforeAll`，失败点因此就是失败的那一项，而不是一串无关报错。
+- `beforeAll` / `afterAll` 承担原 `test.beforeAll` / `test.afterAll` 的阶段准备；不需要 `test.describe.configure({ mode: 'serial' })`——`vitest.config.ts` 设了 `pool: 'forks'` + `fileParallelism: false`，同一文件内的用例本就顺序执行。
+- Playwright 的自动重试断言 `expect(locator).toContainText(...)` → `expectLocatorText()`（`test/web/game.ts`），内部是 `vi.waitFor` 轮询 `locator.innerText()`。
+- 九步测试是九个顶层 `it`（一次性的准备放进 `beforeAll`），失败点因此就是失败的那一项，而不是一串无关报错。
 - `playwright.config.ts` 的 `launchOptions.args` → `test/web/browser.ts` 的 `launchGameBrowser()`。
 - `@playwright/test` 的 `devices[...]` 与 projects → 由 `--mode` 选腿：`vitest run`（默认 mode `test`）跑离线腿，`vitest run --mode live` 跑在线腿。两条腿共用同一个 spec，mode 只切换游戏源。
-- 失败时把 CLI 日志写文件（`testInfo.attach`）→ `onTestFailed` 里打印日志尾部，控制台就是证据。
+- 失败时 `onTestFailed` 打印 CLI 日志尾部，控制台就是证据。
 
 ## 运行
 
