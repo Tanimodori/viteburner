@@ -3,9 +3,10 @@
 # keep every checkout identical on its own. It also matches endOfLine in .oxfmtrc.json.
 *                            text=auto eol=crlf
 
-# The CLI entry keeps LF on every platform: its shebang must work when installers
-# link it as an executable on POSIX.
+# CLI entries keep LF on every platform: their shebang must work when installers
+# link them as executables on POSIX.
 packages/viteburner/bin/viteburner.js text eol=lf
+packages/create-viteburner/bin/create-viteburner.js text eol=lf
 
 # ZCode parses a saved workflow's `/* zcode-workflow` metadata block by splitting the file
 # on "\n" and rejoining it with "\n". Under CRLF the block's last line keeps a stray "\r",

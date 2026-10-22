@@ -18,11 +18,15 @@
   "files": [
     "bin",
     "dist",
-    "template"
+    "template",
+    "template/.gitignore",
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "vite build && node scripts/build-template.mjs",
     "prepack": "npm run build",
+    "prepublishOnly": "node ../../scripts/check-publish-manager.mjs",
     "test": "npm run lint && npm run test:spec",
     "test:spec": "vitest run",
     "lint": "npm run lint:ts && npm run lint:oxlint && npm run format:check",
@@ -58,6 +62,6 @@
     "vitest": "^5.0.5"
   },
   "engines": {
-    "node": ">=20.19.0"
+    "node": "^20.19.0 || >=22.12.0"
   }
 }

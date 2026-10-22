@@ -162,7 +162,14 @@ describe('create-viteburner', () => {
     expect(help.stdout).toContain('Usage: create-viteburner');
   });
 
-  it('packs the generated template into the tarball', () => {
+  it('keeps the CLI entry executable on POSIX', () => {
+    const bin = readFileSync(join(CREATE_PACKAGE, 'bin/create-viteburner.js'), 'utf8');
+
+    // npm and pnpm link this file directly on POSIX; a CRLF shebang is an "env: node\r" error.
+    expect(bin.split('\n', 1)[0]).toBe('#!/usr/bin/env node');
+  });
+
+  it('packs the generated template and package metadata into the tarball', () => {
     const npmCli = process.env.npm_execpath;
     if (!npmCli) {
       throw new Error('npm_execpath is not set; run this suite through npm or rushx.');
@@ -175,7 +182,11 @@ describe('create-viteburner', () => {
     const [{ files }] = JSON.parse(output) as { files: { path: string }[] }[];
     const paths = files.map((file) => file.path);
 
+    expect(paths).toContain('bin/create-viteburner.js');
+    expect(paths).toContain('LICENSE');
     expect(paths).toContain('template/package.json');
+    // npm excludes .gitignore files inside a packaged directory unless the exact path is in `files`.
+    expect(paths).toContain('template/.gitignore');
     expect(paths).not.toContain('template/README.mirror.md');
   });
 });

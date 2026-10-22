@@ -12,7 +12,8 @@ End-to-end suite for `create-viteburner`. The installed CLI is spawned as a real
 6. `fixtures/tsconfig.check.json` type-checks `templates/viteburner-template` in place, with `@ns` pointing at the fixture.
 7. A non-empty target is refused without `--force`; `--force` preserves unrelated files.
 8. The default target is `viteburner-project`.
-9. `npm pack --dry-run` includes the generated `template/` and leaves the mirror README out.
+9. The CLI entry uses an LF shebang, so npm/pnpm can link it on POSIX.
+10. `npm pack --dry-run` includes `bin/`, `LICENSE`, the generated `template/`, and `template/.gitignore`, and leaves the mirror README out.
 
 ## Running
 

@@ -2,6 +2,8 @@
 
 Scaffold a [viteburner](https://github.com/Tanimodori/viteburner) project.
 
+Requires Node.js `^20.19.0 || >=22.12.0`.
+
 ## Usage
 
 ```bash
@@ -11,6 +13,8 @@ pnpm create viteburner my-project
 ```
 
 The positional argument is the target directory; it defaults to `viteburner-project`. The CLI does not prompt and does not install dependencies. It copies the template, sets the package name, and prints the install and dev commands.
+
+If you are testing a pre-release, install the matching tag explicitly, for example `npm create viteburner@next`. `@latest` stays on the last stable release.
 
 ```text
 Usage: create-viteburner [options] [dir]
@@ -56,3 +60,7 @@ node packages/create-viteburner/scripts/export-template.mjs \
 ```
 
 `--prune` removes everything in the destination except `.git` (and any `--keep` paths) before writing, so the mirror does not retain files the template no longer ships. Use `--check` to compare a checkout with a fresh export without writing; it exits non-zero when the mirror is behind. The script never commits or pushes.
+
+## License
+
+[MIT](LICENSE) © 2022-present Tanimodori
