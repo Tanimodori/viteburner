@@ -242,7 +242,7 @@
     /**
      * A list of shell commands to run after "rush install" or "rush update" finishes installation
      */
-    "postRushInstall": [],
+    "postRushInstall": ["node scripts/install-git-hooks.mjs"],
 
     /**
      * A list of shell commands to run before "rush build" or "rush rebuild" starts building

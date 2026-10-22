@@ -11,6 +11,16 @@
    * "rush my-global-command --help".
    */
   "commands": [
+    {
+      // Rush renders CHANGELOG.md with the date on its own line. This re-renders it from
+      // CHANGELOG.json after a publish, with the date merged into the version heading.
+      "commandKind": "global",
+      "name": "format-changelog",
+      "summary": "Rewrite CHANGELOG.md files with the compact version (YYYY.MM.DD) heading format",
+      "description": "Rush regenerates CHANGELOG.md from CHANGELOG.json with a fixed layout. This command re-renders the markdown with the date on the version heading, e.g. \"## 0.5.3 (2023.03.14)\". Run it after \"rush publish --apply\".",
+      "safeForSimultaneousRushProcesses": false,
+      "shellCommand": "node scripts/format-changelog.mjs"
+    },
     // {
     //   /**
     //    * (Required) Determines the type of custom command.
