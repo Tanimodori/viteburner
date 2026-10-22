@@ -17,6 +17,8 @@ jobs:
         run: node common/scripts/install-run-rush.js install
       - name: Rush check
         run: node common/scripts/install-run-rush.js check
+      - name: Release metadata check
+        run: node common/scripts/install-run-rush.js check-release
       - name: Build and typecheck
         run: node common/scripts/install-run-rush.js rebuild --verbose
       - name: Unit tests (@viteburner/bb-ws-server)

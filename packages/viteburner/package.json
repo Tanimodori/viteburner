@@ -17,6 +17,8 @@
   "typings": "dist/index.d.ts",
   "scripts": {
     "build": "vite build",
+    "prepack": "npm run build",
+    "prepublishOnly": "node ../../scripts/check-publish-manager.mjs",
     "test": "npm run lint && npm run test:spec",
     "test:spec": "vitest run",
     "postversion": "npm run build",
@@ -61,6 +63,6 @@
     "vite": "^7.0.0"
   },
   "engines": {
-    "node": ">=20.19.0"
+    "node": "^20.19.0 || >=22.12.0"
   }
 }

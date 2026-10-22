@@ -7,7 +7,7 @@
     },
     {
       "packageName": "@viteburner/vite-plugin",
-      "comment": "Requires Node.js 20.19 or newer and Vite 7.",
+      "comment": "Requires Node.js ^20.19.0 || >=22.12.0 and Vite 7.",
       "type": "none"
     },
     {

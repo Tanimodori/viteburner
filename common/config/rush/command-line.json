@@ -17,9 +17,19 @@
       "commandKind": "global",
       "name": "format-changelog",
       "summary": "Rewrite CHANGELOG.md files with the compact version (YYYY.MM.DD) heading format",
-      "description": "Rush regenerates CHANGELOG.md from CHANGELOG.json with a fixed layout. This command re-renders the markdown with the date on the version heading, e.g. \"## 0.5.3 (2023.03.14)\". Run it after \"rush publish --apply\".",
+      "description": "Rush regenerates CHANGELOG.md from CHANGELOG.json with a fixed layout. This command re-renders the markdown with the date on the version heading, e.g. \"## 0.5.3 (2023.03.14)\". Run it after \"rush version --bump\" or after a publish that regenerated the changelogs.",
       "safeForSimultaneousRushProcesses": false,
       "shellCommand": "node scripts/format-changelog.mjs"
+    },
+    {
+      // These are the metadata mistakes that only surface after `npm pack`, on POSIX, or during
+      // publish. This command never publishes and never reads credentials.
+      "commandKind": "global",
+      "name": "check-release",
+      "summary": "Check release metadata and POSIX-compatible CLI entries",
+      "description": "Validates prepack/prepublishOnly hooks, the scoped package's public access, the create-viteburner files allowlist (including template/.gitignore), and LF shebangs. It does not publish.",
+      "safeForSimultaneousRushProcesses": false,
+      "shellCommand": "node scripts/check-release.mjs"
     },
     {
       // The standalone template repository is a generated mirror. This exports the current source
@@ -31,7 +41,7 @@
       "description": "Writes the generated template into a standalone viteburner-template checkout, resolving workspace:* to the current viteburner version. Use --prune to remove stale files, or --check to compare without writing. The command never commits or pushes.",
       "safeForSimultaneousRushProcesses": false,
       "shellCommand": "node packages/create-viteburner/scripts/export-template.mjs"
-    },
+    }
     // {
     //   /**
     //    * (Required) Determines the type of custom command.
