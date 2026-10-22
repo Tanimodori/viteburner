@@ -22,6 +22,28 @@ function packageName(id: string) {
   return id.startsWith('@') ? parts.slice(0, 2).join('/') : parts[0];
 }
 
+/**
+ * api-extractor writes `import { X } from 'vite'` even when X is only used as a type. Without
+ * `"type": "module"` the d.ts is a CommonJS module, and under node16/nodenext a value import of an
+ * ESM-only package is TS1479. Every import in a declaration file is type-only, so make that explicit.
+ *
+ * For an ESM-only package that still leaves TS1541: a type-only import from a CommonJS declaration
+ * must say which resolution mode it means. `vite` is the only such package in the published surface.
+ */
+const esmOnlyPackages = ['vite'];
+
+function typeOnlyDtsImports(content: string) {
+  const typeOnly = content.replace(/^import\s+(?!type\b)(?=[{*A-Za-z_$])/gm, 'import type ');
+  return esmOnlyPackages.reduce(
+    (result, pkg) =>
+      result.replace(
+        new RegExp(`(^import type\\s+[^;]*?\\s+from\\s+['"]${pkg}['"])(;)`, 'gm'),
+        `$1 with { "resolution-mode": "import" }$2`,
+      ),
+    typeOnly,
+  );
+}
+
 export default defineConfig({
   build: {
     ssr: true,
@@ -51,6 +73,11 @@ export default defineConfig({
       // build.outDir. A nested types directory is not honored — it makes the entry stub reference
       // itself, which api-extractor then fails on.
       bundleTypes: true,
+      beforeWriteFile(filePath, content) {
+        if (filePath.endsWith('.d.ts')) {
+          return { content: typeOnlyDtsImports(content) };
+        }
+      },
     }),
   ],
 });
