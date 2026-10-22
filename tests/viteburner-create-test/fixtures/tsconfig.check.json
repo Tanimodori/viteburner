@@ -1,0 +1,15 @@
+{
+  "extends": "../../../templates/viteburner-template/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "../../..",
+    "paths": {
+      "@/*": ["templates/viteburner-template/src/*"],
+      "/src/*": ["templates/viteburner-template/src/*"],
+      "@ns": ["tests/viteburner-create-test/fixtures/ns-definitions.d.ts"]
+    }
+  },
+  "include": [
+    "../../../templates/viteburner-template/src/**/*.ts",
+    "../../../templates/viteburner-template/vite.config.ts"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "name": "viteburner-create-test",
+  "version": "0.0.1",
+  "private": true,
+  "description": "End-to-end suite for create-viteburner: the installed CLI scaffolds a child project, a fixture is copied in, and the child is type-checked and loaded as a real vite config.",
+  "homepage": "https://github.com/Tanimodori/viteburner#readme",
+  "bugs": {
+    "url": "https://github.com/Tanimodori/viteburner/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tanimodori/viteburner.git"
+  },
+  "license": "MIT",
+  "author": "Tanimodori",
+  "type": "module",
+  "scripts": {
+    "build": "npm run typecheck",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "lint": "npm run lint:ts && npm run lint:oxlint && npm run format:check",
+    "lint:ts": "tsc --noEmit",
+    "lint:oxlint": "oxlint",
+    "test": "npm run test:create",
+    "test:create": "vitest run",
+    "test:create:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "create-viteburner": "workspace:*",
+    "oxfmt": "^0.74.0",
+    "oxlint": "^1.89.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.7",
+    "viteburner": "workspace:*",
+    "vitest": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
