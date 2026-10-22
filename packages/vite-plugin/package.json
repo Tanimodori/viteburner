@@ -40,7 +40,6 @@
   "homepage": "https://github.com/Tanimodori/viteburner#readme",
   "devDependencies": {
     "@microsoft/api-extractor": "^7.59.4",
-    "@types/estree": "^1.0.0",
     "@types/micromatch": "^4.0.2",
     "@types/node": "^24.19.2",
     "@viteburner/bb-ws-server": "workspace:*",

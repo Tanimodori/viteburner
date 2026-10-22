@@ -7,4 +7,5 @@ rush-logs/**
 src/**
 vite.config.ts
 vitest.config.ts
+tsconfig.json
 test/**
