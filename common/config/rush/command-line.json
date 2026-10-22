@@ -21,6 +21,17 @@
       "safeForSimultaneousRushProcesses": false,
       "shellCommand": "node scripts/format-changelog.mjs"
     },
+    {
+      // The standalone template repository is a generated mirror. This exports the current source
+      // template with `workspace:*` resolved to the released version. Run
+      // "rush build --to create-viteburner" first. Pass "-- --dest <checkout> [--prune|--check]".
+      "commandKind": "global",
+      "name": "export-template",
+      "summary": "Export templates/viteburner-template to a standalone template checkout",
+      "description": "Writes the generated template into a standalone viteburner-template checkout, resolving workspace:* to the current viteburner version. Use --prune to remove stale files, or --check to compare without writing. The command never commits or pushes.",
+      "safeForSimultaneousRushProcesses": false,
+      "shellCommand": "node packages/create-viteburner/scripts/export-template.mjs"
+    },
     // {
     //   /**
     //    * (Required) Determines the type of custom command.

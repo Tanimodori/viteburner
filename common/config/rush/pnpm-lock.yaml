@@ -52,6 +52,33 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@24.19.2)(vite@7.3.7(@types/node@24.19.2)(jiti@2.7.0)(tsx@4.23.15))
 
+  ../../packages/create-viteburner:
+    devDependencies:
+      '@microsoft/api-extractor':
+        specifier: ^7.59.4
+        version: 7.59.4(@types/node@24.19.2)
+      '@types/node':
+        specifier: ^24.19.2
+        version: 24.19.2
+      oxfmt:
+        specifier: ^0.74.0
+        version: 0.74.0
+      oxlint:
+        specifier: ^1.89.0
+        version: 1.89.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vite:
+        specifier: ^7.3.7
+        version: 7.3.7(@types/node@24.19.2)(jiti@2.7.0)(tsx@4.23.15)
+      vite-plugin-dts:
+        specifier: 5.1.2
+        version: 5.1.2(@microsoft/api-extractor@7.59.4(@types/node@24.19.2))(esbuild@0.28.2)(rollup@4.64.12)(typescript@5.9.3)(vite@7.3.7(@types/node@24.19.2)(jiti@2.7.0)(tsx@4.23.15))
+      vitest:
+        specifier: ^5.0.5
+        version: 5.0.5(@types/node@24.19.2)(vite@7.3.7(@types/node@24.19.2)(jiti@2.7.0)(tsx@4.23.15))
+
   ../../packages/vite-plugin:
     dependencies:
       acorn:
@@ -159,11 +186,53 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@24.19.2)(vite@7.3.7(@types/node@24.19.2)(jiti@2.7.0)(tsx@4.23.15))
 
+  ../../templates/viteburner-template:
+    devDependencies:
+      '@types/node':
+        specifier: ^24.19.2
+        version: 24.19.2
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vite:
+        specifier: ^7.3.7
+        version: 7.3.7(@types/node@24.19.2)(jiti@2.7.0)(tsx@4.23.15)
+      viteburner:
+        specifier: workspace:*
+        version: link:../../packages/viteburner
+
   ../../tests/viteburner-config-test:
     devDependencies:
       '@types/node':
         specifier: ^24.19.2
         version: 24.19.2
+      oxfmt:
+        specifier: ^0.74.0
+        version: 0.74.0
+      oxlint:
+        specifier: ^1.89.0
+        version: 1.89.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vite:
+        specifier: ^7.3.7
+        version: 7.3.7(@types/node@24.19.2)(jiti@2.7.0)(tsx@4.23.15)
+      viteburner:
+        specifier: workspace:*
+        version: link:../../packages/viteburner
+      vitest:
+        specifier: ^5.0.5
+        version: 5.0.5(@types/node@24.19.2)(vite@7.3.7(@types/node@24.19.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  ../../tests/viteburner-create-test:
+    devDependencies:
+      '@types/node':
+        specifier: ^24.19.2
+        version: 24.19.2
+      create-viteburner:
+        specifier: workspace:*
+        version: link:../../packages/create-viteburner
       oxfmt:
         specifier: ^0.74.0
         version: 0.74.0

@@ -322,7 +322,7 @@
    * ".", and "@" characters.
    */
   // "allowedProjectTags": [ "tools", "frontend-team", "1.0.0-release" ],
-  "allowedProjectTags": ["tool", "library", "test"],
+  "allowedProjectTags": ["tool", "library", "test", "template"],
 
   /**
    * (Required) This is the inventory of projects to be managed by Rush.
@@ -455,6 +455,18 @@
       "tags": ["tool"]
     },
     {
+      "packageName": "create-viteburner",
+      "projectFolder": "packages/create-viteburner",
+      "versionPolicyName": "viteburner",
+      "tags": ["tool"]
+    },
+    {
+      "packageName": "viteburner-template",
+      "projectFolder": "templates/viteburner-template",
+      "shouldPublish": false,
+      "tags": ["template"]
+    },
+    {
       "packageName": "viteburner-e2e-test",
       "projectFolder": "tests/viteburner-e2e-test",
       "tags": ["test"]
@@ -462,6 +474,11 @@
     {
       "packageName": "viteburner-config-test",
       "projectFolder": "tests/viteburner-config-test",
+      "tags": ["test"]
+    },
+    {
+      "packageName": "viteburner-create-test",
+      "projectFolder": "tests/viteburner-create-test",
       "tags": ["test"]
     }
   ]
