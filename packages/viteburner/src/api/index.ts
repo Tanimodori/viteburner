@@ -43,6 +43,9 @@ export function createCliApi(getSession: () => Session | undefined): CliApi {
         displayStatus(session);
       }
     },
+    // q and escape reach this while the CLI is still starting or between servers; with no session
+    // there is nothing to stop, so leaving is a no-op rather than an exit. Ctrl+C/Ctrl+D are the
+    // emergency exit and bypass this api entirely (see `key/reader.ts`).
     quit: () => {
       const session = getSession();
       if (session) {

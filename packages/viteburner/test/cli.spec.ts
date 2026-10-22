@@ -51,6 +51,7 @@ describe('the CLI against a real dev server', () => {
       fs.rmSync(root, { recursive: true, force: true });
       root = undefined;
     }
+    vi.restoreAllMocks();
   });
 
   /** A minimal project the plugin can serve: one watched source and a viteburner config. */
@@ -117,4 +118,53 @@ describe('the CLI against a real dev server', () => {
     expect(() => api.displayStatus()).not.toThrow();
     expect(() => api.quit()).not.toThrow();
   });
+
+  it('keeps q and escape harmless while no session is up', async () => {
+    // The shortcuts are not emergency exits: with nothing to dispose, they must not end the process
+    // that is still starting. The real api is used here; `key.spec.ts` proves the keys reach `quit`.
+    const exit = vi.spyOn(process, 'exit').mockImplementation((() => undefined) as never);
+    const api = createCliApi(() => undefined);
+    const input = new PassThrough();
+    startCliKeys(api, input);
+
+    input.write('q');
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    input.write('\x1B');
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    expect(exit).not.toHaveBeenCalled();
+  });
+
+  for (const [name, key] of [
+    ['q', 'q'],
+    ['escape', '\x1B'],
+  ] as const) {
+    it(`exits cleanly on ${name} once a session is up`, async () => {
+      const port = await freePort();
+      const dir = makeProject();
+      const inline = { cwd: dir, port };
+      const daemon = viteburnerPlugin(inline);
+      const api = createCliApi(() => daemon.api.getSession());
+      const input = new PassThrough();
+      startCliKeys(api, input);
+
+      const config: ViteBurnerUserConfig = {
+        root: dir,
+        logLevel: 'silent',
+        viteburner: inline,
+        plugins: [daemon],
+      };
+      server = await createServer(config);
+
+      const session = api.getSession();
+      expect(session, 'the server started a session').toBeDefined();
+      const dispose = vi.spyOn(session!, 'dispose');
+      const exit = vi.spyOn(process, 'exit').mockImplementation((() => undefined) as never);
+
+      input.write(key);
+
+      await vi.waitFor(() => expect(exit).toHaveBeenCalledWith(0));
+      expect(dispose, 'the session was stopped before exiting').toHaveBeenCalledTimes(1);
+    });
+  }
 });

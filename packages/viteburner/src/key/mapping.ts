@@ -33,6 +33,7 @@ export const keyActions: Record<string, KeyAction> = {
   r: { description: 'show RAM usage of scripts', run: (api) => api.displayRamUsage(), interactive: true },
   h: { description: 'show help', run: displayHelp },
   q: { description: 'quit', run: (api) => api.quit() },
+  escape: { description: 'quit', run: (api) => api.quit() },
 };
 
 /** The keys this CLI answers, rendered from the map above. */

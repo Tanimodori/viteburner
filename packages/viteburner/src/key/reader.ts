@@ -34,7 +34,7 @@ export interface Keypress {
   active: boolean;
   running: boolean;
   rl?: readline.Interface;
-  /** The listener attached to the stream, kept so `suspendKeypress` detaches exactly this one. */
+  /** The listener attached to the stream, kept so `stopKeypress` detaches exactly this one. */
   listener?: (str: string, key: KeyInfo) => void | Promise<void>;
 }
 
@@ -56,18 +56,17 @@ export function startKeypress(state: Keypress, onKey: KeyHandler) {
   }
   state.active = true;
   state.listener = async (str: string, key: KeyInfo) => {
-    // esc, ctrl+d or ctrl+c to force exit. The control bytes are what a TTY in raw mode and a pipe
-    // both deliver; the `key` check covers the same chords when readline names them instead.
-    if (
-      str === '\x03' ||
-      str === '\x04' ||
-      str === '\x1B' ||
-      (key && key.ctrl && (key.name === 'c' || key.name === 'd'))
-    ) {
+    // ctrl+c and ctrl+d are the emergency exit: they end the process before anything else runs, with
+    // or without a session. The control bytes are what a TTY in raw mode and a pipe both deliver; the
+    // `key` check covers the same chords when readline names them instead. q and escape are not here
+    // — they are ordinary shortcuts in the key map, so they stay harmless while no session exists.
+    if (str === '\x03' || str === '\x04' || (key && key.ctrl && (key.name === 'c' || key.name === 'd'))) {
       logger.info('sigterm');
       process.exit(1);
     }
-    if (state.running) {
+    // While suspended, an interactive prompt owns the keyboard. The listener stays attached only so
+    // the emergency chords above still work; every other key belongs to the prompt.
+    if (!state.rl || state.running) {
       return;
     }
     state.running = true;
@@ -81,21 +80,29 @@ export function startKeypress(state: Keypress, onKey: KeyHandler) {
   if (!state.input.isTTY) {
     logger.warn('current stdin is not a TTY. Keypress events may not work.');
   }
+  // Attached for the reader's whole life: `suspendKeypress` only takes the readline interface away,
+  // so the listener keeps hearing the emergency chords while a prompt owns the terminal.
+  state.input.on('keypress', state.listener);
   resumeKeypress(state);
 }
 
 export function stopKeypress(state: Keypress) {
   state.active = false;
   suspendKeypress(state);
+  if (state.listener) {
+    state.input.off('keypress', state.listener);
+    state.listener = undefined;
+  }
 }
 
-/** Let go of the terminal, so a command that needs it for itself (an interactive prompt) can have it. */
+/**
+ * Let go of the terminal, so a command that needs it for itself (an interactive prompt) can have it.
+ * The keypress listener stays attached, but `state.rl` being undefined makes it ignore everything
+ * except ctrl+c/ctrl+d — those must still terminate the process while a prompt is open.
+ */
 export function suspendKeypress(state: Keypress) {
   state.rl?.close();
   state.rl = undefined;
-  if (state.listener) {
-    state.input.off('keypress', state.listener);
-  }
   if (state.input.isTTY) {
     state.input.setRawMode?.(false);
   }
@@ -106,11 +113,10 @@ export function resumeKeypress(state: Keypress) {
   if (!state.active || !state.listener) {
     return;
   }
-  suspendKeypress(state);
+  state.rl?.close();
   state.rl = readline.createInterface({ input: state.input });
   readline.emitKeypressEvents(state.input, state.rl);
   if (state.input.isTTY) {
     state.input.setRawMode?.(true);
   }
-  state.input.on('keypress', state.listener);
 }
